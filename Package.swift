@@ -20,7 +20,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "KituraNIO",
-            dependencies: ["NIO"]),
+            dependencies: ["NIO", "NIOHTTP1"]),
         .testTarget(
             name: "KituraNIOTests",
             dependencies: ["KituraNIO"]),
