@@ -2,12 +2,12 @@ import NIO
 import NIOHTTP1
 
 public class HTTPHandler: ChannelInboundHandler {
-     let router: ServerDelegate 
+     let delegate: ServerDelegate 
      var serverRequest: HTTPServerRequest!
      var serverResponse: HTTPServerResponse!
 
-     public init(router: ServerDelegate) {
-         self.router = router
+     public init(delegate: ServerDelegate) {
+         self.delegate = delegate 
      }
 
      public typealias InboundIn = HTTPServerRequestPart
@@ -23,7 +23,11 @@ public class HTTPHandler: ChannelInboundHandler {
              serverRequest.buffer = buffer           
          case .end(_):
              serverResponse = HTTPServerResponse(ctx: ctx, handler: self)
-             router.handle(request: serverRequest, response: serverResponse)
+             delegate.handle(request: serverRequest, response: serverResponse)
          }
+     }
+
+     public func channelReadComplete(ctx: ChannelHandlerContext) {
+         ctx.flush()
      }
 }
