@@ -2,7 +2,6 @@ import NIO
 import NIOHTTP1
 import Foundation
 
-public typealias HeadersContainer = HTTPHeaders
 
 public class HTTPServerRequest: ServerRequest {
 
@@ -27,7 +26,7 @@ public class HTTPServerRequest: ServerRequest {
     public var method: String
 
     init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead) {
-        self.headers = requestHead.headers
+        self.headers = HeadersContainer.create(from: requestHead.headers)
         self.method = String(describing: requestHead.method)
         self.httpVersionMajor = requestHead.version.major
         self.httpVersionMinor = requestHead.version.minor

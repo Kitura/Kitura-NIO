@@ -26,7 +26,7 @@ public class HTTPServerResponse: ServerResponse {
         buffer.write(string: String(data: data, encoding: .utf8)!)
         let request = handler.serverRequest!
         let version = HTTPVersion(major: request.httpVersionMajor!, minor: request.httpVersionMinor!)
-        let response = HTTPResponseHead(version: version, status: .ok, headers: headers)
+        let response = HTTPResponseHead(version: version, status: .ok, headers: headers.httpHeaders())
         ctx.write(handler.wrapOutboundOut(.head(response)), promise: nil)
         ctx.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
         ctx.write(handler.wrapOutboundOut(.end(nil)), promise: nil)

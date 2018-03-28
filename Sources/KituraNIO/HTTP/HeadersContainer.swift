@@ -44,7 +44,7 @@ public class HeadersContainer {
              "if-unmodified-since", "from", "location", "max-forwards",
              "retry-after", "etag", "last-modified", "server", "age", "expires":
             if let _ = entry {
-                Log.warning("Duplicate header \(key) discarded")
+                //Log.warning("Duplicate header \(key) discarded")
                 break
             }
             fallthrough
@@ -113,11 +113,9 @@ extension HeadersContainer {
         }
         return httpHeaders
     }
-}
 
-extension HTTPHeaders {
 
-    static func create(httpHeaders: HTTPHeaders) -> HeadersContainer {
+    static func create(from httpHeaders: HTTPHeaders) -> HeadersContainer {
         let headerContainer = HeadersContainer()
         for header in httpHeaders {
             headerContainer.append(header.name, value: header.value)
