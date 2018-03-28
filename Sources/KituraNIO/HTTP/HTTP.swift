@@ -24,12 +24,14 @@ public class HTTP {
         511: "Network Authentication Required"
     ]
     
-    /// Create a new `HTTPServer`.
-    ///
-    /// - Returns: an instance of `HTTPServer`.
     public static func createServer() -> HTTPServer {
         return HTTPServer()
     }
+
+    public static func request(_ url: String, callback: @escaping ClientRequest.Callback) -> ClientRequest {
+        return ClientRequest(url: url, callback: callback)
+    }
+    
 }
 
 

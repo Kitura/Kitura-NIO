@@ -33,11 +33,13 @@ public class ClientResponse {
 
     var buffer: ByteBuffer!
 
+    @discardableResult
     public func read(into data: inout Data) throws -> Int {
         guard var buffer = buffer else { return 0 }
         return buffer.fill(data: &data)
     }
 
+    @discardableResult
     public func readString() throws -> String? {
         var data = Data(capacity: ClientResponse.bufferSize)
         let length = try read(into: &data)
@@ -48,6 +50,7 @@ public class ClientResponse {
         }
     }
 
+    @discardableResult
     public func readAllData(into data: inout Data) throws -> Int {
         guard var buffer = buffer else { return 0 }
         var length = buffer.fill(data: &data)
