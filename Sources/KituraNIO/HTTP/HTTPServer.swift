@@ -30,7 +30,8 @@ public class HTTPServer : Server {
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
         let serverChannel = try! bootstrap.bind(host: "localhost", port: port)  //TODO: localhost?
             .wait()
-        try! serverChannel.closeFuture.wait()
+        let queuedBlock = DispatchWorkItem(block: { try! serverChannel.closeFuture.wait() })
+        ListenerGroup.enqueueAsynchronously(on: DispatchQueue.global(), block: queuedBlock)
     }
 
     public static func listen(on port: Int, delegate: ServerDelegate?) throws -> ServerType {
