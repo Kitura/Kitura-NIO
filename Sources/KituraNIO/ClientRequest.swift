@@ -221,7 +221,7 @@ public class HTTPClientHandler: ChannelInboundHandler {
              clientResponse.headers = HeadersContainer.create(from: header.headers)
              clientResponse.httpVersionMajor = header.version.major
              clientResponse.httpVersionMinor = header.version.minor
-             clientResponse.httpStatusCode = HTTPStatusCode(rawValue: Int(header.status.code))!
+             clientResponse.statusCode = HTTPStatusCode(rawValue: Int(header.status.code))!
          case .body(let buffer):
              clientResponse.buffer = buffer
          case .end(_):

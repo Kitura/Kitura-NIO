@@ -5,11 +5,7 @@ public class ClientResponse {
 
     public init() { }
 
-    public internal(set) var httpStatusCode: HTTPStatusCode = .unknown {
-        didSet {
-            statusCode = httpStatusCode
-        }
-    }
+    public internal(set) var httpStatusCode: HTTPStatusCode = .unknown
     
     /// HTTP Method of the incoming message.
     @available(*, deprecated, message:
