@@ -1,5 +1,6 @@
 import NIO
 import NIOHTTP1
+import Dispatch
 
 public class HTTPServer : Server {
     
