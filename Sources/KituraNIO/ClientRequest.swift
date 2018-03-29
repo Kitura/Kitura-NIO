@@ -21,6 +21,12 @@ public class ClientRequest {
 
     public private(set) var callback: Callback
 
+    /// Should SSL verification be disabled
+    private var disableSSLVerification = false
+
+    /// Should HTTP/2 protocol be used
+    private var useHTTP2 = false
+
     public enum Options {
         case method(String)
 
@@ -45,12 +51,78 @@ public class ClientRequest {
         case useHTTP2
     }
 
-    private let hostName: String
 
     init(url: String, callback: @escaping Callback) {
         self.url = url
         self.callback = callback
-        self.hostName = URL(string: url)?.host ?? ""
+    }
+
+     public func set(_ option: Options) {
+        switch(option) {
+        case .schema, .hostname, .port, .path, .username, .password:
+            print("Must use ClientRequest.init() to set URL components")
+        case .method(let method):
+            self.method = method
+        case .headers(let headers):
+            for (key, value) in headers {
+                self.headers[key] = value
+            }
+        case .maxRedirects(let maxRedirects):
+            self.maxRedirects = maxRedirects
+        case .disableSSLVerification:
+            self.disableSSLVerification = true
+        case .useHTTP2:
+            self.useHTTP2 = true
+        }
+    }
+
+    init(options: [Options], callback: @escaping Callback) {
+
+        self.callback = callback
+
+        var theSchema = "http://"
+        var hostName = "localhost"
+        var path = ""
+        var port = ""
+
+        for option in options  {
+            switch(option) {
+
+                case .method, .headers, .maxRedirects, .disableSSLVerification, .useHTTP2:
+                    // call set() for Options that do not construct the URL
+                    set(option)
+                case .schema(var schema):
+                    if !schema.contains("://") && !schema.isEmpty {
+                      schema += "://"
+                    }
+                    theSchema = schema
+                case .hostname(let host):
+                    hostName = host
+                case .port(let thePort):
+                    port = ":\(thePort)"
+                case .path(var thePath):
+                    if thePath.first != "/" {
+                      thePath = "/" + thePath
+                    }
+                    path = thePath
+                case .username(let userName):
+                    self.userName = userName
+                case .password(let password):
+                    self.password = password
+            }
+        }
+
+        // Adding support for Basic HTTP authentication
+        let user = self.userName ?? ""
+        let pwd = self.password ?? ""
+        var authenticationClause = ""
+        // If either the userName or password are non-empty, add the authenticationClause
+        if (!user.isEmpty || !pwd.isEmpty) {
+          authenticationClause = "\(user):\(pwd)@"
+        }
+
+        url = "\(theSchema)\(authenticationClause)\(hostName)\(port)\(path)"
+
     }
 
     public typealias Callback = (ClientResponse?) -> Void
@@ -115,7 +187,7 @@ public class ClientRequest {
                     channel.pipeline.add(handler: HTTPClientHandler(request: self))
                 }
             }
-        
+        let hostName = URL(string: url)?.host ?? "" //TODO: what could be the failure path here
         channel = try! bootstrap.connect(host: hostName, port: 80).wait()
         let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET, uri: "/get")
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
