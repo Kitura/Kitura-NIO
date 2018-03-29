@@ -31,6 +31,8 @@ public class ClientRequest {
     /// Should HTTP/2 protocol be used
     private var useHTTP2 = false
 
+    private var path = ""
+
     public enum Options {
         case method(String)
 
@@ -111,6 +113,7 @@ public class ClientRequest {
                       thePath = "/" + thePath
                     }
                     path = thePath
+                    self.path = path
                 case .username(let userName):
                     self.userName = userName
                 case .password(let password):
@@ -195,7 +198,7 @@ public class ClientRequest {
             }
         let hostName = URL(string: url)?.host ?? "" //TODO: what could be the failure path here
         channel = try! bootstrap.connect(host: hostName, port: Int(self.port ?? 80)).wait()
-        let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET, uri: "/get")
+        let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET, uri: self.path)
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
         try! channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
         try! channel.closeFuture.wait()       
