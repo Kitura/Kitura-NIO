@@ -21,6 +21,10 @@ public class ClientRequest {
 
     public private(set) var callback: Callback
 
+    private var port: Int16?
+
+    private var hostName: String?
+
     /// Should SSL verification be disabled
     private var disableSSLVerification = false
 
@@ -57,7 +61,7 @@ public class ClientRequest {
         self.callback = callback
     }
 
-     public func set(_ option: Options) {
+    public func set(_ option: Options) {
         switch(option) {
         case .schema, .hostname, .port, .path, .username, .password:
             print("Must use ClientRequest.init() to set URL components")
@@ -98,8 +102,10 @@ public class ClientRequest {
                     theSchema = schema
                 case .hostname(let host):
                     hostName = host
+                    self.hostName = host
                 case .port(let thePort):
                     port = ":\(thePort)"
+                    self.port = thePort
                 case .path(var thePath):
                     if thePath.first != "/" {
                       thePath = "/" + thePath
@@ -188,7 +194,7 @@ public class ClientRequest {
                 }
             }
         let hostName = URL(string: url)?.host ?? "" //TODO: what could be the failure path here
-        channel = try! bootstrap.connect(host: hostName, port: 80).wait()
+        channel = try! bootstrap.connect(host: hostName, port: Int(self.port ?? 80)).wait()
         let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET, uri: "/get")
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
         try! channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
