@@ -31,6 +31,10 @@ public class HTTP {
     public static func request(_ url: String, callback: @escaping ClientRequest.Callback) -> ClientRequest {
         return ClientRequest(url: url, callback: callback)
     }
+
+    public static func request(_ options: [ClientRequest.Options], callback: @escaping ClientRequest.Callback) -> ClientRequest {
+        return ClientRequest(options: options, callback: callback)
+    }
     
 }
 
