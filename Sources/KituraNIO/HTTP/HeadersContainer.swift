@@ -107,9 +107,10 @@ extension HeadersContainer {
 
     func httpHeaders() -> HTTPHeaders {
         var httpHeaders = HTTPHeaders()
-        for h in self.headers {
-            let header = h.value
-            httpHeaders.add(name: header.key, value: header.value.joined(separator: ", "))
+        for (_, keyValues) in headers {
+            for value in keyValues.1 {
+                httpHeaders.add(name: keyValues.0, value: value)
+            }
         }
         return httpHeaders
     }
