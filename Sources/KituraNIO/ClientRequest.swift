@@ -198,10 +198,87 @@ public class ClientRequest {
             }
         let hostName = URL(string: url)?.host ?? "" //TODO: what could be the failure path here
         channel = try! bootstrap.connect(host: hostName, port: Int(self.port ?? 80)).wait()
-        let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET, uri: self.path)
+        let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: HTTPMethod.method(from: self.method), uri: self.path)
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
         try! channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
         try! channel.closeFuture.wait()       
+    }
+}
+
+extension HTTPMethod {
+    static func method(from method: String) -> HTTPMethod {
+        let methodUpperCase = method.uppercased()
+        switch methodUpperCase {
+        case "GET":
+            return .GET
+        case "PUT":
+            return .PUT
+        case "ACL":
+            return .ACL
+        case "HEAD":
+            return .HEAD
+        case "POST":
+            return .POST
+        case "COPY":
+            return .COPY
+        case "LOCK":
+            return .LOCK
+        case "MOVE":
+            return .MOVE
+        case "BIND":
+            return .BIND
+        case "LINK":
+            return .LINK
+        case "PATCH":
+            return .PATCH
+        case "TRACE":
+            return .TRACE
+        case "MKCOL":
+            return .MKCOL
+        case "MERGE":
+            return .MERGE
+        case "PURGE":
+            return .PURGE
+        case "NOTIFY":
+            return .NOTIFY
+        case "SEARCH":
+            return .SEARCH
+        case "UNLOCK":
+            return .UNLOCK
+        case "REBIND":
+            return .REBIND
+        case "UNBIND":
+            return .UNBIND
+        case "REPORT":
+            return .REPORT
+        case "DELETE":
+            return .DELETE
+        case "UNLINK":
+            return .UNLINK
+        case "CONNECT":
+            return .CONNECT
+        case "MSEARCH":
+            return .MSEARCH
+        case "OPTIONS":
+            return .OPTIONS
+        case "PROPFIND":
+            return .PROPFIND
+        case "CHECKOUT":
+            return .CHECKOUT
+        case "PROPPATCH":
+            return .PROPPATCH
+        case "SUBSCRIBE":
+            return .SUBSCRIBE
+        case "MKCALENDAR":
+            return .MKCALENDAR
+        case "MKACTIVITY":
+            return .MKACTIVITY
+        case "UNSUBSCRIBE":
+            return .UNSUBSCRIBE
+        default:
+            return HTTPMethod.RAW(value: methodUpperCase)
+        }
+
     }
 }
 
