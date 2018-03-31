@@ -6,7 +6,13 @@ public class HTTPServer : Server {
     
     public typealias ServerType = HTTPServer
 
-    public var delegate: ServerDelegate?
+    public var delegate: ServerDelegate? {
+        didSet {
+            httpHandler.delegate = delegate
+       }
+    }
+
+    private var httpHandler: HTTPHandler = HTTPHandler()
 
     public private(set) var port: Int?
 
@@ -20,16 +26,17 @@ public class HTTPServer : Server {
         self.port = port
         //TODO: Add a dummy delegate
         guard let delegate = self.delegate else { fatalError("No delegate registered") }
+        httpHandler.delegate = delegate
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
             .serverChannelOption(ChannelOptions.backlog, value: 100)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: allowPortReuse ? 1 : 0)
             .childChannelInitializer { channel in
                 channel.pipeline.configureHTTPServerPipeline().then {
-                    channel.pipeline.add(handler: HTTPHandler(delegate: delegate))
+                    channel.pipeline.add(handler: self.httpHandler)
                 }
             }
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
-        let serverChannel = try! bootstrap.bind(host: "localhost", port: port)  //TODO: localhost?
+        let serverChannel = try! bootstrap.bind(host: "127.0.0.1", port: port)  //TODO: localhost?
             .wait()
         let queuedBlock = DispatchWorkItem(block: { try! serverChannel.closeFuture.wait() })
         ListenerGroup.enqueueAsynchronously(on: DispatchQueue.global(), block: queuedBlock)

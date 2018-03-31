@@ -198,10 +198,21 @@ public class ClientRequest {
             }
         let hostName = URL(string: url)?.host ?? "" //TODO: what could be the failure path here
         channel = try! bootstrap.connect(host: hostName, port: Int(self.port ?? 80)).wait()
-        let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: HTTPMethod.method(from: self.method), uri: self.path)
+        var request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: HTTPMethod.method(from: self.method), uri: self.path)
+        request.headers = HTTPHeaders.from(dictionary: self.headers)
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
         try! channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
         try! channel.closeFuture.wait()       
+    }
+}
+
+extension HTTPHeaders {
+    static func from(dictionary: [String: String]) -> HTTPHeaders {
+        var headers = HTTPHeaders()
+        for (key, value) in dictionary {
+            headers.add(name: key, value: value)
+        }
+        return headers
     }
 }
 

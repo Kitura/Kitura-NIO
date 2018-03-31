@@ -33,7 +33,7 @@ public class HTTPServerRequest: ServerRequest {
         self.urlString = requestHead.uri
         self.url = requestHead.uri.data(using: .utf8) ?? Data()
         self.urlURL = URL(string: urlString) ?? URL(string: "")!
-        self.remoteAddress = ctx.remoteAddress?.description ?? ""
+        self.remoteAddress = ctx.remoteAddress?.description.components(separatedBy: ":").first?.components(separatedBy: "]").last ?? ""
         self.urlComponents = URLComponents(url: urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
     } 
    

@@ -2,14 +2,12 @@ import NIO
 import NIOHTTP1
 
 public class HTTPHandler: ChannelInboundHandler {
-    let delegate: ServerDelegate 
+    var delegate: ServerDelegate!
     var serverRequest: HTTPServerRequest!
     var serverResponse: HTTPServerResponse!
     var errorResponseSent = false
 
-    public init(delegate: ServerDelegate) {
-        self.delegate = delegate 
-    }
+    public init() { }
 
     public typealias InboundIn = HTTPServerRequestPart
     public typealias OutboundOut = HTTPServerResponsePart

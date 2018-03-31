@@ -35,7 +35,7 @@ public class ClientResponse {
 
     @discardableResult
     public func read(into data: inout Data) throws -> Int {
-        guard var buffer = buffer else { return 0 }
+        guard buffer != nil else { return 0 }
         return buffer.fill(data: &data)
     }
 
@@ -52,7 +52,7 @@ public class ClientResponse {
 
     @discardableResult
     public func readAllData(into data: inout Data) throws -> Int {
-        guard var buffer = buffer else { return 0 }
+        guard buffer != nil else { return 0 }
         var length = buffer.fill(data: &data)
         var bytesRead = length
         while length > 0 {
