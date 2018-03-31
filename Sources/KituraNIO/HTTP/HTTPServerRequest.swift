@@ -10,12 +10,37 @@ public class HTTPServerRequest: ServerRequest {
     //@available(*, deprecated, message: "This contains just the path and query parameters starting with '/'. use 'urlURL' instead")
     public var urlString : String 
 
-    public var url : Data 
-
+    public var url : Data {
+        return urlURL.absoluteString.data(using: .utf8) ?? Data()
+    }
     //@available(*, deprecated, message: "URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead")
-    public var urlComponents : URLComponents
+    public var urlComponents : URLComponents {
+        return URLComponents(url: urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
+    }
 
-    public var urlURL : URL
+    private var _url: URL?
+
+    public var urlURL : URL {
+        if let _url = _url {
+            return _url
+        }
+        var url = ""
+        //TODO: http or https?
+        url.append("http://")
+        let hostname = localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").first ?? "Host_Not_Available"
+        url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
+        url.append(":")
+        url.append(localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").last ?? "")
+        url.append(urlString)
+   
+         if let urlURL = URL(string: url) {
+            self._url = urlURL
+        } else {
+            self._url = URL(string: "http://not_available/")!
+        }
+        
+        return self._url!
+    }
 
     public var remoteAddress: String
     
@@ -25,16 +50,16 @@ public class HTTPServerRequest: ServerRequest {
     
     public var method: String
 
+    private let localAddress: String
+
     init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead) {
         self.headers = HeadersContainer.create(from: requestHead.headers)
         self.method = String(describing: requestHead.method)
         self.httpVersionMajor = requestHead.version.major
         self.httpVersionMinor = requestHead.version.minor
         self.urlString = requestHead.uri
-        self.url = requestHead.uri.data(using: .utf8) ?? Data()
-        self.urlURL = URL(string: urlString) ?? URL(string: "")!
         self.remoteAddress = ctx.remoteAddress?.description.components(separatedBy: ":").first?.components(separatedBy: "]").last ?? ""
-        self.urlComponents = URLComponents(url: urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
+        self.localAddress = ctx.localAddress?.description ?? ""
     } 
    
     var buffer: ByteBuffer?
