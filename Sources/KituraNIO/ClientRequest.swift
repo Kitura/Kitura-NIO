@@ -178,6 +178,7 @@ public class ClientRequest {
             bodyData = Data()
         }
         bodyData!.append(data)
+        headers["Content-Length"] = "\(bodyData!.count)" //very eagerly adding
     }
 
     public func end(_ data: String, close: Bool = false) {

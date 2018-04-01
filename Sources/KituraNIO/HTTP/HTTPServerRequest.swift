@@ -67,8 +67,8 @@ public class HTTPServerRequest: ServerRequest {
     let bufferSize = 2048
 
     public func read(into data: inout Data) throws -> Int {
-        guard var buffer = buffer else { return 0 }
-        return buffer.fill(data: &data)
+        guard buffer != nil else { return 0 }
+        return buffer!.fill(data: &data)
     }
     
     public func readString() throws -> String? {
@@ -82,8 +82,8 @@ public class HTTPServerRequest: ServerRequest {
     }
     
     public func readAllData(into data: inout Data) throws -> Int {
-        guard var buffer = buffer else { return 0 }
-        var length = buffer.fill(data: &data)
+        guard buffer != nil else { return 0 }
+        var length = buffer!.fill(data: &data)
         var bytesRead = length
         while length > 0 {
             length = try read(into: &data)
