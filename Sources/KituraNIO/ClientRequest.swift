@@ -313,8 +313,12 @@ public class HTTPClientHandler: ChannelInboundHandler {
              clientResponse.httpVersionMajor = header.version.major
              clientResponse.httpVersionMinor = header.version.minor
              clientResponse.statusCode = HTTPStatusCode(rawValue: Int(header.status.code))!
-         case .body(let buffer):
-             clientResponse.buffer = buffer
+         case .body(var buffer):
+             if clientResponse.buffer == nil {
+                 clientResponse.buffer = buffer
+             } else {
+                 clientResponse.buffer!.write(buffer: &buffer)
+             }
          case .end(_):
             clientRequest.callback(clientResponse)
             _ = clientRequest.channel.close()

@@ -31,8 +31,7 @@ public class HTTPServerResponse: ServerResponse {
         if buffer == nil {
             buffer = ctx.channel.allocator.buffer(capacity: 1024)
          }
-        //TODO: Fix forced unwrapping here
-        buffer!.write(string: String(data: data, encoding: .utf8)!)
+        buffer!.append(data: data)
     }
     
     public func end(text: String) throws {

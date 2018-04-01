@@ -31,12 +31,12 @@ public class ClientResponse {
 
     private static let bufferSize = 2000
 
-    var buffer: ByteBuffer!
+    var buffer: ByteBuffer?
 
     @discardableResult
     public func read(into data: inout Data) throws -> Int {
         guard buffer != nil else { return 0 }
-        return buffer.fill(data: &data)
+        return buffer!.fill(data: &data)
     }
 
     @discardableResult
@@ -53,7 +53,7 @@ public class ClientResponse {
     @discardableResult
     public func readAllData(into data: inout Data) throws -> Int {
         guard buffer != nil else { return 0 }
-        var length = buffer.fill(data: &data)
+        var length = buffer!.fill(data: &data)
         var bytesRead = length
         while length > 0 {
             length = try read(into: &data)
