@@ -18,8 +18,12 @@ public class HTTPHandler: ChannelInboundHandler {
         switch request {
         case .head(let header):
             serverRequest = HTTPServerRequest(ctx: ctx, requestHead: header)
-        case .body(let buffer):
-            serverRequest.buffer = buffer           
+        case .body(var buffer):
+            if serverRequest.buffer == nil {
+                serverRequest.buffer = buffer
+            } else {
+                serverRequest.buffer!.write(buffer: &buffer)
+            }
         case .end(_):
             serverResponse = HTTPServerResponse(ctx: ctx, handler: self)
             delegate.handle(request: serverRequest, response: serverResponse)
