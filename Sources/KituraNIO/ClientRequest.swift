@@ -23,6 +23,8 @@ public class ClientRequest {
 
     private var port: Int16?
 
+    var bodyData: Data?
+
     private var hostName: String?
 
     /// Should SSL verification be disabled
@@ -172,6 +174,10 @@ public class ClientRequest {
     }
 
     public func write(from data: Data) {
+        if bodyData == nil {
+            bodyData = Data()
+        }
+        bodyData!.append(data)
     }
 
     public func end(_ data: String, close: Bool = false) {
@@ -201,6 +207,11 @@ public class ClientRequest {
         var request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: HTTPMethod.method(from: self.method), uri: self.path)
         request.headers = HTTPHeaders.from(dictionary: self.headers)
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
+        if let bodyData = bodyData {
+            var buffer = BufferList.create()
+            buffer.append(data: bodyData)
+            channel.write(NIOAny(HTTPClientRequestPart.body(.byteBuffer(buffer))), promise: nil)
+        }
         try! channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
         try! channel.closeFuture.wait()       
     }
