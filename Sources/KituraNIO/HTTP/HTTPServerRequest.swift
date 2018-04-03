@@ -27,13 +27,20 @@ public class HTTPServerRequest: ServerRequest {
         var url = ""
         //TODO: http or https?
         url.append("http://")
-        let hostname = localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").first ?? "Host_Not_Available"
-        url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
-        url.append(":")
-        url.append(localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").last ?? "")
+
+        if let hostname = headers["Host"]?.first {
+            url.append(hostname)
+        } else {
+            let hostname = localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").first ?? "Host_Not_Available"
+            url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
+            url.append(":")
+            url.append(localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").last ?? "")
+        }
+
         url.append(urlString)
+
    
-         if let urlURL = URL(string: url) {
+        if let urlURL = URL(string: url) {
             self._url = urlURL
         } else {
             self._url = URL(string: "http://not_available/")!
