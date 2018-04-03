@@ -60,7 +60,7 @@ public class URLParser : CustomStringConvertible {
         let urlComponents = URLComponents(string: String(data: url, encoding: .utf8)!)
         self.schema = urlComponents?.scheme
         self.host = urlComponents?.host
-        self.path = urlComponents?.path
+        self.path = urlComponents?.percentEncodedPath
         self.query = urlComponents?.query
         self.fragment = urlComponents?.fragment
         self.userinfo = urlComponents?.user
