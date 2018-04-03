@@ -48,8 +48,11 @@ public class HTTPServerResponse: ServerResponse {
         if let buffer = buffer {
             ctx.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
         }
-        ctx.write(handler.wrapOutboundOut(.end(nil)), promise: nil) //TODO: .end(nil) for now!
-        ctx.flush()
+        ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil))).whenComplete {
+            self.ctx.channel.close().whenComplete {
+                self.ctx.close(promise: nil)
+            }
+        }
     }
 
     func end(with errorCode: HTTPStatusCode) throws {
@@ -57,8 +60,11 @@ public class HTTPServerResponse: ServerResponse {
         let status = HTTPResponseStatus(statusCode: errorCode.rawValue)
         let response = HTTPResponseHead(version: HTTPVersion(major: 1, minor: 1), status: status, headers: HTTPHeaders())
         ctx.write(handler.wrapOutboundOut(.head(response)), promise: nil)
-        ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
-        ctx.close(promise:nil)
+        ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil))).whenComplete {
+            self.ctx.channel.close().whenComplete {
+                self.ctx.close(promise: nil)
+            }
+        }
     }
  
     public func reset() { //TODO 
