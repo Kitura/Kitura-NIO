@@ -21,11 +21,11 @@ public class ClientRequest {
 
     public private(set) var callback: Callback
 
-    private var port: Int16?
+    var port: Int16?
 
     var bodyData: Data?
 
-    private var hostName: String?
+    var hostName: String?
 
     /// Should SSL verification be disabled
     private var disableSSLVerification = false
@@ -204,7 +204,12 @@ public class ClientRequest {
                 }
             }
         let hostName = URL(string: url)?.host ?? "" //TODO: what could be the failure path here
-        channel = try! bootstrap.connect(host: hostName, port: Int(self.port ?? 80)).wait()
+        do {
+            channel = try bootstrap.connect(host: hostName, port: Int(self.port ?? 80)).wait()
+        } catch {
+            callback(nil)
+            return //we must ideally throw from here, but alas!
+        } 
         var request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: HTTPMethod.method(from: self.method), uri: self.path)
         request.headers = HTTPHeaders.from(dictionary: self.headers)
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
@@ -332,8 +337,17 @@ public class HTTPClientHandler: ChannelInboundHandler {
                  clientResponse.buffer!.write(buffer: &buffer)
              }
          case .end(_):
-            clientRequest.callback(clientResponse)
-            _ = clientRequest.channel.close()
+            if clientResponse.statusCode == .movedTemporarily {
+                guard let url = clientResponse.headers["Location"]?.first else { fatalError("Redirected but no Location header") }
+                if url.starts(with: "/") {
+                    ClientRequest(options: [.hostname(clientRequest.hostName!), .port(clientRequest.port!), .path(url)], callback: clientRequest.callback)
+                        .end()
+                } else {
+                    ClientRequest(url: url, callback: clientRequest.callback).end()
+                }
+            } else {
+                clientRequest.callback(clientResponse)
+            }
          }
      }
 }

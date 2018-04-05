@@ -18,6 +18,10 @@ public class HTTPServer : Server {
 
     public private(set) var state: ServerState = .unknown
 
+    fileprivate let lifecycleListener = ServerLifecycleListener()
+
+    var serverChannel: Channel!
+
     public var allowPortReuse = false
 
     let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: System.coreCount)
@@ -29,16 +33,32 @@ public class HTTPServer : Server {
         httpHandler.delegate = delegate
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
             .serverChannelOption(ChannelOptions.backlog, value: 100)
-            .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: allowPortReuse ? 1 : 0)
+            //TODO: always setting to SO_REUSEADDR for now
+            .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .childChannelInitializer { channel in
                 channel.pipeline.configureHTTPServerPipeline().then {
                     channel.pipeline.add(handler: self.httpHandler)
                 }
             }
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
-        let serverChannel = try! bootstrap.bind(host: "127.0.0.1", port: port)  //TODO: localhost?
-            .wait()
-        let queuedBlock = DispatchWorkItem(block: { try! serverChannel.closeFuture.wait() })
+
+
+        do {
+            serverChannel = try bootstrap.bind(host: "127.0.0.1", port: port)  //TODO: localhost?
+                .wait()
+            self.state = .started
+            self.lifecycleListener.performStartCallbacks()
+        } catch let error {
+            self.state = .failed
+            self.lifecycleListener.performFailCallbacks(with: error)
+            throw error
+        }
+
+        let queuedBlock = DispatchWorkItem(block: { 
+            try! self.serverChannel.closeFuture.wait()
+            self.state = .stopped
+            self.lifecycleListener.performStopCallbacks()
+        })
         ListenerGroup.enqueueAsynchronously(on: DispatchQueue.global(), block: queuedBlock)
     }
 
@@ -69,32 +89,38 @@ public class HTTPServer : Server {
         server.listen(port: port, errorHandler: errorHandler)
         return server
     }
+    
+    deinit { 
+        try! eventLoopGroup.syncShutdownGracefully()
+    }
 
     public func stop() {
-        try! eventLoopGroup.syncShutdownGracefully()
+        guard serverChannel != nil else { return }
+        try! serverChannel.close().wait()
+        self.state = .stopped
     }
 
     @discardableResult
     public func started(callback: @escaping () -> Void) -> Self {
-        //TODO
+        self.lifecycleListener.addStartCallback(perform: self.state == .started, callback)
         return self
     }
 
     @discardableResult
     public func stopped(callback: @escaping () -> Void) -> Self {
-        //TODO
+        self.lifecycleListener.addStopCallback(perform: self.state == .stopped, callback)
         return self
     }
 
     @discardableResult
     public func failed(callback: @escaping (Swift.Error) -> Void) -> Self {
-        //TODO
+        self.lifecycleListener.addFailCallback(callback) 
         return self
     }
 
     @discardableResult
     public func clientConnectionFailed(callback: @escaping (Swift.Error) -> Void) -> Self {
-        //TODO
+        self.lifecycleListener.addClientConnectionFailCallback(callback)
         return self
     }
 }
