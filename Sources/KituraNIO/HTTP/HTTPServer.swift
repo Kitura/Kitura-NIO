@@ -16,11 +16,15 @@ public class HTTPServer : Server {
 
     public private(set) var port: Int?
 
-    public var keepAliveState: KeepAliveState = .unlimited
-
     public private(set) var state: ServerState = .unknown
 
     fileprivate let lifecycleListener = ServerLifecycleListener()
+
+    public var keepAliveState: KeepAliveState = .unlimited {
+        didSet(newValue) {
+            httpHandler.keepAliveState = newValue
+        }
+    }
 
     var serverChannel: Channel!
 

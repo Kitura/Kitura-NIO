@@ -1,11 +1,20 @@
 import NIO
 import NIOHTTP1
+import Foundation
 
 public class HTTPHandler: ChannelInboundHandler {
     var delegate: ServerDelegate!
     var serverRequest: HTTPServerRequest!
     var serverResponse: HTTPServerResponse!
     var errorResponseSent = false
+
+    var keepAliveState: KeepAliveState = .unlimited
+   
+    static let keepAliveTimeout: TimeInterval = 60
+  
+    private(set) var clientRequestedKeepAlive = false
+
+    var keepAliveUntil: TimeInterval = 0.0
 
     public init() { }
 
@@ -18,6 +27,7 @@ public class HTTPHandler: ChannelInboundHandler {
         switch request {
         case .head(let header):
             serverRequest = HTTPServerRequest(ctx: ctx, requestHead: header)
+            self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
             if serverRequest.buffer == nil {
                 serverRequest.buffer = buffer
@@ -44,5 +54,10 @@ public class HTTPHandler: ChannelInboundHandler {
                try serverResponse.end(with: .badRequest)
             } catch { }
         }
+    }
+
+    func keepAlive() {
+        keepAliveState.decrement()
+        keepAliveUntil = Date(timeIntervalSinceNow: HTTPHandler.keepAliveTimeout).timeIntervalSinceReferenceDate
     }
 }
