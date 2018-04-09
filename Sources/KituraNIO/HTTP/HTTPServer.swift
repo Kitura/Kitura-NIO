@@ -26,7 +26,7 @@ public class HTTPServer : Server {
 
     public var allowPortReuse = false
 
-    let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: System.coreCount)
+    let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: 1)
 
     public func listen(on port: Int) throws {
         self.port = port
