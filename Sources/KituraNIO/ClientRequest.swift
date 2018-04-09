@@ -219,7 +219,6 @@ public class ClientRequest {
             channel.write(NIOAny(HTTPClientRequestPart.body(.byteBuffer(buffer))), promise: nil)
         }
         try! channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
-        try! channel.closeFuture.wait()       
     }
 }
 
@@ -347,6 +346,9 @@ public class HTTPClientHandler: ChannelInboundHandler {
                 }
             } else {
                 clientRequest.callback(clientResponse)
+            }
+            clientRequest.channel.close().whenFailure { error in
+                //TODO: log unexpected error
             }
          }
      }
