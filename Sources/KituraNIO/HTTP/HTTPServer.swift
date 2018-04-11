@@ -6,13 +6,7 @@ public class HTTPServer : Server {
     
     public typealias ServerType = HTTPServer
 
-    public var delegate: ServerDelegate? {
-        didSet {
-            httpHandler.delegate = delegate
-       }
-    }
-
-    private var httpHandler: HTTPHandler = HTTPHandler()
+    public var delegate: ServerDelegate?
 
     public private(set) var port: Int?
 
@@ -20,30 +14,25 @@ public class HTTPServer : Server {
 
     fileprivate let lifecycleListener = ServerLifecycleListener()
 
-    public var keepAliveState: KeepAliveState = .unlimited {
-        didSet(newValue) {
-            httpHandler.keepAliveState = newValue
-        }
-    }
+    public var keepAliveState: KeepAliveState = .unlimited
 
     var serverChannel: Channel!
 
     public var allowPortReuse = false
 
-    let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: 1)
+    let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: System.coreCount)
 
     public func listen(on port: Int) throws {
         self.port = port
         //TODO: Add a dummy delegate
-        guard let delegate = self.delegate else { fatalError("No delegate registered") }
-        httpHandler.delegate = delegate
+        guard let _ = self.delegate else { fatalError("No delegate registered") }
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
             .serverChannelOption(ChannelOptions.backlog, value: 100)
             //TODO: always setting to SO_REUSEADDR for now
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .childChannelInitializer { channel in
                 channel.pipeline.configureHTTPServerPipeline().then {
-                    channel.pipeline.add(handler: self.httpHandler)
+                    channel.pipeline.add(handler: HTTPHandler(for: self))
                 }
             }
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)

@@ -3,9 +3,13 @@ import NIOHTTP1
 import Foundation
 
 public class HTTPHandler: ChannelInboundHandler {
-    var delegate: ServerDelegate!
+
+    var server: HTTPServer 
+
     var serverRequest: HTTPServerRequest!
+
     var serverResponse: HTTPServerResponse!
+
     var errorResponseSent = false
 
     var keepAliveState: KeepAliveState = .unlimited
@@ -16,7 +20,10 @@ public class HTTPHandler: ChannelInboundHandler {
 
     var keepAliveUntil: TimeInterval = 0.0
 
-    public init() { }
+    public init(for server: HTTPServer) { 
+        self.server = server
+        self.keepAliveState = server.keepAliveState
+    }
 
     public typealias InboundIn = HTTPServerRequestPart
     public typealias OutboundOut = HTTPServerResponsePart
@@ -36,7 +43,10 @@ public class HTTPHandler: ChannelInboundHandler {
             }
         case .end(_):
             serverResponse = HTTPServerResponse(ctx: ctx, handler: self)
-            delegate.handle(request: serverRequest, response: serverResponse)
+            //Make sure we use the latest delegate registered with the server
+            if let delegate = server.delegate {
+                delegate.handle(request: serverRequest, response: serverResponse)
+            } //TODO: failure path
          }
      }
 
