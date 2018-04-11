@@ -56,7 +56,7 @@ public class HTTPHandler: ChannelInboundHandler {
         }
     }
 
-    func keepAlive() {
+    func updateKeepAliveState() {
         keepAliveState.decrement()
         keepAliveUntil = Date(timeIntervalSinceNow: HTTPHandler.keepAliveTimeout).timeIntervalSinceReferenceDate
     }

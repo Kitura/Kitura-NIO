@@ -62,6 +62,7 @@ public class HTTPServerResponse: ServerResponse {
             promise.futureResult.whenComplete { self.ctx.close(promise: nil) }
         }
         ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: promise)
+        handler.updateKeepAliveState()
     }
 
     
@@ -85,6 +86,7 @@ public class HTTPServerResponse: ServerResponse {
             promise.futureResult.whenComplete { self.ctx.close(promise: nil) }
         }
         ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: promise)
+        handler.updateKeepAliveState()
     }
  
     public func reset() { //TODO 
