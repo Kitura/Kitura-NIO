@@ -1,6 +1,8 @@
 import NIO
 import NIOHTTP1
 import Dispatch
+import NIOOpenSSL
+import SSLService
 
 public class HTTPServer : Server {
     
@@ -22,8 +24,27 @@ public class HTTPServer : Server {
 
     let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: System.coreCount)
 
+    public var sslConfig: SSLService.Configuration? {
+        didSet {
+            if let sslConfig = sslConfig {
+                // Bridge SSLConfiguration and TLSConfiguration
+                let config = SSLConfiguration(sslConfig: sslConfig)
+                tlsConfig = config.tlsServerConfig()
+            }
+        }
+    }
+
+    private var tlsConfig: TLSConfiguration?
+
+    private var sslContext: SSLContext?
+
     public func listen(on port: Int) throws {
         self.port = port
+
+        if let tlsConfig = tlsConfig {
+            self.sslContext = try! SSLContext(configuration: tlsConfig)
+        }
+
         //TODO: Add a dummy delegate
         guard let _ = self.delegate else { fatalError("No delegate registered") }
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
@@ -32,7 +53,10 @@ public class HTTPServer : Server {
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .childChannelInitializer { channel in
                 channel.pipeline.configureHTTPServerPipeline().then {
-                    channel.pipeline.add(handler: HTTPHandler(for: self))
+                    if let sslCtxt = self.sslContext {
+                        channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslCtxt), first: true)
+                    }
+                    return channel.pipeline.add(handler: HTTPHandler(for: self))
                 }
             }
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
