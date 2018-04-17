@@ -47,23 +47,23 @@ public class HTTPHandler: ChannelInboundHandler {
             if let delegate = server.delegate {
                 delegate.handle(request: serverRequest, response: serverResponse)
             } //TODO: failure path
-         }
-     }
-
-     public func channelReadComplete(ctx: ChannelHandlerContext) {
-         ctx.flush()
-     }
-
-     public func errorCaught(ctx: ChannelHandlerContext, error: Error) {
-         //Check for parser errors
-         guard !errorResponseSent else { return }
-         if error is HTTPParserError {
-            do {
-               errorResponseSent = true
-               serverResponse = HTTPServerResponse(ctx: ctx, handler: self)
-               try serverResponse.end(with: .badRequest)
-            } catch { }
         }
+    }
+
+    public func channelReadComplete(ctx: ChannelHandlerContext) {
+        ctx.flush()
+    }
+
+    public func errorCaught(ctx: ChannelHandlerContext, error: Error) {
+        //Check for parser errors
+        guard !errorResponseSent else { return }
+        if error is HTTPParserError {
+           do {
+              errorResponseSent = true
+              serverResponse = HTTPServerResponse(ctx: ctx, handler: self)
+              try serverResponse.end(with: .badRequest)
+           } catch { }
+       }
     }
 
     func updateKeepAliveState() {
