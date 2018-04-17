@@ -52,11 +52,13 @@ public class HTTPServer : Server {
             //TODO: always setting to SO_REUSEADDR for now
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .childChannelInitializer { channel in
-                channel.pipeline.configureHTTPServerPipeline().then {
-                    if let sslCtxt = self.sslContext {
-                        channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslCtxt), first: true)
+                channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {
+                    channel.pipeline.configureHTTPServerPipeline().then {
+                        if let sslCtxt = self.sslContext {
+                            channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslCtxt), first: true)
+                        }
+                        return channel.pipeline.add(handler: HTTPHandler(for: self))
                     }
-                    return channel.pipeline.add(handler: HTTPHandler(for: self))
                 }
             }
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
