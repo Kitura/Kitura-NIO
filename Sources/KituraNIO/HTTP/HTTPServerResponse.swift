@@ -25,14 +25,17 @@ public class HTTPServerResponse: ServerResponse {
     } 
 
     public func write(from string: String) throws {
-        try write(from: string.data(using: .utf8)!)
+        if buffer == nil {
+            buffer = ctx.channel.allocator.buffer(capacity: 1024)
+        }
+        buffer!.write(string: string)
     }
     
     public func write(from data: Data) throws {
         if buffer == nil {
             buffer = ctx.channel.allocator.buffer(capacity: 1024)
          }
-        buffer!.append(data: data)
+        buffer!.write(bytes: data)
     }
     
     public func end(text: String) throws {
