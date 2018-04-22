@@ -18,8 +18,6 @@ public class HTTPHandler: ChannelInboundHandler {
   
     private(set) var clientRequestedKeepAlive = false
 
-    var keepAliveUntil: TimeInterval = 0.0
-
     public init(for server: HTTPServer) { 
         self.server = server
         self.keepAliveState = server.keepAliveState
@@ -68,6 +66,5 @@ public class HTTPHandler: ChannelInboundHandler {
 
     func updateKeepAliveState() {
         keepAliveState.decrement()
-        keepAliveUntil = Date(timeIntervalSinceNow: HTTPHandler.keepAliveTimeout).timeIntervalSinceReferenceDate
     }
 }
