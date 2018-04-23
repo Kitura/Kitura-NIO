@@ -26,10 +26,12 @@ public class HTTPServerRequest: ServerRequest {
         }
         var url = ""
         //TODO: http or https?
-        url.append("http://")
+        self.enableSSL ? url.append("https://") : url.append("http://")
 
         if let hostname = headers["Host"]?.first {
             url.append(hostname)
+            url.append(":")
+            url.append(localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").last ?? "")
         } else {
             let hostname = localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").first ?? "Host_Not_Available"
             url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
@@ -59,7 +61,9 @@ public class HTTPServerRequest: ServerRequest {
 
     private let localAddress: String
 
-    init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead) {
+    private var enableSSL: Bool = false
+
+    init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead, enableSSL: Bool) {
         self.headers = HeadersContainer.create(from: requestHead.headers)
         self.method = String(describing: requestHead.method)
         self.httpVersionMajor = requestHead.version.major
@@ -67,6 +71,7 @@ public class HTTPServerRequest: ServerRequest {
         self.urlString = requestHead.uri
         self.remoteAddress = ctx.remoteAddress?.description.components(separatedBy: ":").first?.components(separatedBy: "]").last ?? ""
         self.localAddress = ctx.localAddress?.description ?? ""
+        self.enableSSL = enableSSL
     } 
    
     var buffer: ByteBuffer?

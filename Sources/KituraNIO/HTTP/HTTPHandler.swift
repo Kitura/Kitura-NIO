@@ -18,9 +18,14 @@ public class HTTPHandler: ChannelInboundHandler {
   
     private(set) var clientRequestedKeepAlive = false
 
+    private(set) var enableSSLVerfication = false
+
     public init(for server: HTTPServer) { 
         self.server = server
         self.keepAliveState = server.keepAliveState
+        if let _ = server.sslConfig {
+            self.enableSSLVerfication = true
+        }
     }
 
     public typealias InboundIn = HTTPServerRequestPart
@@ -31,7 +36,7 @@ public class HTTPHandler: ChannelInboundHandler {
 
         switch request {
         case .head(let header):
-            serverRequest = HTTPServerRequest(ctx: ctx, requestHead: header)
+            serverRequest = HTTPServerRequest(ctx: ctx, requestHead: header, enableSSL: enableSSLVerfication)
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
             if serverRequest.buffer == nil {
