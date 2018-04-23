@@ -53,6 +53,13 @@ public class HTTPHandler: ChannelInboundHandler {
         }
     }
 
+    //IdleStateEvents are received on this method
+    public func userInboundEventTriggered(ctx: ChannelHandlerContext, event: Any) {
+        if event is IdleStateHandler.IdleStateEvent {
+            _ = ctx.close()
+        }
+    }
+
     public func channelReadComplete(ctx: ChannelHandlerContext) {
         ctx.flush()
     }
