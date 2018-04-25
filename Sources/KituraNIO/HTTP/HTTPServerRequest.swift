@@ -30,8 +30,10 @@ public class HTTPServerRequest: ServerRequest {
 
         if let hostname = headers["Host"]?.first {
             url.append(hostname)
-            url.append(":")
-            url.append(localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").last ?? "")
+            if !hostname.contains(":") {
+                url.append(":")
+                url.append(localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").last ?? "")
+            }
         } else {
             let hostname = localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").first ?? "Host_Not_Available"
             url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
