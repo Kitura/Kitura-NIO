@@ -24,6 +24,8 @@ public class HTTPServer : Server {
 
     let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: System.coreCount)
 
+    public init() { }
+
     public var sslConfig: SSLService.Configuration? {
         didSet {
             if let sslConfig = sslConfig {
