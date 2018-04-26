@@ -210,6 +210,8 @@ public class ClientRequest {
     var bootstrap: ClientBootstrap!
 
     public func end(close: Bool = false) {
+        closeConnection = close
+
         //TODO: Handle redirection
         let group = MultiThreadedEventLoopGroup(numThreads: 1)
         if (URL(string: url)?.scheme)! == "https" {
@@ -227,6 +229,9 @@ public class ClientRequest {
            self.headers["Host"] = hostName
         }
         self.headers["User-Agent"] = "KituraNIO"
+        if closeConnection {
+            self.headers["Connection"] = "close"
+        }
         if self.port == nil {
             self.port = enableSSLVerification ? 443 : 80
         }
