@@ -60,10 +60,6 @@ public class HTTPServerResponse: ServerResponse {
         if let buffer = buffer {
             ctx.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
         }
-        let promise: EventLoopPromise<Void> = ctx.eventLoop.newPromise() 
-        if !self.handler.clientRequestedKeepAlive {
-            promise.futureResult.whenComplete { self.ctx.close(promise: nil) }
-        }
         ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: promise)
         handler.updateKeepAliveState()
     }
@@ -83,11 +79,6 @@ public class HTTPServerResponse: ServerResponse {
         }
         let response = HTTPResponseHead(version: HTTPVersion(major: 1, minor: 1), status: status, headers: headers.httpHeaders())
         ctx.write(handler.wrapOutboundOut(.head(response)), promise: nil)
-
-        let promise: EventLoopPromise<Void> = ctx.eventLoop.newPromise()
-        if !self.handler.clientRequestedKeepAlive {
-            promise.futureResult.whenComplete { self.ctx.close(promise: nil) }
-        }
         ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: promise)
         handler.updateKeepAliveState()
     }
