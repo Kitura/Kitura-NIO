@@ -40,9 +40,9 @@ public class HTTPHandler: ChannelInboundHandler {
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
             if serverRequest.buffer == nil {
-                serverRequest.buffer = buffer
+                serverRequest.buffer = BufferList(with: buffer)
             } else {
-                serverRequest.buffer!.write(buffer: &buffer)
+                serverRequest.buffer!.byteBuffer.write(buffer: &buffer)
             }
         case .end(_):
             serverResponse = HTTPServerResponse(ctx: ctx, handler: self)

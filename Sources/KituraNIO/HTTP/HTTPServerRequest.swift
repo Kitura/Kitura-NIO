@@ -76,7 +76,7 @@ public class HTTPServerRequest: ServerRequest {
         self.enableSSL = enableSSL
     } 
    
-    var buffer: ByteBuffer?
+    var buffer: BufferList?
 
     let bufferSize = 2048
 

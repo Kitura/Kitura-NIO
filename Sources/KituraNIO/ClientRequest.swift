@@ -387,9 +387,9 @@ public class HTTPClientHandler: ChannelInboundHandler {
              clientResponse.statusCode = HTTPStatusCode(rawValue: Int(header.status.code))!
          case .body(var buffer):
              if clientResponse.buffer == nil {
-                 clientResponse.buffer = buffer
+                 clientResponse.buffer = BufferList(with: buffer)
              } else {
-                 clientResponse.buffer!.write(buffer: &buffer)
+                 clientResponse.buffer!.byteBuffer.write(buffer: &buffer)
              }
          case .end(_):
             if clientResponse.statusCode == .movedTemporarily || clientResponse.statusCode == .movedPermanently {

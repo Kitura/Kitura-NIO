@@ -31,7 +31,7 @@ public class ClientResponse {
 
     private static let bufferSize = 2000
 
-    var buffer: ByteBuffer?
+    var buffer: BufferList?
 
     @discardableResult
     public func read(into data: inout Data) throws -> Int {

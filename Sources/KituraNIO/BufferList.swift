@@ -11,6 +11,10 @@ public struct BufferList {
          byteBuffer = ByteBufferAllocator().buffer(capacity: 4096)
     }
 
+    init(with byteBuffer: ByteBuffer) {
+        self.byteBuffer = byteBuffer
+    }
+    
     public var count: Int {
         return byteBuffer.capacity
     }
