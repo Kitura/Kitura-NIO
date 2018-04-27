@@ -245,7 +245,7 @@ public class ClientRequest {
         request.headers = HTTPHeaders.from(dictionary: self.headers)
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
         if let bodyData = bodyData {
-            var buffer = BufferList()
+            let buffer = BufferList()
             buffer.append(data: bodyData)
             channel.write(NIOAny(HTTPClientRequestPart.body(.byteBuffer(buffer.byteBuffer))), promise: nil)
         }
