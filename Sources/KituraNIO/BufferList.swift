@@ -1,26 +1,28 @@
 import NIO
 import Foundation
 
-public typealias BufferList = NIO.ByteBuffer
+//public typealias BufferList = NIO.ByteBuffer
 
-public extension ByteBuffer {
+public struct BufferList {
 
-    public static func create() -> ByteBuffer {
-        return ByteBufferAllocator().buffer(capacity: 4096)
+    var byteBuffer: ByteBuffer
+
+    public init() {
+         byteBuffer = ByteBufferAllocator().buffer(capacity: 4096)
     }
 
     public var count: Int {
-        return self.capacity
+        return byteBuffer.capacity
     }
 
     public var data: Data {
-       let bytes = self.getBytes(at: 0, length: self.readableBytes) ?? []
+       let bytes = byteBuffer.getBytes(at: 0, length: byteBuffer.readableBytes) ?? []
        return Data(bytes: bytes) 
     }
 
     public mutating func append(bytes: UnsafePointer<UInt8>, length: Int) {
         let array = Array(UnsafeBufferPointer(start: bytes, count: length))
-        self.write(bytes: array)
+        byteBuffer.write(bytes: array)
     }
 
     public mutating func append(data: Data) {
@@ -34,21 +36,21 @@ public extension ByteBuffer {
     }
 
     public mutating func fill(buffer: UnsafeMutablePointer<UInt8>, length: Int) -> Int {
-        let fillLength = min(length, self.readableBytes)
-        let bytes = self.readBytes(length: fillLength) ?? []
+        let fillLength = min(length, byteBuffer.readableBytes)
+        let bytes = byteBuffer.readBytes(length: fillLength) ?? []
         UnsafeMutableRawPointer(buffer).copyMemory(from: bytes, byteCount: bytes.count)
         return bytes.count 
     }
 
     public mutating func fill(data: inout Data) -> Int {
-        let bytes = self.readBytes(length: self.readableBytes) ?? []
+        let bytes = byteBuffer.readBytes(length: byteBuffer.readableBytes) ?? []
         data.append(contentsOf: bytes)
         return bytes.count
     }
 
     public mutating func fill(data: NSMutableData) -> Int {
-        let length = self.readableBytes
-        let result = self.readWithUnsafeReadableBytes() { body in 
+        let length = byteBuffer.readableBytes
+        let result = byteBuffer.readWithUnsafeReadableBytes() { body in 
             data.append(body.baseAddress!, length: length) 
             return length
         }
@@ -56,10 +58,10 @@ public extension ByteBuffer {
     }
 
     public mutating func reset() {
-        self.clear()
+        byteBuffer.clear()
     }
 
     public mutating func rewind() {
-        self.moveReaderIndex(to: 0)
+        byteBuffer.moveReaderIndex(to: 0)
     }    
 }

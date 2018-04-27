@@ -245,9 +245,9 @@ public class ClientRequest {
         request.headers = HTTPHeaders.from(dictionary: self.headers)
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
         if let bodyData = bodyData {
-            var buffer = BufferList.create()
+            var buffer = BufferList()
             buffer.append(data: bodyData)
-            channel.write(NIOAny(HTTPClientRequestPart.body(.byteBuffer(buffer))), promise: nil)
+            channel.write(NIOAny(HTTPClientRequestPart.body(.byteBuffer(buffer.byteBuffer))), promise: nil)
         }
         try! channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
     }
