@@ -57,7 +57,7 @@ public class HTTPServer : Server {
                 channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {
                     channel.pipeline.configureHTTPServerPipeline().then {
                         if let sslCtxt = self.sslContext {
-                            channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslCtxt), first: true)
+                            _ = channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslCtxt), first: true)
                         }
                         return channel.pipeline.add(handler: HTTPHandler(for: self))
                     }
