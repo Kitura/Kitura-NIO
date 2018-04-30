@@ -152,6 +152,13 @@ public class ClientRequest {
 
     public typealias Callback = (ClientResponse?) -> Void
 
+    public class func parse(_ urlString: String) -> [ClientRequest.Options] {
+        if let url = URL(string: urlString) {
+            return parse(url)
+        }
+        return []
+    }
+
     public class func parse(_ url: URL) -> [ClientRequest.Options] {
 
         var options: [ClientRequest.Options] = []
