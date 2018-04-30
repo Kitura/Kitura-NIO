@@ -35,7 +35,21 @@ public class HTTP {
     public static func request(_ options: [ClientRequest.Options], callback: @escaping ClientRequest.Callback) -> ClientRequest {
         return ClientRequest(options: options, callback: callback)
     }
-    
+
+    public static func get(_ url: String, callback: @escaping ClientRequest.Callback) -> ClientRequest {
+        let req = ClientRequest(url: url, callback: callback)
+        req.end()
+        return req
+    }
+
+    private static let allowedCharacterSet = NSCharacterSet(charactersIn:"\"#%/<>?@\\^`{|} ").inverted
+
+    public static func escape(url: String) -> String {
+        if let escaped = url.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet) {
+            return escaped
+        }
+        return url
+    }
 }
 
 
