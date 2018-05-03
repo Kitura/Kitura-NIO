@@ -18,7 +18,9 @@ public class HTTPServer : Server {
 
     public var keepAliveState: KeepAliveState = .unlimited
 
-    var serverChannel: Channel!
+    var ipv4ServerChannel: Channel!
+
+    var ipv6ServerChannel: Channel!
 
     public var allowPortReuse = false
 
@@ -67,8 +69,10 @@ public class HTTPServer : Server {
 
 
         do {
-            serverChannel = try bootstrap.bind(host: "127.0.0.1", port: port)  //TODO: localhost?
-                .wait()
+            //To support both IPv4 and IPv6
+            ipv4ServerChannel = try bootstrap.bind(host: "127.0.0.1", port: port).wait()
+            ipv6ServerChannel = try bootstrap.bind(host: "::1", port: port).wait()
+
             self.state = .started
             self.lifecycleListener.performStartCallbacks()
         } catch let error {
@@ -78,7 +82,8 @@ public class HTTPServer : Server {
         }
 
         let queuedBlock = DispatchWorkItem(block: { 
-            try! self.serverChannel.closeFuture.wait()
+            try! self.ipv4ServerChannel.closeFuture.wait()
+            try! self.ipv6ServerChannel.closeFuture.wait()
             self.state = .stopped
             self.lifecycleListener.performStopCallbacks()
         })
@@ -118,8 +123,9 @@ public class HTTPServer : Server {
     }
 
     public func stop() {
-        guard serverChannel != nil else { return }
-        try! serverChannel.close().wait()
+        guard ipv4ServerChannel != nil && ipv6ServerChannel != nil else { return }
+        try! ipv4ServerChannel.close().wait()
+        try! ipv6ServerChannel.close().wait()
         self.state = .stopped
     }
 
