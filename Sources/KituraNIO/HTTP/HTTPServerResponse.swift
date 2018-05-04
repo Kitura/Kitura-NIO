@@ -69,14 +69,8 @@ public class HTTPServerResponse: ServerResponse {
     func end(with errorCode: HTTPStatusCode) throws {
         self.statusCode = errorCode
         let status = HTTPResponseStatus(statusCode: errorCode.rawValue)
-        if self.handler.clientRequestedKeepAlive {
-            headers["Connection"] = ["Keep-Alive"]
-            if let maxConnections = self.handler.keepAliveState.requestsRemaining {
-                headers["Keep-Alive"] = ["timeout=\(HTTPHandler.keepAliveTimeout), max=\(Int(maxConnections))"]
-            } else {
-                headers["Keep-Alive"] = ["timeout=\(HTTPHandler.keepAliveTimeout)"]
-             }
-        }
+        //We don't keep the connection alive on an HTTP error
+        headers["Connection"] = ["Close"]
         let response = HTTPResponseHead(version: HTTPVersion(major: 1, minor: 1), status: status, headers: headers.httpHeaders())
         ctx.write(handler.wrapOutboundOut(.head(response)), promise: nil)
         ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
