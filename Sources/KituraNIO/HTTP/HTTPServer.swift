@@ -51,8 +51,7 @@ public class HTTPServer : Server {
         guard let _ = self.delegate else { fatalError("No delegate registered") }
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
             .serverChannelOption(ChannelOptions.backlog, value: 100)
-            //TODO: always setting to SO_REUSEADDR for now
-            .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
+            .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .childChannelInitializer { channel in
                 channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {
                     channel.pipeline.configureHTTPServerPipeline().then {
