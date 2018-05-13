@@ -17,6 +17,7 @@
 import NIOOpenSSL
 import SSLService
 
+/// A helper class to bridge betweem SSLService.Configuration (used by Kitura) and TLSConfiguration requred by NIOOpenSSL
 internal class SSLConfiguration {
    
     private var certificateFilePath: String? = nil
@@ -24,12 +25,14 @@ internal class SSLConfiguration {
     private var keyFilePath: String? = nil
     
     // TODO: Consider other TLSConfiguration options (cipherSuites, trustRoots, applicationProtocols, etc..)
-    
+
+    /// Initialize using SSLService.Configuration
     init(sslConfig: SSLService.Configuration) {
         self.certificateFilePath = sslConfig.certificateFilePath
         self.keyFilePath = sslConfig.keyFilePath
     }
-    
+
+    /// Convert SSLService.Configuration to NIOOpenSSL.TLSConfiguration
     func tlsServerConfig() -> TLSConfiguration? {
         #if os(Linux)
             // TODO: Consider other configuration options

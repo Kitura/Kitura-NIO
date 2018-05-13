@@ -20,12 +20,16 @@ import Foundation
 
 public class HTTPHandler: ChannelInboundHandler {
 
+    /// The HTTPServer instance on which this handler is installed
     var server: HTTPServer 
 
+    /// The serverRequest related to this handler instance
     var serverRequest: HTTPServerRequest!
 
+    /// The serverResponse related to this handler instance
     var serverResponse: HTTPServerResponse!
 
+    /// We'd want to send an error response only once
     var errorResponseSent = false
 
     var keepAliveState: KeepAliveState = .unlimited

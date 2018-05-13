@@ -20,14 +20,18 @@ import Dispatch
 import NIOOpenSSL
 import SSLService
 
+/// An HTTP server that listens for connections on a socket.
 public class HTTPServer : Server {
     
     public typealias ServerType = HTTPServer
 
+    /// HTTP `ServerDelegate`.
     public var delegate: ServerDelegate?
 
+    /// Port number for listening for new connections.
     public private(set) var port: Int?
 
+    /// A server state.
     public private(set) var state: ServerState = .unknown
 
     fileprivate let lifecycleListener = ServerLifecycleListener()
@@ -36,30 +40,41 @@ public class HTTPServer : Server {
 
     public var supportIPv6 = false
 
-    var ipv4ServerChannel: Channel!
+    /// The channel used to listen for new connections (IPv4)
+    var serverChannelIPv4: Channel!
 
-    var ipv6ServerChannel: Channel!
+    /// The channel used to listen for new connections (IPv6)
+    var serverChannelIPv6: Channel!
 
+    /// Whether or not this server allows port reuse (default: disallowed)
     public var allowPortReuse = false
 
+    /// The event loop group on which the HTTP handler runs
     let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: System.coreCount)
 
     public init() { }
 
+    /// SSL cert configs for handling client requests
     public var sslConfig: SSLService.Configuration? {
         didSet {
             if let sslConfig = sslConfig {
-                // Bridge SSLConfiguration and TLSConfiguration
+                //convert to TLSConfiguration
                 let config = SSLConfiguration(sslConfig: sslConfig)
                 tlsConfig = config.tlsServerConfig()
             }
         }
     }
 
+    /// NIOOpenSSL.TLSConfiguration used with the ServerBootstrap
     private var tlsConfig: TLSConfiguration?
 
+    /// The SSLContext built using the TLSConfiguration
     private var sslContext: SSLContext?
 
+
+    /// Listens for connections on a socket
+    ///
+    /// - Parameter on: port number for new connections (eg. 8080)
     public func listen(on port: Int) throws {
         self.port = port
 
@@ -77,8 +92,8 @@ public class HTTPServer : Server {
             .childChannelInitializer { channel in
                 channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {
                     channel.pipeline.configureHTTPServerPipeline().then {
-                        if let sslCtxt = self.sslContext {
-                            _ = channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslCtxt), first: true)
+                        if let sslContext = self.sslContext {
+                            _ = channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslContext), first: true)
                         }
                         return channel.pipeline.add(handler: HTTPHandler(for: self))
                     }
@@ -89,11 +104,11 @@ public class HTTPServer : Server {
 
         do {
             //To support both IPv4 and IPv6
-            ipv4ServerChannel = try bootstrap.bind(host: "127.0.0.1", port: port).wait()
-            self.port = ipv4ServerChannel?.localAddress?.port.map { Int($0) }
+            serverChannelIPv4 = try bootstrap.bind(host: "127.0.0.1", port: port).wait()
+            self.port = serverChannelIPv4?.localAddress?.port.map { Int($0) }
             if supportIPv6 {
-                ipv6ServerChannel = try bootstrap.bind(host: "::1", port: port).wait()
-                //TODO: update the ipv6 port number
+                serverChannelIPv6 = try bootstrap.bind(host: "::1", port: port).wait()
+                //TODO: update the IPv6 port number
             }
             self.state = .started
             self.lifecycleListener.performStartCallbacks()
@@ -104,9 +119,9 @@ public class HTTPServer : Server {
         }
 
         let queuedBlock = DispatchWorkItem(block: { 
-            try! self.ipv4ServerChannel.closeFuture.wait()
+            try! self.serverChannelIPv4.closeFuture.wait()
             if self.supportIPv6 {
-                try! self.ipv6ServerChannel.closeFuture.wait()
+                try! self.serverChannelIPv6.closeFuture.wait()
             }
             self.state = .stopped
             self.lifecycleListener.performStopCallbacks()
@@ -114,6 +129,13 @@ public class HTTPServer : Server {
         ListenerGroup.enqueueAsynchronously(on: DispatchQueue.global(), block: queuedBlock)
     }
 
+
+    /// Static method to create a new HTTPServer and have it listen for connections.
+    ///
+    /// - Parameter on: port number for accepting new connections
+    /// - Parameter delegate: the delegate handler for HTTP connections
+    ///
+    /// - Returns: a new `HTTPServer` instance
     public static func listen(on port: Int, delegate: ServerDelegate?) throws -> ServerType {
         let server = HTTP.createServer()
         server.delegate = delegate
@@ -121,6 +143,11 @@ public class HTTPServer : Server {
         return server
     }
 
+
+    /// Listens for connections on a socket
+    ///
+    /// - Parameter port: port number for new connections (eg. 8080)
+    /// - Parameter errorHandler: optional callback for error handling
     @available(*, deprecated, message: "use 'listen(on:) throws' with 'server.failed(callback:)' instead")
     public func listen(port: Int, errorHandler: ((Swift.Error) -> Void)?) {
         do {
@@ -134,6 +161,14 @@ public class HTTPServer : Server {
         }
     }
 
+
+    /// Static method to create a new HTTPServer and have it listen for connections.
+    ///
+    /// - Parameter port: port number for accepting new connections
+    /// - Parameter delegate: the delegate handler for HTTP connections
+    /// - Parameter errorHandler: optional callback for error handling
+    ///
+    /// - Returns: a new `HTTPServer` instance
     @available(*, deprecated, message: "use 'listen(on:delegate:) throws' with 'server.failed(callback:)' instead")
     public static func listen(port: Int, delegate: ServerDelegate, errorHandler: ((Swift.Error) -> Void)?) -> ServerType {
         let server = HTTP.createServer()
@@ -146,33 +181,54 @@ public class HTTPServer : Server {
         try! eventLoopGroup.syncShutdownGracefully()
     }
 
+    /// Stop listening for new connections.
     public func stop() {
-        guard ipv4ServerChannel != nil else { return }
-        try! ipv4ServerChannel.close().wait()
+        guard serverChannelIPv4 != nil else { return }
+        try! serverChannelIPv4.close().wait()
         if supportIPv6 {
-            try! ipv6ServerChannel.close().wait()
+            try! serverChannelIPv6.close().wait()
         }
         self.state = .stopped
     }
 
+    /// Add a new listener for server beeing started
+    ///
+    /// - Parameter callback: The listener callback that will run on server successfull start-up
+    ///
+    /// - Returns: a `HTTPServer` instance
     @discardableResult
     public func started(callback: @escaping () -> Void) -> Self {
         self.lifecycleListener.addStartCallback(perform: self.state == .started, callback)
         return self
     }
 
+    /// Add a new listener for server beeing stopped
+    ///
+    /// - Parameter callback: The listener callback that will run when server stops
+    ///
+    /// - Returns: a `HTTPServer` instance
     @discardableResult
     public func stopped(callback: @escaping () -> Void) -> Self {
         self.lifecycleListener.addStopCallback(perform: self.state == .stopped, callback)
         return self
     }
 
+    /// Add a new listener for server throwing an error
+    ///
+    /// - Parameter callback: The listener callback that will run when server throws an error
+    ///
+    /// - Returns: a `HTTPServer` instance
     @discardableResult
     public func failed(callback: @escaping (Swift.Error) -> Void) -> Self {
         self.lifecycleListener.addFailCallback(callback) 
         return self
     }
 
+    /// Add a new listener for when listenSocket.acceptClientConnection throws an error
+    ///
+    /// - Parameter callback: The listener callback that will run
+    ///
+    /// - Returns: a Server instance
     @discardableResult
     public func clientConnectionFailed(callback: @escaping (Swift.Error) -> Void) -> Self {
         self.lifecycleListener.addClientConnectionFailCallback(callback)

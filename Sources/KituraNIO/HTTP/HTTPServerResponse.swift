@@ -18,13 +18,20 @@ import NIO
 import NIOHTTP1
 import Foundation
 
+/// This class implements the `ServerResponse` protocol for outgoing server
+/// responses via the HTTP protocol.
 public class HTTPServerResponse: ServerResponse {
-   
-    private let ctx: ChannelHandlerContext 
+
+    /// The channel handler context on which an HTTP response should be written
+    private let ctx: ChannelHandlerContext
+
+    /// The handler that processed the HTTP request
     private let handler: HTTPHandler 
 
+    /// Status code
     private var status = HTTPStatusCode.OK.rawValue
- 
+
+    /// HTTP status code of the response.
     public var statusCode: HTTPStatusCode? {
         get {
             return HTTPStatusCode(rawValue: status)
@@ -36,11 +43,14 @@ public class HTTPServerResponse: ServerResponse {
             }
         } 
     }
-    
+
+    /// The HTTP headers to be sent to the client as part of the response.
     public var headers : HeadersContainer = HeadersContainer()
 
+    /// The HTTP version to be sent in the response.
     private var httpVersion: HTTPVersion
-    
+
+    /// The data to be written as a part of the response.
     private var buffer: ByteBuffer?
     
     init(ctx: ChannelHandlerContext, handler: HTTPHandler) {
@@ -52,26 +62,36 @@ public class HTTPServerResponse: ServerResponse {
         headers["Date"] = [SPIUtils.httpDate()]
     } 
 
+    /// Write a string as a response.
+    ///
+    /// - Parameter from: String data to be written.
     public func write(from string: String) throws {
         if buffer == nil {
             buffer = ctx.channel.allocator.buffer(capacity: 1024)
         }
         buffer!.write(string: string)
     }
-    
+
+    /// Write data as a response.
+    ///
+    /// - Parameter from: Data object that contains the data to be written.
     public func write(from data: Data) throws {
         if buffer == nil {
             buffer = ctx.channel.allocator.buffer(capacity: 1024)
          }
         buffer!.write(bytes: data)
     }
-    
+
+    /// Write a string and end sending the response.
+    ///
+    /// - Parameter text: String to write to a socket.
     public func end(text: String) throws {
-        //TODO: Forced unwrapping
         try write(from: text)
         try end()
     }
-    
+
+    /// End sending the response.
+    ///
     public func end() throws {
         let status = HTTPResponseStatus(statusCode: statusCode?.rawValue ?? 0)
         if self.handler.clientRequestedKeepAlive {
@@ -92,8 +112,7 @@ public class HTTPServerResponse: ServerResponse {
         handler.updateKeepAliveState()
     }
 
-    
-
+    /// End sending the response on an HTTP error
     func end(with errorCode: HTTPStatusCode) throws {
         self.statusCode = errorCode
         let status = HTTPResponseStatus(statusCode: errorCode.rawValue)
@@ -104,7 +123,8 @@ public class HTTPServerResponse: ServerResponse {
         ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
         handler.updateKeepAliveState()
     }
- 
+
+    /// Reset this response object back to its initial state
     public func reset() { //TODO 
     }
 }

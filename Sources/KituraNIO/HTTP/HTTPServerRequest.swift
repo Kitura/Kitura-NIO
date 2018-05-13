@@ -18,14 +18,20 @@ import NIO
 import NIOHTTP1
 import Foundation
 
-
+/// This class implements the `ServerRequest` protocol for incoming sockets that
+/// are communicating via the HTTP protocol.
 public class HTTPServerRequest: ServerRequest {
 
+    /// Set of HTTP headers of the request.
     public var headers : HeadersContainer
 
-    //@available(*, deprecated, message: "This contains just the path and query parameters starting with '/'. use 'urlURL' instead")
+    @available(*, deprecated, message: "This contains just the path and query parameters starting with '/'. use 'urlURL' instead")
     public var urlString : String 
 
+
+    /// The URL from the request in UTF-8 form
+    /// This contains just the path and query parameters starting with '/'
+    /// Use 'urlURL' for the full URL
     public var url : Data {
         //The url needs to retain the percent encodings. URL.path doesn't, so we do this.
         let components = urlURL.absoluteString.components(separatedBy: "/")
@@ -33,7 +39,7 @@ public class HTTPServerRequest: ServerRequest {
         return path.data(using: .utf8) ?? Data()
     }
 
-    //@available(*, deprecated, message: "URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead")
+    @available(*, deprecated, message: "URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead")
     public var urlComponents : URLComponents {
         return URLComponents(url: urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
     }
@@ -45,7 +51,7 @@ public class HTTPServerRequest: ServerRequest {
             return _url
         }
         var url = ""
-        //TODO: http or https?
+
         self.enableSSL ? url.append("https://") : url.append("http://")
 
         if let hostname = headers["Host"]?.first {
@@ -73,12 +79,16 @@ public class HTTPServerRequest: ServerRequest {
         return self._url!
     }
 
+    /// Server IP address pulled from socket.
     public var remoteAddress: String
     
+    /// Minor version of HTTP of the request
     public var httpVersionMajor: UInt16?
 
+    /// Major version of HTTP of the request
     public var httpVersionMinor: UInt16?
-    
+
+    /// HTTP Method of the request.
     public var method: String
 
     private let localAddress: String
@@ -96,16 +106,27 @@ public class HTTPServerRequest: ServerRequest {
         self.localAddress = ctx.localAddress?.description ?? ""
         self.enableSSL = enableSSL
     } 
-   
+
     var buffer: BufferList?
 
+    /// Default buffer size used for creating a BufferList
     let bufferSize = 2048
 
+    /// Read a chunk of the body of the request.
+    ///
+    /// - Parameter into: An NSMutableData to hold the data in the request.
+    /// - Throws: if an error occurs while reading the body.
+    /// - Returns: the number of bytes read.
     public func read(into data: inout Data) throws -> Int {
         guard buffer != nil else { return 0 }
         return buffer!.fill(data: &data)
     }
-    
+
+    /// Read the whole body of the request.
+    ///
+    /// - Parameter into: An NSMutableData to hold the data in the request.
+    /// - Throws: if an error occurs while reading the data.
+    /// - Returns: the number of bytes read.
     public func readString() throws -> String? {
         var data = Data(capacity: bufferSize)
         let length = try read(into: &data)
@@ -115,7 +136,12 @@ public class HTTPServerRequest: ServerRequest {
             return nil
         }
     }
-    
+
+    /// Read the whole body of the request.
+    ///
+    /// - Parameter into: An NSMutableData to hold the data in the request.
+    /// - Throws: if an error occurs while reading the data.
+    /// - Returns: the number of bytes read.
     public func readAllData(into data: inout Data) throws -> Int {
         guard buffer != nil else { return 0 }
         var length = buffer!.fill(data: &data)
