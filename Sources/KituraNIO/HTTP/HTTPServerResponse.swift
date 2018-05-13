@@ -134,6 +134,12 @@ public class HTTPServerResponse: ServerResponse {
     }
 
     /// Reset this response object back to its initial state
-    public func reset() { //TODO 
+    public func reset() {
+        status = HTTPStatusCode.OK.rawValue
+        if buffer != nil {
+            buffer!.clear()
+        }
+        headers.removeAll()
+        headers["Date"] = [SPIUtils.httpDate()]
     }
 }
