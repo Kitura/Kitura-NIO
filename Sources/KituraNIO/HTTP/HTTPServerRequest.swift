@@ -27,8 +27,9 @@ public class HTTPServerRequest: ServerRequest {
     public var headers : HeadersContainer
 
     @available(*, deprecated, message: "This contains just the path and query parameters starting with '/'. use 'urlURL' instead")
-    public var urlString : String 
-
+    public var urlString : String {
+        return _urlString
+    }
 
     /// The URL from the request in UTF-8 form
     /// This contains just the path and query parameters starting with '/'
@@ -69,7 +70,7 @@ public class HTTPServerRequest: ServerRequest {
             url.append(localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").last ?? "")
         }
 
-        url.append(urlString)
+        url.append(_urlString)
 
    
         if let urlURL = URL(string: url) {
@@ -98,12 +99,14 @@ public class HTTPServerRequest: ServerRequest {
 
     private var enableSSL: Bool = false
 
+    private var _urlString : String
+
     init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead, enableSSL: Bool) {
         self.headers = HeadersContainer.create(from: requestHead.headers)
         self.method = String(describing: requestHead.method)
         self.httpVersionMajor = requestHead.version.major
         self.httpVersionMinor = requestHead.version.minor
-        self.urlString = requestHead.uri
+        self._urlString = requestHead.uri
         //TODO: Handle the IPv6 case
         self.remoteAddress = ctx.remoteAddress?.description.components(separatedBy: ":").first?.components(separatedBy: "]").last ?? ""
         self.localAddress = ctx.localAddress?.description ?? ""
