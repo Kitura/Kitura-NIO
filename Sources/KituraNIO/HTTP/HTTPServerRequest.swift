@@ -11,8 +11,12 @@ public class HTTPServerRequest: ServerRequest {
     public var urlString : String 
 
     public var url : Data {
-        return urlURL.absoluteString.data(using: .utf8) ?? Data()
+        //The url needs to retain the percent encodings. URL.path doesn't, so we do this.
+        let components = urlURL.absoluteString.components(separatedBy: "/")
+        let path = "/" + components.dropFirst(3).joined(separator: "/")
+        return path.data(using: .utf8) ?? Data()
     }
+
     //@available(*, deprecated, message: "URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead")
     public var urlComponents : URLComponents {
         return URLComponents(url: urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
@@ -71,6 +75,7 @@ public class HTTPServerRequest: ServerRequest {
         self.httpVersionMajor = requestHead.version.major
         self.httpVersionMinor = requestHead.version.minor
         self.urlString = requestHead.uri
+        //TODO: Handle the IPv6 case
         self.remoteAddress = ctx.remoteAddress?.description.components(separatedBy: ":").first?.components(separatedBy: "]").last ?? ""
         self.localAddress = ctx.localAddress?.description ?? ""
         self.enableSSL = enableSSL

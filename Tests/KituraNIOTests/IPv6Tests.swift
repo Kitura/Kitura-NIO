@@ -1,7 +1,7 @@
 import XCTest
 @testable import KituraNIO
 
-class IPvTests: KituraNIOTest {
+class IPv6Tests: KituraNetTest {
 
     static var allTests = [
         ("testIPv4", testIPv4),
@@ -13,7 +13,7 @@ class IPvTests: KituraNIOTest {
     let router = Router()
 
     func testIPv4() {
-        performServerTest(router, useSSL: false) { expectation in
+        performServerTest(router, useSSL: false, allowPortReuse: true) { expectation in
             self.performRequest("get", path: "/", hostname: "127.0.0.1", callback: {response in
 
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
@@ -31,7 +31,7 @@ class IPvTests: KituraNIOTest {
     }
 
     func testIPv4WithSSL() {
-        performServerTest(router) { expectation in
+        performServerTest(router, allowPortReuse: true) { expectation in
             self.performRequest("get", path: "/", hostname: "127.0.0.1", callback: {response in
 
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
@@ -49,7 +49,7 @@ class IPvTests: KituraNIOTest {
     }
 
     func testIPv6() {
-        performServerTest(router, useSSL: false) { expectation in
+        performServerTest(router, useSSL: false, allowPortReuse: true, supportIPv6: true) { expectation in
             self.performRequest("get", path: "/", hostname: "localhost", callback: {response in
 
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
@@ -67,7 +67,7 @@ class IPvTests: KituraNIOTest {
     }
 
     func testIPv6WithSSL() {
-        performServerTest(router) { expectation in
+        performServerTest(router, allowPortReuse: true, supportIPv6: true) { expectation in
             self.performRequest("get", path: "/", hostname: "localhost", callback: {response in
 
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")

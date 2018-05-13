@@ -1,37 +1,100 @@
+/**
+ * Copyright IBM Corporation 2016
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 import XCTest
-import SSLService
-import Dispatch
+
 @testable import KituraNIO
 
-class KituraNIOTest: XCTestCase {
+import Foundation
+import Dispatch
+import SSLService
+
+struct KituraNetTestError: Swift.Error {
+    let message: String
+}
+
+class KituraNetTest: XCTestCase {
 
     static let useSSLDefault = true
-    static let httpPort = 8080
+    static let portDefault = 8080
     static let portReuseDefault = false
 
+    var useSSL = useSSLDefault
+    var port = portDefault
+
     static let sslConfig: SSLService.Configuration = {
-        let sslConfigDir = URL(fileURLWithPath: #file).appendingPathComponent("../SSLConfig/")
+        let sslConfigDir = URL(fileURLWithPath: #file).appendingPathComponent("../SSLConfig")
+
         #if os(Linux)
             let certificatePath = sslConfigDir.appendingPathComponent("certificate.pem").standardized.path
             let keyPath = sslConfigDir.appendingPathComponent("key.pem").standardized.path
-            return  SSLService.Configuration(withCACertificateFilePath: nil, usingCertificateFile: certificatePath, withKeyFile:keyPath)
+            return SSLService.Configuration(withCACertificateDirectory: nil, usingCertificateFile: certificatePath,
+                                            withKeyFile: keyPath, usingSelfSignedCerts: true, cipherSuite: nil)
         #else
             let chainFilePath = sslConfigDir.appendingPathComponent("certificateChain.pfx").standardized.path
-            return SSLConfig(withChainFilePath: chainFilePath, withPassword: "kitura", usingSelfSignedCerts: true)
+            return SSLService.Configuration(withChainFilePath: chainFilePath, withPassword: "kitura",
+                                            usingSelfSignedCerts: true, cipherSuite: nil)
         #endif
     }()
+    
+    static let clientSSLConfig = SSLService.Configuration(withCipherSuite: nil, clientAllowsSelfSignedCertificates: true)
 
-    var useSSL = useSSLDefault
-    var port = httpPort
+    //private static let initOnce: () = PrintLogger.use(colored: true)
 
-    func performServerTest(_ delegate: ServerDelegate?, port: Int = httpPort, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: (XCTestExpectation) -> Void...) {
+    func doSetUp() {
+        //KituraNetTest.initOnce
+    }
+
+    func doTearDown() {
+    }
+
+    func startServer(_ delegate: ServerDelegate?, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, supportIPv6: Bool = false) throws -> HTTPServer {
+        
+        let server = HTTP.createServer()
+        server.delegate = delegate
+        server.allowPortReuse = allowPortReuse
+        server.supportIPv6 = supportIPv6
+        if useSSL {
+            server.sslConfig = KituraNetTest.sslConfig
+        }
+        try server.listen(on: port)
+        return server
+    }
+    
+    /// Convenience function for starting an HTTPServer on an ephemeral port,
+    /// returning the a tuple containing the server and the port it is listening on.
+    func startEphemeralServer(_ delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, supportIPv6: Bool = false) throws -> (server: HTTPServer, port: Int) {
+        let server = try startServer(delegate, port: 0, useSSL: useSSL, allowPortReuse: allowPortReuse, supportIPv6: supportIPv6)
+        guard let serverPort = server.port else {
+            throw KituraNetTestError(message: "Server port was not initialized")
+        }
+        guard serverPort != 0 else {
+            throw KituraNetTestError(message: "Ephemeral server port not set (was zero)")
+        }
+        return (server, serverPort)
+    }
+    
+    func performServerTest(_ delegate: ServerDelegate?, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault,
+                           supportIPv6: Bool = false, line: Int = #line, asyncTasks: (XCTestExpectation) -> Void...) {
 
         do {
             self.useSSL = useSSL
-
             self.port = port
 
-            let server: HTTPServer = try startServer(delegate, port: port, useSSL: useSSL, allowPortReuse: allowPortReuse)
+            let server: HTTPServer = try startServer(delegate, port: port, useSSL: useSSL, allowPortReuse: allowPortReuse, supportIPv6: supportIPv6)
             defer {
                 server.stop()
             }
@@ -53,21 +116,39 @@ class KituraNIOTest: XCTestCase {
         }
     }
 
-    func startServer(_ delegate: ServerDelegate?, port: Int = httpPort, useSSL: Bool = false, allowPortReuse: Bool = portReuseDefault) throws -> HTTPServer {
-        
-        let server = HTTP.createServer()
-        server.delegate = delegate
-        server.allowPortReuse = allowPortReuse
-        if useSSL {
-            server.sslConfig = KituraNIOTest.sslConfig
+    /*func performFastCGIServerTest(_ delegate: ServerDelegate?, port: Int = portDefault, allowPortReuse: Bool = portReuseDefault,
+                                  line: Int = #line, asyncTasks: (XCTestExpectation) -> Void...) {
+
+        do {
+            self.port = port
+
+            let server = try FastCGIServer.listen(on: port, delegate: delegate)
+            server.allowPortReuse = allowPortReuse
+            defer {
+                server.stop()
+            }
+
+            let requestQueue = DispatchQueue(label: "Request queue")
+            for (index, asyncTask) in asyncTasks.enumerated() {
+                let expectation = self.expectation(line: line, index: index)
+                requestQueue.async() {
+                    asyncTask(expectation)
+                }
+            }
+
+            // wait for timeout or for all created expectations to be fulfilled
+            waitExpectation(timeout: 10) { error in
+                XCTAssertNil(error);
+            }
         }
-        try server.listen(on: port)
-        return server
-    }
-    
-    func performRequest(_ method: String, path: String, hostname: String, close: Bool=true, callback: @escaping ClientRequest.Callback,
+        catch {
+            XCTFail("Error: \(error)")
+        }
+    }*/
+
+    func performRequest(_ method: String, path: String, hostname: String = "localhost", close: Bool=true, callback: @escaping ClientRequest.Callback,
                         headers: [String: String]? = nil, requestModifier: ((ClientRequest) -> Void)? = nil) {
-        
+
         var allHeaders = [String: String]()
         if  let headers = headers  {
             for  (headerName, headerValue) in headers  {
@@ -75,14 +156,14 @@ class KituraNIOTest: XCTestCase {
             }
         }
         allHeaders["Content-Type"] = "text/plain"
-        
+
         let schema = self.useSSL ? "https" : "http"
         var options: [ClientRequest.Options] =
             [.method(method), .schema(schema), .hostname(hostname), .port(Int16(self.port)), .path(path), .headers(allHeaders)]
         if self.useSSL {
             options.append(.disableSSLVerification)
         }
-        
+
         let req = HTTP.request(options, callback: callback)
         if let requestModifier = requestModifier {
             requestModifier(req)

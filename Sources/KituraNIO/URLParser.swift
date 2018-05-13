@@ -63,7 +63,9 @@ public class URLParser : CustomStringConvertible {
         self.path = urlComponents?.percentEncodedPath
         self.query = urlComponents?.query
         self.fragment = urlComponents?.fragment
-        self.userinfo = urlComponents?.user
+        if let username = urlComponents?.user, let password = urlComponents?.password {
+            self.userinfo = "\(username):\(password)"
+        }
         self.port = urlComponents?.port
         if let queryItems = urlComponents?.queryItems{
            queryItems.forEach { 

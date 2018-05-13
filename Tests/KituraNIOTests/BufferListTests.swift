@@ -1,8 +1,8 @@
 import XCTest
 @testable import KituraNIO
 
-class KituraNIOTests: XCTestCase {
-    var bufferList = BufferList.create()
+class BufferListTests: XCTestCase {
+    var bufferList = BufferList()
 
     func testAppendUnsafePointerLength() {
        let array: [UInt8] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]

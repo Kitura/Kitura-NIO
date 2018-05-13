@@ -6,8 +6,20 @@ public class HTTPServerResponse: ServerResponse {
    
     private let ctx: ChannelHandlerContext 
     private let handler: HTTPHandler 
+
+    private var status = HTTPStatusCode.OK.rawValue
  
-    public var statusCode: HTTPStatusCode?
+    public var statusCode: HTTPStatusCode? {
+        get {
+            return HTTPStatusCode(rawValue: status)
+        }
+
+        set (newValue) {
+            if let newValue = newValue {
+                status = newValue.rawValue
+            }
+        } 
+    }
     
     public var headers : HeadersContainer = HeadersContainer()
 

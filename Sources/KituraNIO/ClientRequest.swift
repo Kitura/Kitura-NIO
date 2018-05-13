@@ -21,7 +21,7 @@ public class ClientRequest {
 
     public private(set) var callback: Callback
 
-    var port: Int16?
+    var port: Int?
 
     var bodyData: Data?
 
@@ -72,10 +72,33 @@ public class ClientRequest {
     }
 
 
-   convenience init(url: String, callback: @escaping Callback) {
-        let options =  ClientRequest.parse(URL(string: url)!)
-        self.init(options: options, callback: callback)
+    init(url: String, callback: @escaping Callback) {
+        //let options =  ClientRequest.parse(URL(string: url)!)
+        //self.init(options: options, callback: callback)
         self.url = url
+        let url = URL(string: url)!
+        if let host = url.host {
+            self.hostName = host
+        }
+
+        if let port = url.port {
+            self.port = port
+        }
+
+        var fullPath = url.path
+        // query strings and parameters need to be appended here
+        if let query = url.query {
+            fullPath += "?"
+            fullPath += query
+        }
+        self.path = fullPath
+
+        if let username = url.user {
+            self.userName = username
+        }
+        if let password = url.password {
+            self.password = password
+        }
         self.callback = callback
     }
 
@@ -104,7 +127,7 @@ public class ClientRequest {
 
         var theSchema = "http://"
         var hostName = "localhost"
-        var path = "/"
+        var path = ""
         var port = ""
 
         for option in options  {
@@ -123,7 +146,7 @@ public class ClientRequest {
                     self.hostName = host
                 case .port(let thePort):
                     port = ":\(thePort)"
-                    self.port = thePort
+                    self.port = Int(thePort)
                 case .path(var thePath):
                     if thePath.first != "/" {
                       thePath = "/" + thePath
@@ -248,7 +271,9 @@ public class ClientRequest {
             callback(nil)
             return //we must ideally throw from here, but alas!
         }
-        var request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: HTTPMethod.method(from: self.method), uri: self.path)
+        //If the path is empty, set it to /
+        let path = self.path == "" ? "/" : self.path
+        var request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: HTTPMethod.method(from: self.method), uri: path)
         request.headers = HTTPHeaders.from(dictionary: self.headers)
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
         if let bodyData = bodyData {
@@ -405,7 +430,7 @@ public class HTTPClientHandler: ChannelInboundHandler {
                     guard let url = clientResponse.headers["Location"]?.first else { fatalError("Redirected but no Location header") }
                     if url.starts(with: "/") {
                         let scheme = URL(string: clientRequest.url)?.scheme
-                        let request = ClientRequest(options: [.schema(scheme!), .hostname(clientRequest.hostName!), .port(clientRequest.port!), .path(url)], callback: clientRequest.callback)
+                        let request = ClientRequest(options: [.schema(scheme!), .hostname(clientRequest.hostName!), .port(Int16(clientRequest.port!)), .path(url)], callback: clientRequest.callback)
                         request.maxRedirects = self.clientRequest.maxRedirects - 1
                         request.end()
                     } else {
@@ -419,9 +444,7 @@ public class HTTPClientHandler: ChannelInboundHandler {
             } else {
                 clientRequest.callback(clientResponse)
             }
-            clientRequest.channel.close().whenFailure { error in
-                //TODO: log unexpected error
-            }
+            clientRequest.channel.close(promise: nil)
          }
      }
 }
