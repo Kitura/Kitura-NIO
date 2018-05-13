@@ -19,6 +19,7 @@ import NIOHTTP1
 import Dispatch
 import NIOOpenSSL
 import SSLService
+import LoggerAPI
 
 /// An HTTP server that listens for connections on a socket.
 public class HTTPServer : Server {
@@ -48,6 +49,9 @@ public class HTTPServer : Server {
 
     /// Whether or not this server allows port reuse (default: disallowed)
     public var allowPortReuse = false
+
+    /// Maximum number of pending connections
+    private let maxPendingConnections = 100
 
     /// The event loop group on which the HTTP handler runs
     let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: System.coreCount)
@@ -87,7 +91,7 @@ public class HTTPServer : Server {
         }
 
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
-            .serverChannelOption(ChannelOptions.backlog, value: 100)
+            .serverChannelOption(ChannelOptions.backlog, value: BacklogOption.OptionType(self.maxPendingConnections))
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .childChannelInitializer { channel in
                 channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {
@@ -115,8 +119,12 @@ public class HTTPServer : Server {
         } catch let error {
             self.state = .failed
             self.lifecycleListener.performFailCallbacks(with: error)
+            Log.error("Error trying to bing to \(port): \(error)")
             throw error
         }
+
+        Log.info("Listening on port \(self.port!)")
+        Log.verbose("Options for port \(self.port!): maxPendingConnections: \(maxPendingConnections), allowPortReuse: \(self.allowPortReuse)")
 
         let queuedBlock = DispatchWorkItem(block: { 
             try! self.serverChannelIPv4.closeFuture.wait()
@@ -156,7 +164,7 @@ public class HTTPServer : Server {
             if let callback = errorHandler {
                 callback(error)
             } else {
-                //Log.error("Error listening on port \(port): \(error)")
+                Log.error("Error listening on port \(port): \(error)")
             }
         }
     }
@@ -255,7 +263,7 @@ private class HTTPDummyServerDelegate: ServerDelegate {
             try response.end()
         }
         catch {
-            //Log.error("Failed to send the response. Error = \(error)")
+            Log.error("Failed to send the response. Error = \(error)")
         }
     } 
 }

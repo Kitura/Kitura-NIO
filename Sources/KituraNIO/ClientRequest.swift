@@ -18,6 +18,7 @@ import NIO
 import NIOHTTP1
 import Foundation
 import NIOOpenSSL
+import LoggerAPI
 
 /// This class provides a set of low level APIs for issuing HTTP requests to another server.
 public class ClientRequest {
@@ -155,7 +156,7 @@ public class ClientRequest {
     public func set(_ option: Options) {
         switch(option) {
         case .schema, .hostname, .port, .path, .username, .password:
-            print("Must use ClientRequest.init() to set URL components")
+            Log.error("Must use ClientRequest.init() to set URL components")
         case .method(let method):
             self.method = method
         case .headers(let headers):
@@ -370,7 +371,8 @@ public class ClientRequest {
 
         do {
             channel = try bootstrap.connect(host: hostName, port: Int(self.port ?? 80)).wait()
-        } catch {
+        } catch let error {
+            Log.error("Connection to \(hostName):\(self.port ?? 80) failed with error: \(error)")
             callback(nil)
             return
         }

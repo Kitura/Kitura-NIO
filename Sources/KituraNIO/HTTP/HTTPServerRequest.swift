@@ -16,6 +16,7 @@
 
 import NIO
 import NIOHTTP1
+import LoggerAPI
 import Foundation
 
 /// This class implements the `ServerRequest` protocol for incoming sockets that
@@ -61,6 +62,7 @@ public class HTTPServerRequest: ServerRequest {
                 url.append(localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").last ?? "")
             }
         } else {
+            Log.error("Host header not received")
             let hostname = localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").first ?? "Host_Not_Available"
             url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
             url.append(":")
@@ -73,6 +75,7 @@ public class HTTPServerRequest: ServerRequest {
         if let urlURL = URL(string: url) {
             self._url = urlURL
         } else {
+            Log.error("URL init failed from: \(url)")
             self._url = URL(string: "http://not_available/")!
         }
         
