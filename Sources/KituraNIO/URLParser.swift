@@ -16,6 +16,10 @@
 
 import Foundation
 
+/// Splits and parses URLs into components - scheme, host, port, path, query string etc. according to the following format:
+///	**scheme:[//[user:password@]host[:port]][/]path[?query][#fragment]**
+/// We use the URLComponents class from Foundation here.
+
 public class URLParser : CustomStringConvertible {
 
     /// Schema.
@@ -72,6 +76,10 @@ public class URLParser : CustomStringConvertible {
         return desc
     }
 
+
+    /// Initialize a new `URLParser` instance.
+    ///     - Parameter url: The URL to be parsed.
+    ///     - Parameter isConnect: A boolean, indicating whether or not a connection has been established.
     public init (url: Data, isConnect: Bool) {
         let urlComponents = URLComponents(string: String(data: url, encoding: .utf8)!)
         self.schema = urlComponents?.scheme
