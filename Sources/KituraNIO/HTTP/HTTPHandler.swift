@@ -69,6 +69,7 @@ public class HTTPHandler: ChannelInboundHandler {
             serverResponse = HTTPServerResponse(ctx: ctx, handler: self)
             //Make sure we use the latest delegate registered with the server
             if let delegate = server.delegate {
+                Monitor.delegate?.started(request: serverRequest, response: serverResponse)
                 delegate.handle(request: serverRequest, response: serverResponse)
             } //TODO: failure path
         }

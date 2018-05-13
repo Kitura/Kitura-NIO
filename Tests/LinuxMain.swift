@@ -54,4 +54,5 @@ XCTMain([
     testCase(ClientE2ETests.allTests.shuffled()),
     testCase(PipeliningTests.allTests.shuffled()),
     testCase(RegressionTests.allTests.shuffled()),
+    testCase(MonitoringTests.allTests.shuffled()),
 ].shuffled())

@@ -110,18 +110,27 @@ public class HTTPServerResponse: ServerResponse {
         }
         ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
         handler.updateKeepAliveState()
+
+        if let request = handler.serverRequest {
+                Monitor.delegate?.finished(request: request, response: self)
+        }
     }
 
     /// End sending the response on an HTTP error
     func end(with errorCode: HTTPStatusCode) throws {
         self.statusCode = errorCode
         let status = HTTPResponseStatus(statusCode: errorCode.rawValue)
+
         //We don't keep the connection alive on an HTTP error
         headers["Connection"] = ["Close"]
         let response = HTTPResponseHead(version: HTTPVersion(major: 1, minor: 1), status: status, headers: headers.httpHeaders())
         ctx.write(handler.wrapOutboundOut(.head(response)), promise: nil)
         ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
         handler.updateKeepAliveState()
+
+        if let request = handler.serverRequest {
+                Monitor.delegate?.finished(request: request, response: self)
+        }
     }
 
     /// Reset this response object back to its initial state
