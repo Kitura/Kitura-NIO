@@ -19,29 +19,44 @@ import NIOHTTP1
 import Foundation
 import NIOOpenSSL
 
+/// This class provides a set of low level APIs for issuing HTTP requests to another server.
 public class ClientRequest {
-    
+
+    /// The set of HTTP headers to be sent with the request.
     public var headers = [String: String]()
 
+    /// The URL for the request
     public private(set) var url: String = ""
 
+    /// The HTTP method (i.e. GET, POST, PUT, DELETE) for the request
     public private(set) var method: String = "get"
 
+    /// The username to be used if using Basic Auth authentication
     public private(set) var userName: String?
 
+    /// The password to be used if using Basic Auth authentication.
     public private(set) var password: String?
 
+    /// The maximum number of redirects before failure.
+    ///
+    /// - Note: The `ClientRequest` class will automatically follow redirect responses. To
+    ///        avoid redirect loops, it will at maximum follow `maxRedirects` redirects.
     public internal(set) var maxRedirects = 10
 
+    /// If true, the "Connection: close" header will be added to the request that is sent.
     public private(set) var closeConnection = false
 
+    /// The callback to receive the response
     public private(set) var callback: Callback
 
+    /// The hostname of the remote server
+    var hostName: String?
+
+    /// The port number of the remote server
     var port: Int?
 
+    /// The request body
     var bodyData: Data?
-
-    var hostName: String?
 
     /// Should SSL verification be enabled
     private var enableSSLVerification = false {
@@ -52,8 +67,10 @@ public class ClientRequest {
         }
     }
 
+    /// TLS Configuration
     var sslConfig: TLSConfiguration?
 
+    /// The current redirection count
     internal var redirectCount: Int = 0
 
     private var sslContext: NIOOpenSSL.SSLContext?
@@ -61,38 +78,51 @@ public class ClientRequest {
     /// Should HTTP/2 protocol be used
     private var useHTTP2 = false
 
+    /// The path (uri) related to the request, starting from / and including query parameters
     private var path = ""
 
+    /// Client request option enum
     public enum Options {
+        /// Specifies the HTTP method (i.e. PUT, POST...) to be sent in the request
         case method(String)
 
+        /// Specifies the schema (i.e. HTTP, HTTPS) to be used in the URL of request
         case schema(String)
-  
+
+        /// Specifies the host name to be used in the URL of request
         case hostname(String)
 
+        /// Specifies the port to be used in the URL of request
         case port(Int16)
 
+        /// Specifies the path to be used in the URL of request
         case path(String)
 
+        /// Specifies the HTTP headers to be sent with the request
         case headers([String: String])
 
+        /// Specifies the user name to be sent with the request, when using basic auth authentication
         case username(String)
 
+        /// Specifies the password to be sent with the request, when using basic auth authentication
         case password(String)
 
+        /// Specifies the maximum number of redirect responses that will be followed (i.e. re-issue the
+        /// request to the location received in the redirect response)
         case maxRedirects(Int)
 
+        /// If present, the SSL credentials of the remote server will not be verified.
         case disableSSLVerification
 
+        /// If present, the client will try to use HTTP/2 protocol for the connection.
         case useHTTP2
     }
 
 
     init(url: String, callback: @escaping Callback) {
-        //let options =  ClientRequest.parse(URL(string: url)!)
-        //self.init(options: options, callback: callback)
         self.url = url
         let url = URL(string: url)!
+
         if let host = url.host {
             self.hostName = host
         }
@@ -102,6 +132,7 @@ public class ClientRequest {
         }
 
         var fullPath = url.path
+
         // query strings and parameters need to be appended here
         if let query = url.query {
             fullPath += "?"
@@ -118,6 +149,9 @@ public class ClientRequest {
         self.callback = callback
     }
 
+    /// Set a single option in the request.  URL parameters must be set in init()
+    ///
+    /// - Parameter option: an `Options` instance describing the change to be made to the request
     public func set(_ option: Options) {
         switch(option) {
         case .schema, .hostname, .port, .path, .username, .password:
@@ -137,6 +171,10 @@ public class ClientRequest {
         }
     }
 
+    /// Initializes a `ClientRequest` instance
+    ///
+    /// - Parameter options: An array of `Options' describing the request
+    /// - Parameter callback: The closure of type `Callback` to be used for the callback.
     init(options: [Options], callback: @escaping Callback) {
 
         self.callback = callback
@@ -176,7 +214,7 @@ public class ClientRequest {
             }
         }
 
-        // Adding support for Basic HTTP authentication
+        // Support for Basic HTTP authentication
         let user = self.userName ?? ""
         let pwd = self.password ?? ""
         var authenticationClause = ""
@@ -185,12 +223,23 @@ public class ClientRequest {
           authenticationClause = "\(user):\(pwd)@"
         }
 
+        //the url string
         url = "\(theSchema)\(authenticationClause)\(hostName)\(port)\(path)"
 
     }
 
+    /// Response callback closure type
+    ///
+    /// - Parameter ClientResponse: The `ClientResponse` object that describes the response
+    ///                            that was received from the remote server.
     public typealias Callback = (ClientResponse?) -> Void
 
+
+    /// Parse an URL String into options
+    ///
+    /// - Parameter urlString: URL of a String type
+    ///
+    /// - Returns: A `ClientRequest.Options` array
     public class func parse(_ urlString: String) -> [ClientRequest.Options] {
         if let url = URL(string: urlString) {
             return parse(url)
@@ -198,6 +247,12 @@ public class ClientRequest {
         return []
     }
 
+
+    /// Parse an URL class into options
+    ///
+    /// - Parameter url: Foundation URL class
+    ///
+    /// - Returns: A `ClientRequest.Options` array
     public class func parse(_ url: URL) -> [ClientRequest.Options] {
 
         var options: [ClientRequest.Options] = []
@@ -227,12 +282,20 @@ public class ClientRequest {
         return options
     }
 
+
+    /// Add a string to the body of the request to be sent
+    ///
+    /// - Parameter from: The String to be added
     public func write(from string: String) {
         if let data = string.data(using: .utf8) {
             write(from: data)
         }
     }
 
+
+    /// Add the bytes in a Data struct to the body of the request to be sent
+    ///
+    /// - Parameter from: The Data Struct containing the bytes to be added
     public func write(from data: Data) {
         if bodyData == nil {
             bodyData = Data()
@@ -241,24 +304,44 @@ public class ClientRequest {
         headers["Content-Length"] = "\(bodyData!.count)" //very eagerly adding
     }
 
+
+    /// Add a string to the body of the request to be sent and send the request
+    /// to the remote server
+    ///
+    /// - Parameter from: The String to be added
+    /// - Parameter close: If true, add the "Connection: close" header to the set
+    ///                   of headers sent with the request
     public func end(_ data: String, close: Bool = false) {
         write(from: data)
         end(close: close)
     }
 
+
+    /// Add the bytes in a Data struct to the body of the request to be sent
+    /// and send the request to the remote server
+    ///
+    /// - Parameter from: The Data Struct containing the bytes to be added
+    /// - Parameter close: If true, add the "Connection: close" header to the set
+    ///                   of headers sent with the request
     public func end(_ data: Data, close: Bool = false) {
         write(from: data)
         end(close: close)
     }
 
+    /// The channel connecting to the remote server
     var channel: Channel!
 
+    /// The client bootstrap used to connect to the remote server
     var bootstrap: ClientBootstrap!
 
+
+    /// Send the request to the remote server
+    ///
+    /// - Parameter close: If true, add the "Connection: close" header to the set
+    ///                   of headers sent with the request
     public func end(close: Bool = false) {
         closeConnection = close
 
-        //TODO: Handle redirection
         let group = MultiThreadedEventLoopGroup(numThreads: 1)
         if (URL(string: url)?.scheme)! == "https" {
            enableSSLVerification = true
@@ -274,21 +357,28 @@ public class ClientRequest {
         if self.headers["Host"] == nil {
            self.headers["Host"] = hostName
         }
-        self.headers["User-Agent"] = "KituraNIO"
+
+        self.headers["User-Agent"] = "Kitura"
+
         if closeConnection {
             self.headers["Connection"] = "close"
         }
+
         if self.port == nil {
             self.port = enableSSLVerification ? 443 : 80
         }
+
         do {
             channel = try bootstrap.connect(host: hostName, port: Int(self.port ?? 80)).wait()
         } catch {
             callback(nil)
-            return //we must ideally throw from here, but alas!
+            return
         }
+
         //If the path is empty, set it to /
         let path = self.path == "" ? "/" : self.path
+
+        //Make the HTTP request, the response callbacks will be received on the HTTPClientHandler
         var request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: HTTPMethod.method(from: self.method), uri: path)
         request.headers = HTTPHeaders.from(dictionary: self.headers)
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
@@ -413,11 +503,14 @@ extension HTTPMethod {
     }
 }
 
-public class HTTPClientHandler: ChannelInboundHandler {
-   
-     private var clientResponse: ClientResponse = ClientResponse()
+/// The ChannelInboundHandler for ClientRequest
+class HTTPClientHandler: ChannelInboundHandler {
 
+     /// The ClientRequest for which we installed this handler
      private let clientRequest: ClientRequest
+
+     /// The ClientResponse object for the response
+     private var clientResponse: ClientResponse = ClientResponse()
 
      init(request: ClientRequest) {
          self.clientRequest = request
@@ -425,6 +518,7 @@ public class HTTPClientHandler: ChannelInboundHandler {
 
      public typealias InboundIn = HTTPClientResponsePart
 
+     /// Read the header, body and trailer. Redirection is handled in the trailer case.
      public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
          let request = self.unwrapInboundIn(data)
          switch request {
@@ -440,13 +534,18 @@ public class HTTPClientHandler: ChannelInboundHandler {
                  clientResponse.buffer!.byteBuffer.write(buffer: &buffer)
              }
          case .end(_):
+            // Handle redirection
             if clientResponse.statusCode == .movedTemporarily || clientResponse.statusCode == .movedPermanently {
                 self.clientRequest.redirectCount += 1
                 if self.clientRequest.redirectCount < self.clientRequest.maxRedirects {
                     guard let url = clientResponse.headers["Location"]?.first else { fatalError("Redirected but no Location header") }
                     if url.starts(with: "/") {
                         let scheme = URL(string: clientRequest.url)?.scheme
-                        let request = ClientRequest(options: [.schema(scheme!), .hostname(clientRequest.hostName!), .port(Int16(clientRequest.port!)), .path(url)], callback: clientRequest.callback)
+                        let request = ClientRequest(options: [.schema(scheme!),
+                                                              .hostname(clientRequest.hostName!),
+                                                              .port(Int16(clientRequest.port!)),
+                                                              .path(url)],
+                                                    callback: clientRequest.callback)
                         request.maxRedirects = self.clientRequest.maxRedirects - 1
                         request.end()
                     } else {
