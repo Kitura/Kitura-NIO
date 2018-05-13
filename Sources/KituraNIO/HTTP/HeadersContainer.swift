@@ -17,6 +17,7 @@
 import Foundation
 import NIO
 import NIOHTTP1
+import LoggerAPI
 
 /// A class that abstracts out the HTTP header APIs of the `ServerRequest` and
 /// `ServerResponse` protocols.
@@ -72,7 +73,7 @@ public class HeadersContainer {
              "if-unmodified-since", "from", "location", "max-forwards",
              "retry-after", "etag", "last-modified", "server", "age", "expires":
             if let _ = entry {
-                //Log.warning("Duplicate header \(key) discarded")
+                Log.warning("Duplicate header \(key) discarded")
                 break
             }
             fallthrough

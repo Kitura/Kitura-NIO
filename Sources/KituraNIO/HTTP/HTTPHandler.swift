@@ -16,6 +16,7 @@
 
 import NIO
 import NIOHTTP1
+import LoggerAPI
 import Foundation
 
 public class HTTPHandler: ChannelInboundHandler {
@@ -92,7 +93,9 @@ public class HTTPHandler: ChannelInboundHandler {
               errorResponseSent = true
               serverResponse = HTTPServerResponse(ctx: ctx, handler: self)
               try serverResponse.end(with: .badRequest)
-           } catch { }
+           } catch { 
+              Log.error("Failed to send error response")
+           }
        }
     }
 
