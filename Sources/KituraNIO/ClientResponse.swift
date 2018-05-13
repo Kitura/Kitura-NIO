@@ -17,6 +17,8 @@
 import NIO
 import Foundation
 
+/// This class describes the response sent by the remote server to an HTTP request
+/// sent using the `ClientRequest` class.
 public class ClientResponse {
 
     public init() { }
@@ -37,24 +39,38 @@ public class ClientResponse {
     /// Set of HTTP headers of the response.
     public var headers: HeadersContainer!
 
+    /// The HTTP Status code, as an Int, sent in the response by the remote server.
     public internal(set) var status = -1 {
         didSet {
             statusCode = HTTPStatusCode(rawValue: status) ?? .unknown
         }
     }
 
+    /// The HTTP Status code, as an `HTTPStatusCode`, sent in the response by the remote server.
     public internal(set) var statusCode: HTTPStatusCode = HTTPStatusCode.unknown
 
+    /// Default buffer size to read the response into
     private static let bufferSize = 2000
 
+    /// BufferList instance for storing the response
     var buffer: BufferList?
 
+
+    /// Read a chunk of the body of the response.
+    ///
+    /// - Parameter into: An NSMutableData to hold the data in the response.
+    /// - Throws: if an error occurs while reading the body.
+    /// - Returns: the number of bytes read.
     @discardableResult
     public func read(into data: inout Data) throws -> Int {
         guard buffer != nil else { return 0 }
         return buffer!.fill(data: &data)
     }
 
+    /// Read a chunk of the body and return it as a String.
+    ///
+    /// - Throws: if an error occurs while reading the data.
+    /// - Returns: an Optional string.
     @discardableResult
     public func readString() throws -> String? {
         var data = Data(capacity: ClientResponse.bufferSize)
@@ -66,6 +82,11 @@ public class ClientResponse {
         }
     }
 
+    /// Read the whole body of the response.
+    ///
+    /// - Parameter into: An NSMutableData to hold the data in the response.
+    /// - Throws: if an error occurs while reading the data.
+    /// - Returns: the number of bytes read.
     @discardableResult
     public func readAllData(into data: inout Data) throws -> Int {
         guard buffer != nil else { return 0 }
