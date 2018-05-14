@@ -1,3 +1,21 @@
+<p align="center">
+<a href="http://kitura.io/">
+<img src="https://raw.githubusercontent.com/IBM-Swift/Kitura/master/Sources/Kitura/resources/kitura-bird.svg?sanitize=true" height="100" alt="Kitura">
+</a>
+</p>
+
+
+<p align="center">
+<a href="http://www.kitura.io/">
+<img src="https://img.shields.io/badge/docs-kitura.io-1FBCE4.svg" alt="Docs">
+</a>
+<img src="https://img.shields.io/badge/os-linux-green.svg?style=flat" alt="Linux">
+<img src="https://img.shields.io/badge/license-Apache2-blue.svg?style=flat" alt="Apache 2">
+<a href="http://swift-at-ibm-slack.mybluemix.net/">
+<img src="http://swift-at-ibm-slack.mybluemix.net/badge.svg" alt="Slack Status">
+</a>
+</p>
+
 # Kitura-NIO
 
 Kitura-NIO is a SwiftNIO based networking library for Kitura. Other than an additive change to the HTTPServer API around IPv6 support, Kitura-NIO adopts the same API as KituraNet, making the transition to using the NIO port almost seamless. While Kitura-NIO shares some code with Kitura-Net, the core comprising of HTTPServer, ClientRequest/ClientResponse and TLS support have been implemented using SwiftNIO.
@@ -6,6 +24,7 @@ We expect most of our users to require higher level concepts such as routing, te
 
 Kitura-NIO utilises [SwiftNIO](https://github.com/apple/swift-nio) and [NIOOpenSSL](https://github.com/apple/swift-nio-ssl). 
 
+As of today, Kitura-NIO has been tested with Swift 4.1 only.
 ## Features
 
 - Port Listening
