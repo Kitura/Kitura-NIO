@@ -23,7 +23,7 @@ We'd be more than happy to receive bug reports, enhancement requests and pull re
 
 `$ git clone https://github.com/IBM-Swift/Kitura-NIO && cd Kitura-NIO`
 
-2. Set the open file limit to a large number. This is to work around an open issue.
+2. Set the open file limit to a large number. This is to work around an [open issue](https://github.com/IBM-Swift/Kitura-NIO/issues/1).
 
 `$ ulimit -n 65536`
 
