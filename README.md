@@ -36,4 +36,4 @@ We'd be more than happy to receive bug reports, enhancement requests and pull re
 
 These are early days for Kitura-NIO. We'd really love to hear feedback from you.
 
-Join the [Kitura Forum on Swift Forums](https://forums.swift.org/c/related-projects/kitura) or our [Slack](http://swift-at-ibm-slack.mybluemix.net/) to meet the team!
+Join the [Kitura on Swift Forums](https://forums.swift.org/c/related-projects/kitura) or our [Slack](http://swift-at-ibm-slack.mybluemix.net/) to meet the team!
