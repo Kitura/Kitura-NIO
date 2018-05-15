@@ -1,0 +1,20 @@
+# Travis CI build file for Kitura-MustacheTemplateEngine.
+# Kitura runs on OS X and Linux (Ubuntu v14.04).
+
+# whitelist (branches that should be built)
+branches:
+  only:
+    - master
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      env: SWIFT_SNAPSHOT=4.1
+
+before_install:
+  - git clone https://github.com/IBM-Swift/Package-Builder.git
+
+script:
+- ./Package-Builder/build-package.sh -projectDir $TRAVIS_BUILD_DIR
