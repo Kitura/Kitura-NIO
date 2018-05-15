@@ -9,7 +9,7 @@ branches:
 matrix:
   include:
     - os: linux
-      dist: trusty
+      dist: xenial 
       sudo: required
       env: SWIFT_SNAPSHOT=4.1
 
