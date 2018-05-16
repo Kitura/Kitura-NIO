@@ -67,7 +67,7 @@ public class HTTPServerResponse: ServerResponse {
     /// - Parameter from: String data to be written.
     public func write(from string: String) throws {
         if buffer == nil {
-            buffer = ctx.channel.allocator.buffer(capacity: 1024)
+            buffer = ctx.channel.allocator.buffer(capacity: string.utf8.count)
         }
         buffer!.write(string: string)
     }
@@ -77,7 +77,7 @@ public class HTTPServerResponse: ServerResponse {
     /// - Parameter from: Data object that contains the data to be written.
     public func write(from data: Data) throws {
         if buffer == nil {
-            buffer = ctx.channel.allocator.buffer(capacity: 1024)
+            buffer = ctx.channel.allocator.buffer(capacity: data.count)
          }
         buffer!.write(bytes: data)
     }

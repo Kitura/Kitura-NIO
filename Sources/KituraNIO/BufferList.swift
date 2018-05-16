@@ -15,6 +15,7 @@
  */
 
 import NIO
+import NIOFoundationCompat
 import Foundation
 
 ///This is a BufferList implementation using a ByteBuffer as the backing store.
@@ -40,21 +41,17 @@ public class BufferList {
 
     ///Read the data from the `BufferList`
     public var data: Data {
-       let bytes = byteBuffer.getBytes(at: 0, length: byteBuffer.readableBytes) ?? []
-       return Data(bytes: bytes) 
+        return byteBuffer.getData(at: 0, length: byteBuffer.readableBytes) ?? Data()
     }
 
     ///Append bytes to the buffer.
     public func append(bytes: UnsafePointer<UInt8>, length: Int) {
-        let array = Array(UnsafeBufferPointer(start: bytes, count: length))
-        byteBuffer.write(bytes: array)
+        byteBuffer.write(bytes: UnsafeBufferPointer(start: bytes, count: length))
     }
 
     ///Append data into the `BufferList`.
     public func append(data: Data) {
-        data.withUnsafeBytes { (bytes: UnsafePointer<UInt8>) in
-            self.append(bytes: bytes, length: data.count)
-        }
+        byteBuffer.write(bytes: data)
     }
 
     ///Fill an array with data from the buffer. The data is copied from the BufferList to `array`.
@@ -65,16 +62,18 @@ public class BufferList {
     ///Fill memory with data from a `BufferList`. The data is copied from the `BufferList` to `buffer`.
     public func fill(buffer: UnsafeMutablePointer<UInt8>, length: Int) -> Int {
         let fillLength = min(length, byteBuffer.readableBytes)
-        let bytes = byteBuffer.readBytes(length: fillLength) ?? []
-        UnsafeMutableRawPointer(buffer).copyMemory(from: bytes, byteCount: bytes.count)
-        return bytes.count 
+        return byteBuffer.readWithUnsafeReadableBytes { bytes in
+            UnsafeMutableRawPointer(buffer).copyMemory(from: bytes.baseAddress!, byteCount: fillLength)
+            return fillLength
+        }
     }
 
     ///Fill a `Data` structure with data from the buffer.
     public func fill(data: inout Data) -> Int {
-        let bytes = byteBuffer.readBytes(length: byteBuffer.readableBytes) ?? []
-        data.append(contentsOf: bytes)
-        return bytes.count
+        return byteBuffer.readWithUnsafeReadableBytes { ptr in
+            data.append(contentsOf: ptr)
+            return ptr.count
+        }
     }
 
     ///Fill a `NSMutableData` with data from the buffer.
