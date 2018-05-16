@@ -9,6 +9,9 @@
 <a href="http://www.kitura.io/">
 <img src="https://img.shields.io/badge/docs-kitura.io-1FBCE4.svg" alt="Docs">
 </a>
+<a href="https://travis-ci.org/IBM-Swift/Kitura-NIO">
+<img src="https://travis-ci.org/IBM-Swift/Kitura-NIO.svg?branch=master" alt="Build Status - Master">
+</a>
 <img src="https://img.shields.io/badge/os-linux-green.svg?style=flat" alt="Linux">
 <img src="https://img.shields.io/badge/license-Apache2-blue.svg?style=flat" alt="Apache 2">
 <a href="http://swift-at-ibm-slack.mybluemix.net/">
