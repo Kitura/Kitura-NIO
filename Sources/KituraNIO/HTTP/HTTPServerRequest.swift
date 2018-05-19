@@ -60,14 +60,14 @@ public class HTTPServerRequest: ServerRequest {
             url.append(hostname)
             if !hostname.contains(":") {
                 url.append(":")
-                url.append(localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").last ?? "")
+                url.append(String(describing: self.localAddressPort))
             }
         } else {
             Log.error("Host header not received")
-            let hostname = localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").first ?? "Host_Not_Available"
+            let hostname = self.localAddress
             url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
             url.append(":")
-            url.append(localAddress.components(separatedBy: "]").last?.components(separatedBy: ":").last ?? "")
+            url.append(String(describing: self.localAddressPort))
         }
 
         url.append(_urlString)
@@ -97,9 +97,25 @@ public class HTTPServerRequest: ServerRequest {
 
     private let localAddress: String
 
+    private let localAddressPort: Int
+
     private var enableSSL: Bool = false
 
     private var _urlString : String
+
+    private static func host(socketAddress: SocketAddress?) -> String {
+        guard let socketAddress = socketAddress else {
+            return ""
+        }
+        switch socketAddress {
+        case .v4(let addr):
+            return addr.host
+        case .v6(let addr):
+            return addr.host
+        case .unixDomainSocket(_):
+            return "n/a"
+        }
+    }
 
     init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead, enableSSL: Bool) {
         self.headers = HeadersContainer.create(from: requestHead.headers)
@@ -108,8 +124,10 @@ public class HTTPServerRequest: ServerRequest {
         self.httpVersionMinor = requestHead.version.minor
         self._urlString = requestHead.uri
         //TODO: Handle the IPv6 case
-        self.remoteAddress = ctx.remoteAddress?.description.components(separatedBy: ":").first?.components(separatedBy: "]").last ?? ""
-        self.localAddress = ctx.localAddress?.description ?? ""
+        let localAddress = ctx.localAddress
+        self.remoteAddress = HTTPServerRequest.host(socketAddress: ctx.remoteAddress)
+        self.localAddress = HTTPServerRequest.host(socketAddress: localAddress)
+        self.localAddressPort = localAddress?.port.map { Int($0) } ?? 0
         self.enableSSL = enableSSL
     } 
 

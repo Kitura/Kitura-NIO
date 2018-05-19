@@ -38,7 +38,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "KituraNIO",
-            dependencies: ["NIO", "NIOHTTP1", "NIOOpenSSL", "SSLService", "LoggerAPI"]),
+            dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOOpenSSL", "SSLService", "LoggerAPI"]),
         .testTarget(
             name: "KituraNIOTests",
             dependencies: ["KituraNIO"]),
