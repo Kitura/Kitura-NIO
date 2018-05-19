@@ -28,10 +28,24 @@ We expect most of our users to require higher level concepts such as routing, te
 Kitura-NIO utilises [SwiftNIO](https://github.com/apple/swift-nio) and [NIOOpenSSL](https://github.com/apple/swift-nio-ssl). 
 
 As of today, Kitura-NIO has been tested with Swift 4.1 only.
+
 ## Features
 
 - Port Listening
 - HTTP Server support (request and response)
+
+## Using Kitura-NIO
+
+To test your Kitura app with the very eary version of the Kitura-NIO networking framework, all you need to do is point to the [kitura-nio](https://github.com/IBM-Swift/Kitura/tree/kitura-nio) branch from your Package.swift:
+
+```swift
+    dependencies: [
+        // Dependencies declare other packages that this package depends on.
+        .package(url: "https://github.com/IBM-Swift/Kitura", .branch("kitura-nio")),
+    ],
+```
+
+Kitura will then use Kitura-NIO instead of Kitura-net for, networking.
 
 ## Getting Started
 
