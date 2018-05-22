@@ -1,5 +1,5 @@
-# Travis CI build file for Kitura-MustacheTemplateEngine.
-# Kitura runs on OS X and Linux (Ubuntu v14.04).
+# Travis CI build file for Kitura-NIO.
+# Runs on Linux (Ubuntu v14.04).
 
 # whitelist (branches that should be built)
 branches:
