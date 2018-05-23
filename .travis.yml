@@ -12,10 +12,11 @@ matrix:
       dist: trusty
       sudo: true
       env: SWIFT_SNAPSHOT=4.1
-
-before_install:
-  - git clone https://github.com/IBM-Swift/Package-Builder.git
+    - os: linux
+      dist: trusty
+      sudo: true
+      services: docker
+      env: DOCKER_IMAGE=ubuntu:16.04 SWIFT_SNAPSHOT=4.1
 
 script:
-  - sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6'
-  - ./Package-Builder/build-package.sh -projectDir $TRAVIS_BUILD_DIR
+  - ./build.sh
