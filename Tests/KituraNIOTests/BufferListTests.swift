@@ -68,7 +68,7 @@ class BufferListTests: XCTestCase {
         bufferList.append(data: data)
         let fillData = NSMutableData(capacity: 400)!
         let result = bufferList.fill(data: fillData)
-        XCTAssertEqual(result, 400)
+        XCTAssertEqual(result, 512)
         bufferList.reset()
     }
 
@@ -110,6 +110,7 @@ class BufferListTests: XCTestCase {
         ("testAppendData", testAppendData),
         ("testFillArray", testFillArray),
         ("testFillData", testFillData), 
+        ("testFillMutableData", testFillMutableData),
         ("testFillUnsafeMutablePointer", testFillUnsafeMutablePointer),
         ("testRewind", testRewind),
         ("testDataAndCount", testDataAndCount),
