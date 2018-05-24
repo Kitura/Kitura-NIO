@@ -21,8 +21,12 @@ import XCTest
 @testable import KituraNIO
 
 func randomNumber(limit: Int) -> Int {
+    #if os(OSX)
+    return Int(arc4random_uniform(UInt32(limit)))
+    #else
     let random: Int = Int(rand())
     return random > 0 ? random % limit : (-1) * random % limit
+    #endif
 }
 
 class PipeliningTests : KituraNetTest {
