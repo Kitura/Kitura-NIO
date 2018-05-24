@@ -38,16 +38,14 @@ class KituraNetTest: XCTestCase {
     static let sslConfig: SSLService.Configuration = {
         let sslConfigDir = URL(fileURLWithPath: #file).appendingPathComponent("../SSLConfig")
 
-        #if os(Linux)
             let certificatePath = sslConfigDir.appendingPathComponent("certificate.pem").standardized.path
             let keyPath = sslConfigDir.appendingPathComponent("key.pem").standardized.path
             return SSLService.Configuration(withCACertificateDirectory: nil, usingCertificateFile: certificatePath,
                                             withKeyFile: keyPath, usingSelfSignedCerts: true, cipherSuite: nil)
-        #else
-            let chainFilePath = sslConfigDir.appendingPathComponent("certificateChain.pfx").standardized.path
-            return SSLService.Configuration(withChainFilePath: chainFilePath, withPassword: "kitura",
-                                            usingSelfSignedCerts: true, cipherSuite: nil)
-        #endif
+
+            /// TODO: We will need to reenable this. `swift nio-ssl` doesn't support PKCS#12-formatted certificates
+            // let chainFilePath = sslConfigDir.appendingPathComponent("certificateChain.pfx").standardized.path
+            // return SSLService.Configuration(withChainFilePath: chainFilePath, withPassword: "kitura", usingSelfSignedCerts: true, cipherSuite: nil)
     }()
     
     static let clientSSLConfig = SSLService.Configuration(withCipherSuite: nil, clientAllowsSelfSignedCertificates: true)

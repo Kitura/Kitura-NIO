@@ -34,16 +34,12 @@ internal class SSLConfiguration {
 
     /// Convert SSLService.Configuration to NIOOpenSSL.TLSConfiguration
     func tlsServerConfig() -> TLSConfiguration? {
-        #if os(Linux)
             // TODO: Consider other configuration options
+            // TODO: Add support for PKCS#12-formatted certificates
             if let certificateFilePath = certificateFilePath, let keyFilePath = keyFilePath {
                 return TLSConfiguration.forServer(certificateChain: [.file(certificateFilePath)], privateKey: .file(keyFilePath))
             } else {
                 return nil
             }
-        #else
-            // TODO: Add support for other platforms
-            fatalError("Not supported")
-        #endif
     }
 }
