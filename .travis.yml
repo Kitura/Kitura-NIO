@@ -22,5 +22,8 @@ matrix:
       sudo: true
       env: SWIFT_SNAPSHOT=4.1
 
+before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew install libressl ; fi
+
 script:
-  - ./build.sh
+    - ./build.sh
