@@ -20,6 +20,7 @@ import Dispatch
 import NIOOpenSSL
 import SSLService
 import LoggerAPI
+import NIOWebSocket
 
 /// An HTTP server that listens for connections on a socket.
 public class HTTPServer : Server {
@@ -102,6 +103,15 @@ public class HTTPServer : Server {
             self.sslContext = try! SSLContext(configuration: tlsConfig)
         }
 
+        var upgraders: [HTTPProtocolUpgrader] = []
+        if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
+            let upgrader = WebSocketUpgrader(shouldUpgrade: { (head: HTTPRequestHead) in HTTPHeaders() },
+                                             upgradePipelineHandler: { (channel: Channel, request: HTTPRequestHead) in
+                                                                           channel.pipeline.add(handler: webSocketHandlerFactory.handler(for: request))})
+            upgraders.append(upgrader)
+        }
+        let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { _ in })
+
         if self.delegate == nil {
             self.delegate = HTTPDummyServerDelegate()
         }
@@ -111,7 +121,7 @@ public class HTTPServer : Server {
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .childChannelInitializer { channel in
                 channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {
-                    channel.pipeline.configureHTTPServerPipeline().then {
+                    channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config).then {
                         if let sslContext = self.sslContext {
                             _ = channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslContext), first: true)
                         }
