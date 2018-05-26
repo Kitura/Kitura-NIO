@@ -32,8 +32,24 @@ public class HTTPServer : Server {
     /// Port number for listening for new connections.
     public private(set) var port: Int?
 
-    /// A server state.
-    public private(set) var state: ServerState = .unknown
+    private var _state: ServerState = .unknown
+
+    private let syncQ = DispatchQueue(label: "HTTPServer.syncQ")
+
+    /// A server state
+    public private(set) var state: ServerState {
+        get {
+            return self.syncQ.sync {
+                return self._state
+            }
+        }
+
+        set {
+            self.syncQ.sync {
+                self._state = newValue
+            }
+        }
+    }
 
     fileprivate let lifecycleListener = ServerLifecycleListener()
 
