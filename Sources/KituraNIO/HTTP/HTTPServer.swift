@@ -105,7 +105,11 @@ public class HTTPServer : Server {
 
         var upgraders: [HTTPProtocolUpgrader] = []
         if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
-            let upgrader = WebSocketUpgrader(shouldUpgrade: { (head: HTTPRequestHead) in HTTPHeaders() },
+            let upgrader = WebSocketUpgrader(shouldUpgrade: { (head: HTTPRequestHead) in
+                                                              var headers = HTTPHeaders()
+                                                              headers.add(name: "Sec-WebSocket-Protocol", value: head.uri)
+                                                              return headers },
+
                                              upgradePipelineHandler: { (channel: Channel, request: HTTPRequestHead) in
                                                                            channel.pipeline.add(handler: webSocketHandlerFactory.handler(for: request))})
             upgraders.append(upgrader)
