@@ -70,7 +70,7 @@ public class HTTPServer : Server {
     private let maxPendingConnections = 100
 
     /// The event loop group on which the HTTP handler runs
-    let eventLoopGroup = MultiThreadedEventLoopGroup(numThreads: System.coreCount)
+    let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
     public init() { }
 

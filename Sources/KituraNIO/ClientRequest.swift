@@ -343,7 +343,7 @@ public class ClientRequest {
     public func end(close: Bool = false) {
         closeConnection = close
 
-        let group = MultiThreadedEventLoopGroup(numThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         if (URL(string: url)?.scheme)! == "https" {
            enableSSLVerification = true
         }
