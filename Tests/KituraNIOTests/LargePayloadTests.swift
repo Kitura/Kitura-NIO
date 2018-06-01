@@ -26,8 +26,7 @@ class LargePayloadTests: KituraNetTest {
     static var allTests : [(String, (LargePayloadTests) -> () throws -> Void)] {
         return [
             ("testLargePosts", testLargePosts),
-            //https://github.com/IBM-Swift/Kitura-NIO/issues/7
-            //("testLargeGets", testLargeGets)
+            ("testLargeGets", testLargeGets)
         ]
     }
 
