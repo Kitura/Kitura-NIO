@@ -201,7 +201,7 @@ class RegressionTests: KituraNetTest {
         }
             
         init() throws {
-            clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numThreads: 1))
+            clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
                 .channelInitializer { channel in
                     channel.pipeline.addHTTPClientHandlers()
                 } 
@@ -230,7 +230,7 @@ class RegressionTests: KituraNetTest {
         init() throws {
             let sslConfig = TLSConfiguration.forClient(certificateVerification: .none)
             let sslContext = try! SSLContext(configuration: sslConfig)
-            clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numThreads: 1))
+            clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
                 .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
                 .channelInitializer { channel in
                     channel.pipeline.add(handler: try! OpenSSLClientHandler(context: sslContext)).then {
@@ -240,7 +240,7 @@ class RegressionTests: KituraNetTest {
         }
 
         init(with httpClient: HTTPClient) {
-            clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numThreads: 1))
+            clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
                 .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
                 .channelInitializer { channel in
                     channel.pipeline.addHTTPClientHandlers().then {

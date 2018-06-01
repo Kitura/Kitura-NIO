@@ -48,7 +48,7 @@ class PipeliningTests : KituraNetTest {
         server.allowPortReuse = true
         try! server.listen(on: 0)
         let expectation = self.expectation(description: "test pipelining")
-        let group = MultiThreadedEventLoopGroup(numThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         let clientChannel = try! ClientBootstrap(group: group)
             .channelInitializer { channel in
                 channel.pipeline.addHTTPClientHandlers().then {
@@ -77,7 +77,7 @@ class PipeliningTests : KituraNetTest {
         server.allowPortReuse = true
         try! server.listen(on: 0)
         let expectation = self.expectation(description: "test pipelining spanning packets")
-        let group = MultiThreadedEventLoopGroup(numThreads: 1)
+        let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         let clientChannel = try! ClientBootstrap(group: group)
             .channelInitializer { channel in
                 channel.pipeline.addHTTPClientHandlers().then {
