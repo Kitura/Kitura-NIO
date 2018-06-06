@@ -37,7 +37,7 @@ As of today, Kitura-NIO has been tested with Swift 4.1 only.
 
 ## Using Kitura-NIO
 
-To test your Kitura app with the very eary version of the Kitura-NIO networking framework, all you need to do is point to the [kitura-nio](https://github.com/IBM-Swift/Kitura/tree/kitura-nio) branch from your Package.swift:
+To test your Kitura app with the very early version of the Kitura-NIO networking framework, all you need to do is point to the [kitura-nio](https://github.com/IBM-Swift/Kitura/tree/kitura-nio) branch from your `Package.swift`:
 
 ```swift
     dependencies: [
