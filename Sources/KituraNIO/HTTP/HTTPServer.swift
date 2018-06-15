@@ -107,14 +107,15 @@ public class HTTPServer : Server {
         if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
             let upgrader = WebSocketUpgrader(shouldUpgrade: { (head: HTTPRequestHead) in
                                                               var headers = HTTPHeaders()
-                                                              headers.add(name: "Sec-WebSocket-Protocol", value: head.uri)
+                                                              headers.add(name: "Connection", value: "upgrade")
+                                                              headers.add(name: "upgrade", value: "websocket")
+                                                              headers.add(name: "Sec-WebSocket-Protocol", value: "chat") //TODO: Add headers from original request
                                                               return headers },
 
                                              upgradePipelineHandler: { (channel: Channel, request: HTTPRequestHead) in
                                                                            channel.pipeline.add(handler: webSocketHandlerFactory.handler(for: request))})
             upgraders.append(upgrader)
         }
-        let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { _ in })
 
         if self.delegate == nil {
             self.delegate = HTTPDummyServerDelegate()
@@ -124,17 +125,20 @@ public class HTTPServer : Server {
             .serverChannelOption(ChannelOptions.backlog, value: BacklogOption.OptionType(self.maxPendingConnections))
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .childChannelInitializer { channel in
-                channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {
-                    channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config).then {
+                let httpHandler = HTTPHandler(for: self)
+                let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { _ in
+                                                                              _ = channel.pipeline.remove(handler: httpHandler)
+                })
+                return channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {
+                    return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config).then { () -> EventLoopFuture<Void> in
                         if let sslContext = self.sslContext {
                             _ = channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslContext), first: true)
                         }
-                        return channel.pipeline.add(handler: HTTPHandler(for: self))
+                        return channel.pipeline.add(handler: httpHandler)
                     }
                 }
             }
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
-
 
         do {
             //To support both IPv4 and IPv6
