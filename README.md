@@ -29,7 +29,7 @@ We expect most of our users to require higher level concepts such as routing, te
 
 Kitura-NIO utilises [SwiftNIO](https://github.com/apple/swift-nio) and [NIOOpenSSL](https://github.com/apple/swift-nio-ssl). 
 
-As of today, Kitura-NIO has been tested with Swift 4.1 only.
+Kitura-NIO works with Swift 4.1. It is also being tested with the development binaries for Swift 4.2. 
 
 ## Features
 
