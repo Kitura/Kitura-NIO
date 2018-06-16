@@ -6,6 +6,7 @@
 
 
 <p align="center">
+<img src="https://img.shields.io/badge/Swift-4.2-orange.svg?style=flat" alt="Swift 4.2">
 <a href="https://www.kitura.io/packages.html#all">
 <img src="https://img.shields.io/badge/docs-kitura.io-1FBCE4.svg" alt="Docs">
 </a>
@@ -28,7 +29,7 @@ We expect most of our users to require higher level concepts such as routing, te
 
 Kitura-NIO utilises [SwiftNIO](https://github.com/apple/swift-nio) and [NIOOpenSSL](https://github.com/apple/swift-nio-ssl). 
 
-As of today, Kitura-NIO has been tested with Swift 4.1 only.
+Kitura-NIO works with Swift 4.1. It is also being tested with the development binaries for Swift 4.2. 
 
 ## Features
 
