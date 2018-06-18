@@ -26,6 +26,9 @@ public class HeadersContainer {
     /// The header storage
     internal var headers: [String: (key: String, value: [String])] = [:]
     
+    /// Will be used only by ServerResponse
+    internal var httpHeaders = HTTPHeaders()
+
     /// Create an instance of `HeadersContainer`
     public init() {}
 
@@ -43,9 +46,11 @@ public class HeadersContainer {
         set(newValue) {
             if let newValue = newValue {
                 set(key, value: newValue)
+                httpHeaders.replaceOrAdd(name: key, values: newValue)
             }
             else {
                 remove(key)
+                httpHeaders.remove(name: key)
             }
         }
     }
@@ -67,6 +72,7 @@ public class HeadersContainer {
             } else {
                 set(key, lowerCaseKey: lowerCaseKey, value: value)
             }
+            httpHeaders.add(name: key, values: value)
             
         case "content-type", "content-length", "user-agent", "referer", "host",
              "authorization", "proxy-authorization", "if-modified-since",
@@ -81,10 +87,12 @@ public class HeadersContainer {
         default:
             guard let oldValue = entry?.value.first else {
                 set(key, lowerCaseKey: lowerCaseKey, value: value)
+                httpHeaders.add(name: key, values: value)
                 return
             }
             let newValue = oldValue + ", " + value.joined(separator: ", ")
             headers[lowerCaseKey]?.value[0] = newValue
+            httpHeaders.replaceOrAdd(name: key, value: newValue)
         }
     }
 
@@ -94,6 +102,7 @@ public class HeadersContainer {
     /// - Parameter value: A string to be appended to the value of the HTTP header
     public func append(_ key: String, value: String) {
         append(key, value: [value])
+        httpHeaders.add(name: key, value: value)
     }
 
     private func get(_ key: String) -> [String]? {
@@ -103,6 +112,7 @@ public class HeadersContainer {
     /// Remove all of the headers
     public func removeAll() {
         headers.removeAll(keepingCapacity: true)
+        httpHeaders = HTTPHeaders()
     }
     
     private func set(_ key: String, value: [String]) {
@@ -118,6 +128,19 @@ public class HeadersContainer {
     }
 }
 
+extension HTTPHeaders {
+    mutating func add(name: String, values: [String]) {
+        values.forEach {
+            self.add(name: name, value: $0)
+        }
+    }
+
+    mutating func replaceOrAdd(name: String, values: [String]) {
+        values.forEach {
+            replaceOrAdd(name: name, value: $0)
+        }
+    }
+}
 /// Conformance to the `Collection` protocol
 extension HeadersContainer: Collection {
 
@@ -153,17 +176,6 @@ extension HeadersContainer: Collection {
 
 /// Kitura uses HeadersContainer and NIOHTTP1 expects HTTPHeader - bridging methods
 extension HeadersContainer {
-    /// HeadersContainer to HTTPHeaders
-    func httpHeaders() -> HTTPHeaders {
-        var httpHeaders = HTTPHeaders()
-        for (_, keyValues) in headers {
-            for value in keyValues.1 {
-                httpHeaders.add(name: keyValues.0, value: value)
-            }
-        }
-        return httpHeaders
-    }
-
     /// HTTPHeaders to HeadersContainer
     static func create(from httpHeaders: HTTPHeaders) -> HeadersContainer {
         let headerContainer = HeadersContainer()
