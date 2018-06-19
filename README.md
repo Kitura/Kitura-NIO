@@ -61,14 +61,11 @@ We'd be more than happy to receive bug reports, enhancement requests and pull re
 
 `$ git clone https://github.com/IBM-Swift/Kitura-NIO && cd Kitura-NIO`
 
-2. Set the open file limit to a large number. This is to work around an [open issue](https://github.com/IBM-Swift/Kitura-NIO/issues/1).
-
-`$ ulimit -n 65536`
-
-3. Build and run tests.
+2. Build and run tests.
 
 `$ swift test`
 
+In some Linux environments, this [issue](https://github.com/IBM-Swift/Kitura-NIO/issues/1) may be experienced.
 
 ## Community
 
