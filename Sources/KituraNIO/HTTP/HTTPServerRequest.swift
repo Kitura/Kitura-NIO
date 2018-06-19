@@ -24,7 +24,11 @@ import Foundation
 public class HTTPServerRequest: ServerRequest {
 
     /// Set of HTTP headers of the request.
-    public var headers : HeadersContainer
+    public var headers : HeadersContainer {
+        return HeadersContainer.create(from: _headers)
+    }
+
+    private var _headers: HTTPHeaders
 
     @available(*, deprecated, message: "This contains just the path and query parameters starting with '/'. use 'urlURL' instead")
     public var urlString : String {
@@ -56,7 +60,7 @@ public class HTTPServerRequest: ServerRequest {
 
         self.enableSSL ? url.append("https://") : url.append("http://")
 
-        if let hostname = headers["Host"]?.first {
+        if let hostname = _headers["Host"].first {
             url.append(hostname)
             if !hostname.contains(":") {
                 url.append(":")
@@ -118,7 +122,7 @@ public class HTTPServerRequest: ServerRequest {
     }
 
     init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead, enableSSL: Bool) {
-        self.headers = HeadersContainer.create(from: requestHead.headers)
+        self._headers = requestHead.headers
         self.method = String(describing: requestHead.method)
         self.httpVersionMajor = requestHead.version.major
         self.httpVersionMinor = requestHead.version.minor

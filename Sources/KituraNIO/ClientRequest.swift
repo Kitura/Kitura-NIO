@@ -525,7 +525,7 @@ class HTTPClientHandler: ChannelInboundHandler {
          let request = self.unwrapInboundIn(data)
          switch request {
          case .head(let header):
-             clientResponse.headers = HeadersContainer.create(from: header.headers)
+             clientResponse._headers = header.headers
              clientResponse.httpVersionMajor = header.version.major
              clientResponse.httpVersionMinor = header.version.minor
              clientResponse.statusCode = HTTPStatusCode(rawValue: Int(header.status.code))!

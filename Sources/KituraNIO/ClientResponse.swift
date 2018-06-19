@@ -15,6 +15,7 @@
  */
 
 import NIO
+import NIOHTTP1
 import Foundation
 
 /// This class describes the response sent by the remote server to an HTTP request
@@ -36,9 +37,21 @@ public class ClientResponse {
     /// Minor version of HTTP of the response
     public var httpVersionMinor: UInt16? 
     
-    /// Set of HTTP headers of the response.
-    public var headers: HeadersContainer!
+    internal var _headers: HTTPHeaders!
 
+    /// Set of HTTP headers of the response.
+    public var headers: HeadersContainer {
+        get {
+            guard let httpHeaders = _headers else {
+                return HeadersContainer()
+            }
+            return HeadersContainer.create(from: httpHeaders)
+        }
+
+        set {
+           _headers = newValue.httpHeaders
+        }
+    }
     /// The HTTP Status code, as an Int, sent in the response by the remote server.
     public internal(set) var status = -1 {
         didSet {

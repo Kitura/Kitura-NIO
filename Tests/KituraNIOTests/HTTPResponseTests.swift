@@ -58,4 +58,27 @@ class HTTPResponseTests: KituraNetTest {
         headers.append("Content-Type", value: "image/png, text/plain")
         XCTAssertEqual(headers["Content-Type"]?[0], "text/html")
     }
+
+    func testHeadersContainerHTTPHeaders() {
+        let headers = HeadersContainer()
+        headers["Content-Type"] = ["image/png, text/plain"]
+        XCTAssertEqual(headers.httpHeaders["Content-Type"], headers["Content-Type"])
+        headers["Content-Type"] = ["text/html"]
+        XCTAssertEqual(headers.httpHeaders["Content-Type"], headers["Content-Type"])
+        headers["Content-Type"] = nil
+        XCTAssertFalse(headers.httpHeaders.contains(name: "Content-Type"))
+        headers["Set-Cookie"] = ["ID=123BAS; Path=/; Secure; HttpOnly"]
+        headers.append("Set-Cookie", value: ["ID=KI9H12; Path=/; Secure; HttpOnly"])
+        XCTAssertEqual(headers["Set-Cookie"], headers.httpHeaders["Set-Cookie"])
+        headers["Content-Type"] = ["text/html"]
+        headers.append("Content-Type", value: "text/json")
+        XCTAssertEqual(headers.httpHeaders["Content-Type"], headers["Content-Type"])
+        headers["foo"] = ["bar0"]
+        headers.append("foo", value: "bar1")
+        XCTAssertEqual(headers.httpHeaders["foo"], headers["foo"])
+        headers.append("foo", value: ["bar2", "bar3"])
+        XCTAssertEqual(headers.httpHeaders["foo"], headers["foo"])
+        headers.removeAll()
+        XCTAssertFalse(headers.httpHeaders.contains(name: "foo"))
+    }
 }

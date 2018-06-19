@@ -47,6 +47,8 @@ public class HTTPServerResponse: ServerResponse {
     /// The HTTP headers to be sent to the client as part of the response.
     public var headers : HeadersContainer = HeadersContainer()
 
+    private var _headers: HTTPHeaders = HTTPHeaders()
+
     /// The HTTP version to be sent in the response.
     private var httpVersion: HTTPVersion
 
@@ -103,7 +105,7 @@ public class HTTPServerResponse: ServerResponse {
             }
         }
 
-        let response = HTTPResponseHead(version: httpVersion, status: status, headers: headers.httpHeaders())
+        let response = HTTPResponseHead(version: httpVersion, status: status, headers: headers.httpHeaders)
         ctx.write(handler.wrapOutboundOut(.head(response)), promise: nil)
         if let buffer = buffer {
             ctx.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
@@ -122,8 +124,8 @@ public class HTTPServerResponse: ServerResponse {
         let status = HTTPResponseStatus(statusCode: errorCode.rawValue)
 
         //We don't keep the connection alive on an HTTP error
-        headers["Connection"] = ["Close"]
-        let response = HTTPResponseHead(version: HTTPVersion(major: 1, minor: 1), status: status, headers: headers.httpHeaders())
+        _headers.add(name: "Connection", value: "Close")
+        let response = HTTPResponseHead(version: HTTPVersion(major: 1, minor: 1), status: status, headers: _headers)
         ctx.write(handler.wrapOutboundOut(.head(response)), promise: nil)
         ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
         handler.updateKeepAliveState()
