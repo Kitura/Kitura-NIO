@@ -102,7 +102,6 @@ public class HeadersContainer {
     /// - Parameter value: A string to be appended to the value of the HTTP header
     public func append(_ key: String, value: String) {
         append(key, value: [value])
-        httpHeaders.add(name: key, value: value)
     }
 
     private func get(_ key: String) -> [String]? {
