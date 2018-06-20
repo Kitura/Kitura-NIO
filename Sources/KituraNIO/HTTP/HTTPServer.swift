@@ -106,14 +106,18 @@ public class HTTPServer : Server {
         var upgraders: [HTTPProtocolUpgrader] = []
         if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
             let upgrader = WebSocketUpgrader(shouldUpgrade: { (head: HTTPRequestHead) in
-                                                              var headers = HTTPHeaders()
-                                                              headers.add(name: "Connection", value: "upgrade")
-                                                              headers.add(name: "upgrade", value: "websocket")
-                                                              headers.add(name: "Sec-WebSocket-Protocol", value: "chat") //TODO: Add headers from original request
-                                                              return headers },
+                var headers = HTTPHeaders()
+                headers.add(name: "Connection", value: "upgrade")
+                headers.add(name: "upgrade", value: "websocket")
+                ///TODO: Handle multiple protocols
+                if let wsProtocol = head.headers["Sec-WebSocket-Protocol"].first {
+                    headers.add(name: "Sec-WebSocket-Protocol", value: wsProtocol)
+                }
+                return headers
 
-                                             upgradePipelineHandler: { (channel: Channel, request: HTTPRequestHead) in
-                                                                           channel.pipeline.add(handler: webSocketHandlerFactory.handler(for: request))})
+                }, upgradePipelineHandler: { (channel: Channel, request: HTTPRequestHead) in
+                    channel.pipeline.add(handler: webSocketHandlerFactory.handler(for: request))
+            })
             upgraders.append(upgrader)
         }
 
@@ -127,7 +131,7 @@ public class HTTPServer : Server {
             .childChannelInitializer { channel in
                 let httpHandler = HTTPHandler(for: self)
                 let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { _ in
-                                                                              _ = channel.pipeline.remove(handler: httpHandler)
+                    _ = channel.pipeline.remove(handler: httpHandler)
                 })
                 return channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {
                     return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config).then { () -> EventLoopFuture<Void> in
