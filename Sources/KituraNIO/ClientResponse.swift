@@ -49,7 +49,7 @@ public class ClientResponse {
         }
 
         set {
-           _headers = newValue.httpHeaders
+           _headers = newValue.httpHeaders()
         }
     }
     /// The HTTP Status code, as an Int, sent in the response by the remote server.
