@@ -103,6 +103,7 @@ public class HTTPServer : Server {
             self.sslContext = try! SSLContext(configuration: tlsConfig)
         }
 
+        var channelHandlerCtx: ChannelHandlerContext?
         var upgraders: [HTTPProtocolUpgrader] = []
         if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
             let upgrader = WebSocketUpgrader(shouldUpgrade: { (head: HTTPRequestHead) in
@@ -116,7 +117,10 @@ public class HTTPServer : Server {
                 return headers
 
                 }, upgradePipelineHandler: { (channel: Channel, request: HTTPRequestHead) in
-                    channel.pipeline.add(handler: webSocketHandlerFactory.handler(for: request))
+                    guard let ctx = channelHandlerCtx else { fatalError("Cannot create ServerRequest") }
+                    ///TODO: Handle secure upgrade request ("wss://")
+                    let serverRequest = HTTPServerRequest(ctx: ctx, requestHead: request, enableSSL: false)
+                    return channel.pipeline.add(handler: webSocketHandlerFactory.handler(for: serverRequest))
             })
             upgraders.append(upgrader)
         }
@@ -130,7 +134,8 @@ public class HTTPServer : Server {
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .childChannelInitializer { channel in
                 let httpHandler = HTTPHandler(for: self)
-                let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { _ in
+                let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { ctx in
+                    channelHandlerCtx = ctx
                     _ = channel.pipeline.remove(handler: httpHandler)
                 })
                 return channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {

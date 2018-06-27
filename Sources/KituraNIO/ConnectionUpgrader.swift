@@ -44,5 +44,5 @@ public struct ConnectionUpgrader {
 public protocol ProtocolHandlerFactory {
     var name: String { get }
 
-    func handler(for request: HTTPRequestHead) -> ChannelHandler
+    func handler(for request: ServerRequest) -> ChannelHandler
 }
