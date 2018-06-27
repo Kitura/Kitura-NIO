@@ -365,6 +365,10 @@ public class ClientRequest {
             self.headers["Connection"] = "close"
         }
 
+        if let username = self.userName, let password = self.password {
+            self.headers["Authorization"] = createHTTPBasicAuthHeader(username: username, password: password)
+        }
+
         if self.port == nil {
             self.port = enableSSLVerification ? 443 : 80
         }
@@ -415,6 +419,14 @@ public class ClientRequest {
                     channel.pipeline.add(handler: HTTPClientHandler(request: self))
                 }
             }
+    }
+
+    private func createHTTPBasicAuthHeader(username: String, password: String) -> String? {
+        let authHeader = "\(username):\(password)"
+        guard let data = authHeader.data(using: String.Encoding.utf8) else {
+            return nil
+        }
+        return "Basic \(data.base64EncodedString)"
     }
 }
 
