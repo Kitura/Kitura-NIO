@@ -107,8 +107,6 @@ public class HTTPServer : Server {
         if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
             let upgrader = WebSocketUpgrader(shouldUpgrade: { (head: HTTPRequestHead) in
                 var headers = HTTPHeaders()
-                headers.add(name: "Connection", value: "upgrade")
-                headers.add(name: "upgrade", value: "websocket")
                 ///TODO: Handle multiple protocols
                 if let wsProtocol = head.headers["Sec-WebSocket-Protocol"].first {
                     headers.add(name: "Sec-WebSocket-Protocol", value: wsProtocol)
