@@ -153,6 +153,10 @@ public class HTTPServer : Server {
             self.state = .started
             self.lifecycleListener.performStartCallbacks()
         } catch let error {
+            //If the IPv6 bind failed, close the IPv4 channel too. If the IPv4 bind failed, there's nothing to close!
+            if let serverChannelIPv4 = serverChannelIPv4 {
+                serverChannelIPv4.close()
+            }
             self.state = .failed
             self.lifecycleListener.performFailCallbacks(with: error)
             Log.error("Error trying to bing to \(port): \(error)")
