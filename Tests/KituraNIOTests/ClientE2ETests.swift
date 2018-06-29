@@ -20,9 +20,8 @@ import Dispatch
 import XCTest
 
 @testable import KituraNIO
-import Socket
 
-class ClientE2ETests: KituraNetTest {
+class ClientE2ETests: KituraNIOTest {
 
     static var allTests : [(String, (ClientE2ETests) -> () throws -> Void)] {
         return [
@@ -62,8 +61,8 @@ class ClientE2ETests: KituraNetTest {
                 catch {
                     XCTFail("Failed reading the body of the response")
                 }
-                XCTAssertEqual(response?.httpVersionMajor, 1, "HTTP Major code from KituraNet should be 1, was \(String(describing: response?.httpVersionMajor))")
-                XCTAssertEqual(response?.httpVersionMinor, 1, "HTTP Minor code from KituraNet should be 1, was \(String(describing: response?.httpVersionMinor))")
+                XCTAssertEqual(response?.httpVersionMajor, 1, "HTTP Major code from KituraNIO should be 1, was \(String(describing: response?.httpVersionMajor))")
+                XCTAssertEqual(response?.httpVersionMinor, 1, "HTTP Minor code from KituraNIO should be 1, was \(String(describing: response?.httpVersionMinor))")
                 expectation.fulfill()
             })
         }
@@ -325,10 +324,10 @@ class ClientE2ETests: KituraNetTest {
     class TestURLDelegate: ServerDelegate {
 
         func handle(request: ServerRequest, response: ServerResponse) {
-            XCTAssertEqual(request.httpVersionMajor, 1, "HTTP Major code from KituraNet should be 1, was \(String(describing: request.httpVersionMajor))")
-            XCTAssertEqual(request.httpVersionMinor, 1, "HTTP Minor code from KituraNet should be 1, was \(String(describing: request.httpVersionMinor))")
+            XCTAssertEqual(request.httpVersionMajor, 1, "HTTP Major code from KituraNIO should be 1, was \(String(describing: request.httpVersionMajor))")
+            XCTAssertEqual(request.httpVersionMinor, 1, "HTTP Minor code from KituraNIO should be 1, was \(String(describing: request.httpVersionMinor))")
             XCTAssertEqual(request.urlURL.path, urlPath, "Path in request.urlURL wasn't \(urlPath), it was \(request.urlURL.path)")
-            XCTAssertEqual(request.urlURL.port, KituraNetTest.portDefault)
+            XCTAssertEqual(request.urlURL.port, KituraNIOTest.portDefault)
             XCTAssertEqual(request.url, urlPath.data(using: .utf8))
             do {
                 response.statusCode = .OK

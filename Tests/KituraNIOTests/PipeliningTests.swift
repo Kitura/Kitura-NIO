@@ -29,7 +29,7 @@ func randomNumber(limit: Int) -> Int {
     #endif
 }
 
-class PipeliningTests : KituraNetTest {
+class PipeliningTests : KituraNIOTest {
 
     static var allTests : [(String, (PipeliningTests) -> () throws -> Void)] {
         return [

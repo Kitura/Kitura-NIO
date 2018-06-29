@@ -19,7 +19,7 @@ import XCTest
 
 @testable import KituraNIO
 
-class HTTPStatusCodeTests: KituraNetTest {
+class HTTPStatusCodeTests: KituraNIOTest {
  
   // Test that a valid status code can be created, and is correctly mapped to its status class. 
   func testStatusCodeCreation() {
