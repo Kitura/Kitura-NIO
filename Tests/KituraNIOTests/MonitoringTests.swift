@@ -21,7 +21,7 @@ import XCTest
 
 @testable import KituraNIO
 
-class MonitoringTests: KituraNetTest {
+class MonitoringTests: KituraNIOTest {
     
     static var allTests : [(String, (MonitoringTests) -> () throws -> Void)] {
         return [
@@ -47,8 +47,8 @@ class MonitoringTests: KituraNetTest {
         let server = HTTP.createServer()
         server.delegate = TestServerDelegate()
         server.allowPortReuse = true
-        if KituraNetTest.useSSLDefault {
-            server.sslConfig = KituraNetTest.sslConfig
+        if KituraNIOTest.useSSLDefault {
+            server.sslConfig = KituraNIOTest.sslConfig
         }
 
         server.started {

@@ -22,7 +22,7 @@ import NIO
 import NIOHTTP1
 import NIOOpenSSL
 
-class RegressionTests: KituraNetTest {
+class RegressionTests: KituraNIOTest {
 
     static var allTests : [(String, (RegressionTests) -> () throws -> Void)] {
         return [

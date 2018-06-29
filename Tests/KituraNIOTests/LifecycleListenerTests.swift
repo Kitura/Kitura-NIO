@@ -21,7 +21,7 @@ import XCTest
 
 @testable import KituraNIO
 
-class LifecycleListenerTests: KituraNetTest {
+class LifecycleListenerTests: KituraNIOTest {
 
     static var allTests : [(String, (LifecycleListenerTests) -> () throws -> Void)] {
         return [
