@@ -56,13 +56,8 @@ public class HTTPServer : Server {
 
     public var keepAliveState: KeepAliveState = .unlimited
 
-    public var supportIPv6 = false
-
-    /// The channel used to listen for new connections (IPv4)
-    var serverChannelIPv4: Channel!
-
-    /// The channel used to listen for new connections (IPv6)
-    var serverChannelIPv6: Channel!
+    /// The channel used to listen for new connections
+    var serverChannel: Channel!
 
     /// Whether or not this server allows port reuse (default: disallowed)
     public var allowPortReuse = false
@@ -143,20 +138,11 @@ public class HTTPServer : Server {
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
 
         do {
-            //To support both IPv4 and IPv6
-            serverChannelIPv4 = try bootstrap.bind(host: "127.0.0.1", port: port).wait()
-            self.port = serverChannelIPv4?.localAddress?.port.map { Int($0) }
-            if supportIPv6 {
-                serverChannelIPv6 = try bootstrap.bind(host: "::1", port: port).wait()
-                //TODO: update the IPv6 port number
-            }
+            serverChannel = try bootstrap.bind(host: "localhost", port: port).wait()
+            self.port = serverChannel?.localAddress?.port.map { Int($0) }
             self.state = .started
             self.lifecycleListener.performStartCallbacks()
         } catch let error {
-            //If the IPv6 bind failed, close the IPv4 channel too. If the IPv4 bind failed, there's nothing to close!
-            if let serverChannelIPv4 = serverChannelIPv4 {
-                serverChannelIPv4.close()
-            }
             self.state = .failed
             self.lifecycleListener.performFailCallbacks(with: error)
             Log.error("Error trying to bing to \(port): \(error)")
@@ -167,10 +153,7 @@ public class HTTPServer : Server {
         Log.verbose("Options for port \(self.port!): maxPendingConnections: \(maxPendingConnections), allowPortReuse: \(self.allowPortReuse)")
 
         let queuedBlock = DispatchWorkItem(block: { 
-            try! self.serverChannelIPv4.closeFuture.wait()
-            if self.supportIPv6 {
-                try! self.serverChannelIPv6.closeFuture.wait()
-            }
+            try! self.serverChannel.closeFuture.wait()
             self.state = .stopped
             self.lifecycleListener.performStopCallbacks()
         })
@@ -231,11 +214,8 @@ public class HTTPServer : Server {
 
     /// Stop listening for new connections.
     public func stop() {
-        guard serverChannelIPv4 != nil else { return }
-        try! serverChannelIPv4.close().wait()
-        if supportIPv6 {
-            try! serverChannelIPv6.close().wait()
-        }
+        guard serverChannel != nil else { return }
+        try! serverChannel.close().wait()
         self.state = .stopped
     }
 

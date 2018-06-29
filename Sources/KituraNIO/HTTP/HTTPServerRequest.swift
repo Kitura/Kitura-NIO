@@ -127,7 +127,6 @@ public class HTTPServerRequest: ServerRequest {
         self.httpVersionMajor = requestHead.version.major
         self.httpVersionMinor = requestHead.version.minor
         self._urlString = requestHead.uri
-        //TODO: Handle the IPv6 case
         let localAddress = ctx.localAddress
         self.remoteAddress = HTTPServerRequest.host(socketAddress: ctx.remoteAddress)
         self.localAddress = HTTPServerRequest.host(socketAddress: localAddress)

@@ -59,12 +59,11 @@ class KituraNetTest: XCTestCase {
     func doTearDown() {
     }
 
-    func startServer(_ delegate: ServerDelegate?, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, supportIPv6: Bool = false) throws -> HTTPServer {
+    func startServer(_ delegate: ServerDelegate?, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault) throws -> HTTPServer {
         
         let server = HTTP.createServer()
         server.delegate = delegate
         server.allowPortReuse = allowPortReuse
-        server.supportIPv6 = supportIPv6
         if useSSL {
             server.sslConfig = KituraNetTest.sslConfig
         }
@@ -74,8 +73,8 @@ class KituraNetTest: XCTestCase {
     
     /// Convenience function for starting an HTTPServer on an ephemeral port,
     /// returning the a tuple containing the server and the port it is listening on.
-    func startEphemeralServer(_ delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, supportIPv6: Bool = false) throws -> (server: HTTPServer, port: Int) {
-        let server = try startServer(delegate, port: 0, useSSL: useSSL, allowPortReuse: allowPortReuse, supportIPv6: supportIPv6)
+    func startEphemeralServer(_ delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault) throws -> (server: HTTPServer, port: Int) {
+        let server = try startServer(delegate, port: 0, useSSL: useSSL, allowPortReuse: allowPortReuse)
         guard let serverPort = server.port else {
             throw KituraNetTestError(message: "Server port was not initialized")
         }
@@ -86,13 +85,13 @@ class KituraNetTest: XCTestCase {
     }
     
     func performServerTest(_ delegate: ServerDelegate?, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault,
-                           supportIPv6: Bool = false, line: Int = #line, asyncTasks: (XCTestExpectation) -> Void...) {
+                           line: Int = #line, asyncTasks: (XCTestExpectation) -> Void...) {
 
         do {
             self.useSSL = useSSL
             self.port = port
 
-            let server: HTTPServer = try startServer(delegate, port: port, useSSL: useSSL, allowPortReuse: allowPortReuse, supportIPv6: supportIPv6)
+            let server: HTTPServer = try startServer(delegate, port: port, useSSL: useSSL, allowPortReuse: allowPortReuse)
             defer {
                 server.stop()
             }
