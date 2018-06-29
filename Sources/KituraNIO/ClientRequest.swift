@@ -60,9 +60,9 @@ public class ClientRequest {
     var bodyData: Data?
 
     /// Should SSL verification be enabled
-    private var enableSSLVerification = false {
+    private var disableSSLVerification = false {
         didSet {
-            if enableSSLVerification {
+            if disableSSLVerification {
                 self.sslConfig = TLSConfiguration.forClient(certificateVerification: .none)
             }
         }
@@ -166,7 +166,7 @@ public class ClientRequest {
         case .maxRedirects(let maxRedirects):
             self.maxRedirects = maxRedirects
         case .disableSSLVerification:
-            self.enableSSLVerification = true
+            self.disableSSLVerification = true
         case .useHTTP2:
             self.useHTTP2 = true
         }
@@ -343,12 +343,14 @@ public class ClientRequest {
     public func end(close: Bool = false) {
         closeConnection = close
 
+        var isHTTPS = false
+
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         if (URL(string: url)?.scheme)! == "https" {
-           enableSSLVerification = true
+           isHTTPS = true
         }
 
-        if enableSSLVerification {
+        if isHTTPS {
             initializeClientBootstrapWithSSL(eventLoopGroup: group)
         } else {
             initializeClientBootstrap(eventLoopGroup: group)
@@ -370,7 +372,7 @@ public class ClientRequest {
         }
 
         if self.port == nil {
-            self.port = enableSSLVerification ? 443 : 80
+            self.port = isHTTPS ? 443 : 80
         }
 
         do {
