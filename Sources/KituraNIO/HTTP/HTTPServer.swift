@@ -85,7 +85,7 @@ public class HTTPServer : Server {
     private var tlsConfig: TLSConfiguration?
 
     /// The SSLContext built using the TLSConfiguration
-    private var sslContext: SSLContext?
+    private var sslContext: NIOOpenSSL.SSLContext?
 
 
     /// Listens for connections on a socket
