@@ -348,6 +348,7 @@ public class ClientRequest {
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         if (URL(string: url)?.scheme)! == "https" {
            isHTTPS = true
+           self.sslConfig = TLSConfiguration.forClient(certificateVerification: .none)   
         }
 
         if isHTTPS {
