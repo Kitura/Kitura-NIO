@@ -277,8 +277,10 @@ class ClientE2ETests: KituraNIOTest {
 
     class TestServerDelegate: ServerDelegate {
 
+        let remoteAddress = ["127.0.0.1", "::1", "::ffff:127.0.0.1"]
+
         func handle(request: ServerRequest, response: ServerResponse) {
-            XCTAssertTrue(request.remoteAddress == "127.0.0.1" || request.remoteAddress == "::1", "Remote address wasn't ::1 or 127.0.0.1, it was \(request.remoteAddress)")
+            XCTAssertTrue(remoteAddress.contains(request.remoteAddress), "Remote address wasn't ::1 or 127.0.0.1 or ::ffff:127.0.0.1, it was \(request.remoteAddress)")
 
             let result: String
             switch request.method.lowercased() {
