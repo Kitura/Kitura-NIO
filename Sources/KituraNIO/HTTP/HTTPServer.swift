@@ -143,7 +143,7 @@ public class HTTPServer : Server {
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
 
         do {
-            serverChannel = try bootstrap.bind(host: "::", port: port).wait()
+            serverChannel = try bootstrap.bind(host: "0.0.0.0", port: port).wait()
             self.port = serverChannel?.localAddress?.port.map { Int($0) }
             self.state = .started
             self.lifecycleListener.performStartCallbacks()
