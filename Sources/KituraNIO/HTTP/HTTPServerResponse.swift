@@ -23,10 +23,10 @@ import Foundation
 public class HTTPServerResponse: ServerResponse {
 
     /// The channel handler context on which an HTTP response should be written
-    private let ctx: ChannelHandlerContext
+    private weak var ctx: ChannelHandlerContext?
 
     /// The handler that processed the HTTP request
-    private let handler: HTTPHandler 
+    private weak var handler: HTTPHandler?
 
     /// Status code
     private var status = HTTPStatusCode.OK.rawValue
@@ -67,6 +67,9 @@ public class HTTPServerResponse: ServerResponse {
     ///
     /// - Parameter from: String data to be written.
     public func write(from string: String) throws {
+        guard let ctx = ctx else {
+            fatalError("No channel handler context available.")
+        }
         if buffer == nil {
             buffer = ctx.channel.allocator.buffer(capacity: string.utf8.count)
         }
@@ -77,6 +80,9 @@ public class HTTPServerResponse: ServerResponse {
     ///
     /// - Parameter from: Data object that contains the data to be written.
     public func write(from data: Data) throws {
+        guard let ctx = ctx else {
+            fatalError("No channel handler context available.")
+        }
         if buffer == nil {
             buffer = ctx.channel.allocator.buffer(capacity: data.count)
          }
@@ -94,10 +100,18 @@ public class HTTPServerResponse: ServerResponse {
     /// End sending the response.
     ///
     public func end() throws {
+        guard let ctx = self.ctx else {
+            fatalError("No channel handler context available.")
+        }
+
+        guard let handler = self.handler else {
+            fatalError("No HTTP handler available")
+        }
+
         let status = HTTPResponseStatus(statusCode: statusCode?.rawValue ?? 0)
-        if self.handler.clientRequestedKeepAlive {
+        if handler.clientRequestedKeepAlive {
             headers["Connection"] = ["Keep-Alive"]
-            if let maxConnections = self.handler.keepAliveState.requestsRemaining {
+            if let maxConnections = handler.keepAliveState.requestsRemaining {
                 headers["Keep-Alive"] = ["timeout=\(HTTPHandler.keepAliveTimeout), max=\(Int(maxConnections))"]
             } else {
                 headers["Keep-Alive"] = ["timeout=\(HTTPHandler.keepAliveTimeout)"]
@@ -119,6 +133,14 @@ public class HTTPServerResponse: ServerResponse {
 
     /// End sending the response on an HTTP error
     func end(with errorCode: HTTPStatusCode) throws {
+        guard let ctx = self.ctx else {
+            fatalError("No channel handler context available.")
+        }
+
+        guard let handler = self.handler else {
+            fatalError("No HTTP handler available")
+        }
+
         self.statusCode = errorCode
         let status = HTTPResponseStatus(statusCode: errorCode.rawValue)
 
