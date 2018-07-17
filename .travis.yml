@@ -15,7 +15,7 @@ matrix:
     - os: linux
       dist: trusty
       sudo: true
-      env: SWIFT_SNAPSHOT=swift-4.2-DEVELOPMENT-SNAPSHOT-2018-06-15-a
+      env: SWIFT_SNAPSHOT=swift-4.2-DEVELOPMENT-SNAPSHOT-2018-07-16-a
     - os: linux
       dist: trusty
       sudo: true
