@@ -537,8 +537,8 @@ class HTTPClientHandler: ChannelInboundHandler {
 
      /// Read the header, body and trailer. Redirection is handled in the trailer case.
      public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
-         let request = self.unwrapInboundIn(data)
-         switch request {
+         let response = self.unwrapInboundIn(data)
+         switch response {
          case .head(let header):
              clientResponse._headers = header.headers
              clientResponse.httpVersionMajor = header.version.major
