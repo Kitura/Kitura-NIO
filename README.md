@@ -27,9 +27,9 @@ Kitura-NIO is a SwiftNIO based networking library for Kitura. Other than an addi
 
 We expect most of our users to require higher level concepts such as routing, templates and middleware, these are not provided in Kitura-NIO, if you want to use those facilities you should be coding at the Kitura level, for this please see the [Kitura](https://github.com/IBM-Swift/Kitura) project. Kitura-NIO, like  Kitura-net, underpins Kitura which offers a higher abstraction level to users.
 
-Kitura-NIO utilises [SwiftNIO](https://github.com/apple/swift-nio) and [NIOOpenSSL](https://github.com/apple/swift-nio-ssl). 
+Kitura-NIO utilises [SwiftNIO](https://github.com/apple/swift-nio) and [NIOOpenSSL](https://github.com/apple/swift-nio-ssl).
 
-Kitura-NIO works with Swift 4.1. It is also being tested with the development binaries for Swift 4.2. 
+Kitura-NIO works with Swift 4.1. It is also being tested with the development binaries for Swift 4.2.
 
 ## Features
 
@@ -72,3 +72,7 @@ In some Linux environments, this [issue](https://github.com/IBM-Swift/Kitura-NIO
 These are early days for Kitura-NIO. We'd really love to hear feedback from you.
 
 Join the [Kitura on Swift Forums](https://forums.swift.org/c/related-projects/kitura) or our [Slack](http://swift-at-ibm-slack.mybluemix.net/) to meet the team!
+
+## License
+
+This library is licensed under Apache 2.0. Full license text is available in [LICENSE](https://github.com/IBM-Swift/Kitura-NIO/blob/master/LICENSE.txt).
