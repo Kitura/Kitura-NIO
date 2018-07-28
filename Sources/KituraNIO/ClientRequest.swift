@@ -82,6 +82,9 @@ public class ClientRequest {
     /// The path (uri) related to the request, starting from / and including query parameters
     private var path = ""
 
+    /// A semaphore used to make ClientRequest.end() synchronous
+    let waitSemaphore = DispatchSemaphore(value: 0)
+
     /// Client request option enum
     public enum Options {
         /// Specifies the HTTP method (i.e. PUT, POST...) to be sent in the request
@@ -397,6 +400,7 @@ public class ClientRequest {
             channel.write(NIOAny(HTTPClientRequestPart.body(.byteBuffer(buffer.byteBuffer))), promise: nil)
         }
         try! channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
+        waitSemaphore.wait()
     }
 
     private func initializeClientBootstrapWithSSL(eventLoopGroup: EventLoopGroup) {
@@ -576,6 +580,7 @@ class HTTPClientHandler: ChannelInboundHandler {
             } else {
                 clientRequest.callback(clientResponse)
             }
+            clientRequest.waitSemaphore.signal()
             clientRequest.channel.close(promise: nil)
          }
      }
