@@ -20,138 +20,127 @@ import XCTest
 @testable import KituraNIO
 
 class ClientRequestTests: KituraNIOTest {
-  let testCallback: ClientRequest.Callback = {_ in }
-  
-  // 1 test URL that is build when initializing with ClientRequestOptions
-  func testClientRequestWhenInitializedWithValidURL() {
-    let options: [ClientRequest.Options] = [ .method("GET"),
-                                            .schema("https://"),
-                                            .hostname("66o.tech")
-                                            ]
-    let testRequest = ClientRequest(options: options, callback: testCallback)
-    
-    XCTAssertEqual(testRequest.url, "https://66o.tech")
-  }
-  
-  func testClientRequestWhenInitializedWithSimpleSchema() {
-    let options: [ClientRequest.Options] = [ .method("GET"),
-                                            .schema("https"),
-                                            .hostname("66o.tech")
-    ]
-    let testRequest = ClientRequest(options: options, callback: testCallback)
-    
-    XCTAssertEqual(testRequest.url, "https://66o.tech")
-  }
-  
-  func testClientRequestDefaultSchemaIsHTTP() {
-    let options: [ClientRequest.Options] = [ .method("GET"),
-                                            .hostname("66o.tech")
-    ]
-    let testRequest = ClientRequest(options: options, callback: testCallback)
-    
-    XCTAssertEqual(testRequest.url, "http://66o.tech")
-  }
-  
-  func testClientRequestDefaultMethodIsGET() {
-    let options: [ClientRequest.Options] = [ .schema("https"),
-                                            .hostname("66o.tech")
-    ]
-    let testRequest = ClientRequest(options: options, callback: testCallback)
-    
-    XCTAssertEqual(testRequest.method, "get")
-  }
-  
-  func testClientRequestAppendsPathCorrectly() {
-    let options: [ClientRequest.Options] = [ .schema("https"),
-                                            .hostname("66o.tech"),
-                                            .path("path/to/resource")
-    ]
-    let testRequest = ClientRequest(options: options, callback: testCallback)
-    
-    XCTAssertEqual(testRequest.url, "https://66o.tech/path/to/resource")
-  }
-  
-  func testClientRequestAppendsMisformattedPathCorrectly() {
-    let options: [ClientRequest.Options] = [ .schema("https"),
-                                            .hostname("66o.tech"),
-                                            .path("/path/to/resource")
-    ]
-    let testRequest = ClientRequest(options: options, callback: testCallback)
-    
-    XCTAssertEqual(testRequest.url, "https://66o.tech/path/to/resource")
-  }
-  
-  func testClientRequestAppendsPort() {
-    let options: [ClientRequest.Options] = [ .schema("https"),
-                                            .hostname("66o.tech"),
-                                            .port(8080)
-    ]
-    let testRequest = ClientRequest(options: options, callback: testCallback)
-    
-    XCTAssertEqual(testRequest.url, "https://66o.tech:8080")
-  }
+    let testCallback: ClientRequest.Callback = {_ in }
+    // 1 test URL that is build when initializing with ClientRequestOptions
 
-  func testClientRequestSet() {
+    func testClientRequestWhenInitializedWithValidURL() {
+        let options: [ClientRequest.Options] = [ .method("GET"),
+                                                 .schema("https://"),
+                                                 .hostname("66o.tech")
+        ]
+        let testRequest = ClientRequest(options: options, callback: testCallback)
+        XCTAssertEqual(testRequest.url, "https://66o.tech")
+    }
 
-    let testRequest = ClientRequest(url: "https://66o.tech:8080", callback: testCallback)
+    func testClientRequestWhenInitializedWithSimpleSchema() {
+        let options: [ClientRequest.Options] = [ .method("GET"),
+                                                 .schema("https"),
+                                                 .hostname("66o.tech")
+        ]
+        let testRequest = ClientRequest(options: options, callback: testCallback)
+        XCTAssertEqual(testRequest.url, "https://66o.tech")
+    }
 
-    // ensure setting non-URL options does not effect the URL
-    testRequest.set(.method("delete"))
-    testRequest.set(.headers(["X-Custom": "Swift"]))
-    testRequest.set(.maxRedirects(3))
-    testRequest.set(.disableSSLVerification)
+    func testClientRequestDefaultSchemaIsHTTP() {
+        let options: [ClientRequest.Options] = [ .method("GET"),
+                                                 .hostname("66o.tech")
+        ]
+        let testRequest = ClientRequest(options: options, callback: testCallback)
+        XCTAssertEqual(testRequest.url, "http://66o.tech")
+    }
 
-    XCTAssertEqual(testRequest.url, "https://66o.tech:8080")
-  }
+    func testClientRequestDefaultMethodIsGET() {
+        let options: [ClientRequest.Options] = [ .schema("https"),
+                                                 .hostname("66o.tech")
+        ]
+        let testRequest = ClientRequest(options: options, callback: testCallback)
+        XCTAssertEqual(testRequest.method, "get")
+    }
 
-  func testClientRequestParse() {
-      
-    let options = ClientRequest.parse("https://username:password@66o.tech:8080/path?key=value")
-    let testRequest = ClientRequest(options: options, callback: testCallback)
-    XCTAssertEqual(testRequest.url, "https://username:password@66o.tech:8080/path?key=value")
-  }
+    func testClientRequestAppendsPathCorrectly() {
+        let options: [ClientRequest.Options] = [ .schema("https"),
+                                                 .hostname("66o.tech"),
+                                                 .path("path/to/resource")
+        ]
+        let testRequest = ClientRequest(options: options, callback: testCallback)
+        XCTAssertEqual(testRequest.url, "https://66o.tech/path/to/resource")
+    }
 
-  func testClientRequestBasicAuthentcation() {
-      
-    // ensure an empty password works
-    let options: [ClientRequest.Options] = [ .username("myusername"),
+    func testClientRequestAppendsMisformattedPathCorrectly() {
+        let options: [ClientRequest.Options] = [ .schema("https"),
+                                                 .hostname("66o.tech"),
+                                                 .path("/path/to/resource")
+        ]
+        let testRequest = ClientRequest(options: options, callback: testCallback)
+        XCTAssertEqual(testRequest.url, "https://66o.tech/path/to/resource")
+    }
+
+    func testClientRequestAppendsPort() {
+        let options: [ClientRequest.Options] = [ .schema("https"),
+                                                 .hostname("66o.tech"),
+                                                 .port(8080)
+        ]
+        let testRequest = ClientRequest(options: options, callback: testCallback)
+        XCTAssertEqual(testRequest.url, "https://66o.tech:8080")
+    }
+
+    func testClientRequestSet() {
+        let testRequest = ClientRequest(url: "https://66o.tech:8080", callback: testCallback)
+        // ensure setting non-URL options does not effect the URL
+        testRequest.set(.method("delete"))
+        testRequest.set(.headers(["X-Custom": "Swift"]))
+        testRequest.set(.maxRedirects(3))
+        testRequest.set(.disableSSLVerification)
+        XCTAssertEqual(testRequest.url, "https://66o.tech:8080")
+    }
+
+    func testClientRequestParse() {
+        let options = ClientRequest.parse("https://username:password@66o.tech:8080/path?key=value")
+        let testRequest = ClientRequest(options: options, callback: testCallback)
+        XCTAssertEqual(testRequest.url, "https://username:password@66o.tech:8080/path?key=value")
+    }
+
+    func testClientRequestBasicAuthentcation() {
+
+        // ensure an empty password works
+        let options: [ClientRequest.Options] = [ .username("myusername"),
                                              .hostname("66o.tech")
-    ]
-    var testRequest = ClientRequest(options: options, callback: testCallback)
-    XCTAssertEqual(testRequest.url, "http://myusername:@66o.tech")
+        ]
+        var testRequest = ClientRequest(options: options, callback: testCallback)
+        XCTAssertEqual(testRequest.url, "http://myusername:@66o.tech")
 
-    // ensure an empty username works
-    let options2: [ClientRequest.Options] = [ .password("mypassword"),
-                                              .hostname("66o.tech")
-    ]
-    testRequest = ClientRequest(options: options2, callback: testCallback)
-    XCTAssertEqual(testRequest.url, "http://:mypassword@66o.tech")
+        // ensure an empty username works
+        let options2: [ClientRequest.Options] = [ .password("mypassword"),
+                                                  .hostname("66o.tech")
+        ]
+        testRequest = ClientRequest(options: options2, callback: testCallback)
+        XCTAssertEqual(testRequest.url, "http://:mypassword@66o.tech")
 
-    // ensure username:password works
-    let options3: [ClientRequest.Options] = [ .username("myusername"),
-                                              .password("mypassword"),
-                                              .hostname("66o.tech")
-    ]
-    testRequest = ClientRequest(options: options3, callback: testCallback)
-    XCTAssertEqual(testRequest.url, "http://myusername:mypassword@66o.tech")
-}
-
+        // ensure username:password works
+        let options3: [ClientRequest.Options] = [ .username("myusername"),
+                                                  .password("mypassword"),
+                                                  .hostname("66o.tech")
+        ]
+        testRequest = ClientRequest(options: options3, callback: testCallback)
+        XCTAssertEqual(testRequest.url, "http://myusername:mypassword@66o.tech")
+    }
 }
 
 extension ClientRequestTests {
-  static var allTests : [(String, (ClientRequestTests) -> () throws -> Void)] {
-    return [
-             ("testClientRequestWhenInitializedWithValidURL", testClientRequestWhenInitializedWithValidURL),
-             ("testClientRequestWhenInitializedWithSimpleSchema",
-              testClientRequestWhenInitializedWithSimpleSchema),
-             ("testClientRequestDefaultSchemaIsHTTP", testClientRequestDefaultSchemaIsHTTP),
-             ("testClientRequestDefaultMethodIsGET", testClientRequestDefaultMethodIsGET),
-             ("testClientRequestAppendsPathCorrectly", testClientRequestAppendsPathCorrectly),
-             ("testClientRequestAppendsMisformattedPathCorrectly", testClientRequestAppendsMisformattedPathCorrectly),
-             ("testClientRequestAppendsPort", testClientRequestAppendsPort),
-             ("testClientRequestSet", testClientRequestSet),
-             ("testClientRequestParse", testClientRequestParse),
-             ("testClientRequestBasicAuthentcation", testClientRequestBasicAuthentcation)
+    static var allTests : [(String, (ClientRequestTests) -> () throws -> Void)] {
+        return [
+            ("testClientRequestWhenInitializedWithValidURL", testClientRequestWhenInitializedWithValidURL),
+            ("testClientRequestWhenInitializedWithSimpleSchema",
+             testClientRequestWhenInitializedWithSimpleSchema),
+            ("testClientRequestDefaultSchemaIsHTTP", testClientRequestDefaultSchemaIsHTTP),
+            ("testClientRequestDefaultMethodIsGET", testClientRequestDefaultMethodIsGET),
+            ("testClientRequestAppendsPathCorrectly", testClientRequestAppendsPathCorrectly),
+            ("testClientRequestAppendsMisformattedPathCorrectly",
+             testClientRequestAppendsMisformattedPathCorrectly),
+            ("testClientRequestAppendsPort", testClientRequestAppendsPort),
+            ("testClientRequestSet", testClientRequestSet),
+            ("testClientRequestParse", testClientRequestParse),
+            ("testClientRequestBasicAuthentcation", testClientRequestBasicAuthentcation)
     ]
   }
 }

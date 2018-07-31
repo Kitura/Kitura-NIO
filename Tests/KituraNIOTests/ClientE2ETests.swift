@@ -276,7 +276,6 @@ class ClientE2ETests: KituraNIOTest {
     }
 
     class TestServerDelegate: ServerDelegate {
-
         let remoteAddress = ["127.0.0.1", "::1", "::ffff:127.0.0.1"]
 
         func handle(request: ServerRequest, response: ServerResponse) {
