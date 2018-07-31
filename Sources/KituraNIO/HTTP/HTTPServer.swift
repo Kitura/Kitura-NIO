@@ -21,6 +21,7 @@ import NIOOpenSSL
 import SSLService
 import LoggerAPI
 import NIOWebSocket
+import Foundation
 
 /// An HTTP server that listens for connections on a socket.
 public class HTTPServer : Server {
@@ -68,7 +69,37 @@ public class HTTPServer : Server {
     /// The event loop group on which the HTTP handler runs
     let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
-    public init() { }
+    class DateContainer {
+        var timestamp: TimeInterval {
+            didSet {
+                dateString = SPIUtils.httpDate(from: time_t(timestamp))
+            }
+        }
+
+        var dateString: String
+
+        init() {
+            timestamp = Date().timeIntervalSince1970
+            dateString =  SPIUtils.httpDate(from: time_t(timestamp))
+        }
+    }
+
+    let latestDate = ThreadSpecificVariable<DateContainer>()
+
+    public init() {
+        for _ in 0..<System.coreCount {
+            let eventLoop = eventLoopGroup.next()
+
+            eventLoop.execute {
+               self.latestDate.currentValue = DateContainer()
+            }
+            
+            PeriodicTask(on: eventLoop, interval: .seconds(1), task: {
+                guard let date = self.latestDate.currentValue else { return }
+                date.timestamp += 1
+            }).start()
+        }
+    }
 
     /// SSL cert configs for handling client requests
     public var sslConfig: SSLService.Configuration? {
@@ -292,4 +323,35 @@ private class HTTPDummyServerDelegate: ServerDelegate {
             Log.error("Failed to send the response. Error = \(error)")
         }
     } 
+}
+
+class PeriodicTask {
+
+    let eventLoop: EventLoop
+    let delay: TimeAmount
+    let interval: TimeAmount
+    let task: () -> Void
+
+    var scheduled: Scheduled<Void>? {
+        didSet {
+            reschedule()
+        }
+    }
+ 
+    init(on eventLoop: EventLoop, delay: TimeAmount = .seconds(0), interval: TimeAmount, task: @escaping () -> Void) {
+        self.eventLoop = eventLoop 
+        self.delay = delay
+        self.interval = interval
+        self.task = task
+    }
+
+    public func start() {
+        scheduled = eventLoop.scheduleTask(in: delay, task)
+    }
+
+    private func reschedule() {
+        scheduled?.futureResult.whenSuccess { _ in
+            self.scheduled = self.scheduled?.futureResult.eventLoop.scheduleTask(in: self.interval, self.task)
+        }
+    }    
 }

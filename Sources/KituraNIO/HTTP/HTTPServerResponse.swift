@@ -60,7 +60,7 @@ public class HTTPServerResponse: ServerResponse {
         let httpVersionMajor = handler.serverRequest?.httpVersionMajor ?? 0
         let httpVersionMinor = handler.serverRequest?.httpVersionMinor ?? 0
         self.httpVersion = HTTPVersion(major: httpVersionMajor, minor: httpVersionMinor)
-        headers["Date"] = [SPIUtils.httpDate()]
+        headers["Date"] = [handler.server.latestDate.currentValue!.dateString]
     } 
 
     /// Write a string as a response.
