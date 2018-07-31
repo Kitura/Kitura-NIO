@@ -21,10 +21,10 @@ class BufferListTests: XCTestCase {
     var bufferList = BufferList()
 
     func testAppendUnsafePointerLength() {
-       let array: [UInt8] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-       let pointer: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer(mutating: array)
-       bufferList.append(bytes: pointer, length: 10)
-       bufferList.reset()
+        let array: [UInt8] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        let pointer: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer(mutating: array)
+        bufferList.append(bytes: pointer, length: 10)
+        bufferList.reset()
     }
 
     func testAppendData() {
