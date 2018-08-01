@@ -1,0 +1,9 @@
+.build
+build
+.vagrant
+Packages
+*.pkg
+KituraNIO.xcodeproj
+*.DS_Store
+.build-ubuntu
+Package.resolved
