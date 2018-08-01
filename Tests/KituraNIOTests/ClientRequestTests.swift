@@ -124,6 +124,19 @@ class ClientRequestTests: KituraNIOTest {
         testRequest = ClientRequest(options: options3, callback: testCallback)
         XCTAssertEqual(testRequest.url, "http://myusername:mypassword@66o.tech")
     }
+
+    func testClientRequestSyncBehavior() {
+        let options: [ClientRequest.Options] = [ .schema("https"),
+                                                 .method("GET"),
+                                                 .hostname("swift.org")
+        ]
+        var isSuccess = false
+        let testRequest = HTTP.request(options) { _ in
+            isSuccess = true
+        }
+        testRequest.end()
+        XCTAssertTrue(isSuccess)
+    }
 }
 
 extension ClientRequestTests {
@@ -140,7 +153,8 @@ extension ClientRequestTests {
             ("testClientRequestAppendsPort", testClientRequestAppendsPort),
             ("testClientRequestSet", testClientRequestSet),
             ("testClientRequestParse", testClientRequestParse),
-            ("testClientRequestBasicAuthentcation", testClientRequestBasicAuthentcation)
-    ]
-  }
+            ("testClientRequestBasicAuthentcation", testClientRequestBasicAuthentcation),
+            ("testClientRequestSyncBehavior", testClientRequestSyncBehavior),
+        ]
+    }
 }
