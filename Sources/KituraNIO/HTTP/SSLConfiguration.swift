@@ -45,21 +45,17 @@ internal class SSLConfiguration {
                 return TLSConfiguration.forServer(certificateChain: [.file(certificateFilePath)], privateKey: .file(keyFilePath))
             } else {
                 /// TLSConfiguration for PKCS#12 formatted certificate
-                if let certificateChainFilePath = certificateChainFilePath, let password = password {
-                    do {
-                        let pkcs12Bundle = try OpenSSLPKCS12Bundle(file: certificateChainFilePath, passphrase: password.utf8)
-                        var sslCertificateSource: [OpenSSLCertificateSource] = []
-                        pkcs12Bundle.certificateChain.forEach {
-                            sslCertificateSource.append(.certificate($0))
-                        }
-                        return TLSConfiguration.forServer(certificateChain: sslCertificateSource, privateKey: .privateKey(pkcs12Bundle.privateKey))
-                    } catch let error {
-                        fatalError("Error: \(error)")
+                guard let certificateChainFilePath = certificateChainFilePath, let password = password else { return nil }
+                do {
+                    let pkcs12Bundle = try OpenSSLPKCS12Bundle(file: certificateChainFilePath, passphrase: password.utf8)
+                    var sslCertificateSource: [OpenSSLCertificateSource] = []
+                    pkcs12Bundle.certificateChain.forEach {
+                        sslCertificateSource.append(.certificate($0))
                     }
-                } else {
-                    return nil
+                    return TLSConfiguration.forServer(certificateChain: sslCertificateSource, privateKey: .privateKey(pkcs12Bundle.privateKey))
+                } catch let error {
+                    fatalError("Error: \(error)")
                 }
             }
-
     }
 }
