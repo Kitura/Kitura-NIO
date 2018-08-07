@@ -20,9 +20,13 @@ import SSLService
 /// A helper class to bridge betweem SSLService.Configuration (used by Kitura) and TLSConfiguration required by NIOOpenSSL
 internal class SSLConfiguration {
    
-    private var certificateFilePath: String? = nil
+    private var certificateFilePath: String?
     
-    private var keyFilePath: String? = nil
+    private var keyFilePath: String?
+
+    private var certificateChainFilePath: String?
+
+    private var password: String?
     
     // TODO: Consider other TLSConfiguration options (cipherSuites, trustRoots, applicationProtocols, etc..)
 
@@ -30,16 +34,28 @@ internal class SSLConfiguration {
     init(sslConfig: SSLService.Configuration) {
         self.certificateFilePath = sslConfig.certificateFilePath
         self.keyFilePath = sslConfig.keyFilePath
+        self.certificateChainFilePath = sslConfig.certificateChainFilePath
+        self.password = sslConfig.password
     }
 
     /// Convert SSLService.Configuration to NIOOpenSSL.TLSConfiguration
     func tlsServerConfig() -> TLSConfiguration? {
             // TODO: Consider other configuration options
-            // TODO: Add support for PKCS#12-formatted certificates
             if let certificateFilePath = certificateFilePath, let keyFilePath = keyFilePath {
                 return TLSConfiguration.forServer(certificateChain: [.file(certificateFilePath)], privateKey: .file(keyFilePath))
             } else {
-                return nil
+                /// TLSConfiguration for PKCS#12 formatted certificate
+                guard let certificateChainFilePath = certificateChainFilePath, let password = password else { return nil }
+                do {
+                    let pkcs12Bundle = try OpenSSLPKCS12Bundle(file: certificateChainFilePath, passphrase: password.utf8)
+                    var sslCertificateSource: [OpenSSLCertificateSource] = []
+                    pkcs12Bundle.certificateChain.forEach {
+                        sslCertificateSource.append(.certificate($0))
+                    }
+                    return TLSConfiguration.forServer(certificateChain: sslCertificateSource, privateKey: .privateKey(pkcs12Bundle.privateKey))
+                } catch let error {
+                    fatalError("Error: \(error)")
+                }
             }
     }
 }
