@@ -19,6 +19,7 @@ import NIOHTTP1
 import Foundation
 import NIOOpenSSL
 import LoggerAPI
+import Dispatch
 
 /// This class provides a set of low level APIs for issuing HTTP requests to another server.
 public class ClientRequest {
