@@ -102,7 +102,7 @@ public class HTTPServer : Server {
         var upgraders: [HTTPProtocolUpgrader] = []
         if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
             ///TODO: Should `maxFrameSize` be configurable?
-            let upgrader = WebSocketUpgrader(maxFrameSize: 1 << 24, shouldUpgrade: { (head: HTTPRequestHead) in
+            let upgrader = WebSocketUpgrader(maxFrameSize: 1 << 24, automaticErrorHandling: false, shouldUpgrade: { (head: HTTPRequestHead) in
                 var headers = HTTPHeaders()
                 ///TODO: Handle multiple protocols
                 if let wsProtocol = head.headers["Sec-WebSocket-Protocol"].first {
