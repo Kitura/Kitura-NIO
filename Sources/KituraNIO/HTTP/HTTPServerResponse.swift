@@ -132,7 +132,7 @@ public class HTTPServerResponse: ServerResponse {
     }
 
     /// End sending the response on an HTTP error
-    func end(with errorCode: HTTPStatusCode) throws {
+    private func end(with errorCode: HTTPStatusCode, withBody: Bool = false) throws {
         guard let ctx = self.ctx else {
             fatalError("No channel handler context available.")
         }
@@ -148,12 +148,22 @@ public class HTTPServerResponse: ServerResponse {
         headers["Connection"] = ["Close"]
         let response = HTTPResponseHead(version: HTTPVersion(major: 1, minor: 1), status: status, headers: headers.httpHeaders())
         ctx.write(handler.wrapOutboundOut(.head(response)), promise: nil)
+        if withBody && buffer != nil {
+            ctx.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer!))), promise: nil)
+        }
         ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
         handler.updateKeepAliveState()
 
         if let request = handler.serverRequest {
                 Monitor.delegate?.finished(request: request, response: self)
         }
+    }
+
+    func end(with errorCode: HTTPStatusCode, message: String? = nil) throws {
+        if let message = message {
+            try write(from: message)
+        }
+        try end(with: errorCode, withBody: message != nil)
     }
 
     /// Reset this response object back to its initial state
