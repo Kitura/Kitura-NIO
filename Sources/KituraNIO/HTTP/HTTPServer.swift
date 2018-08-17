@@ -295,3 +295,88 @@ private class HTTPDummyServerDelegate: ServerDelegate {
         }
     } 
 }
+
+// A specialized Websocket upgrader for Kitura.
+
+// A WebSocket upgrade request is accompanied with two mandatory headers - `Sec-WebSocket-Version` and `Sec-WebSocket-Key`.
+// An upgrade fails if either of these headers are absent or if they have multiple values.
+// An upgrade also fails if the `Sec-WebSocket-Version` value is not set to 13.
+// This means we have at least three kinds of errors related to invalid upgrade headers. However, the `NIOWebSocket.NIOWebSocketUpgradeError`
+// type does not have cases that indicate all these three types of errors. There's only a general `invalidUpgradeHeader` case.
+// A WebSocket server that catches this error has no way to inform the client about what exactly went wrong.
+//
+// Issue created with swift-nio: https://github.com/apple/swift-nio/issues/577
+//
+// A work-around suggested in the issue is to create a wrapper-upgrader around the existing upgrader and generate the more granular errors therein.
+// This work-around will have to be removed once the limitation is removed from swift-nio, possibly in version 2.0
+final class KituraWebSocketUpgrader: HTTPProtocolUpgrader {
+    private let _wrappedUpgrader: WebSocketUpgrader
+
+    public init(maxFrameSize: Int, automaticErrorHandling: Bool = true, shouldUpgrade: @escaping (HTTPRequestHead) -> HTTPHeaders?,
+                upgradePipelineHandler: @escaping (Channel, HTTPRequestHead) -> EventLoopFuture<Void>) {
+        _wrappedUpgrader = WebSocketUpgrader(maxFrameSize: maxFrameSize, automaticErrorHandling: automaticErrorHandling, shouldUpgrade: shouldUpgrade,
+                                             upgradePipelineHandler: upgradePipelineHandler)
+    }
+
+    public convenience init(automaticErrorHandling: Bool = true, shouldUpgrade: @escaping (HTTPRequestHead) -> HTTPHeaders?,
+                upgradePipelineHandler: @escaping (Channel, HTTPRequestHead) -> EventLoopFuture<Void>) {
+        self.init(maxFrameSize: 1 << 14, automaticErrorHandling: automaticErrorHandling,
+                  shouldUpgrade: shouldUpgrade, upgradePipelineHandler: upgradePipelineHandler)
+    }
+
+    public var supportedProtocol: String {
+        return self._wrappedUpgrader.supportedProtocol
+    }
+
+    public var requiredUpgradeHeaders: [String] {
+        return _wrappedUpgrader.requiredUpgradeHeaders
+    }
+
+    public func buildUpgradeResponse(upgradeRequest: HTTPRequestHead, initialResponseHeaders: HTTPHeaders) throws -> HTTPHeaders {
+        do {
+            return try _wrappedUpgrader.buildUpgradeResponse(upgradeRequest: upgradeRequest, initialResponseHeaders: initialResponseHeaders)
+        } catch {
+            if case NIOWebSocketUpgradeError.invalidUpgradeHeader = error {
+                let keyHeader = upgradeRequest.headers[canonicalForm: "Sec-WebSocket-Key"]
+                let versionHeader = upgradeRequest.headers[canonicalForm: "Sec-WebSocket-Version"]
+
+                if keyHeader.count == 0 {
+                    throw KituraWebSocketError.noWebSocketKeyHeader
+                } else if keyHeader.count > 1 {
+                    throw KituraWebSocketError.invalidKeyHeaderCount(keyHeader.count)
+                } else if versionHeader.count == 0 {
+                    throw KituraWebSocketError.noWebSocketVersionHeader
+                } else if versionHeader.count > 1 {
+                    throw KituraWebSocketError.invalidVersionHeaderCount(versionHeader.count)
+                } else if versionHeader.first! != "13" {
+                    throw KituraWebSocketError.invalidVersionHeader(versionHeader.first!)
+                } else {
+                    throw error
+                }
+            } else {
+                throw error
+            }
+        }
+    }
+
+    public func upgrade(ctx: ChannelHandlerContext, upgradeRequest: HTTPRequestHead) -> EventLoopFuture<Void> {
+        return _wrappedUpgrader.upgrade(ctx: ctx, upgradeRequest: upgradeRequest)
+    }
+}
+
+enum KituraWebSocketError: Error {
+    // The upgrade request had no Sec-WebSocket-Key header
+    case noWebSocketKeyHeader
+
+    // The upgrade request had no Sec-WebSocket-Version header
+    case noWebSocketVersionHeader
+
+    // The upgrade request had multiple Sec-WebSocket-Key header values
+    case invalidKeyHeaderCount(Int)
+
+    // The upgrade request had multiple Sec-WebSocket-Version header values
+    case invalidVersionHeaderCount(Int)
+
+    // The Sec-WebSocket-Version is not 13
+    case invalidVersionHeader(String)
+}
