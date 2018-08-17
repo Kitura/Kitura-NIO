@@ -103,13 +103,15 @@ public class HTTPServer : Server {
         if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
             ///TODO: Should `maxFrameSize` be configurable?
             let upgrader = WebSocketUpgrader(maxFrameSize: 1 << 24, automaticErrorHandling: false, shouldUpgrade: { (head: HTTPRequestHead) in
+                guard webSocketHandlerFactory.isServiceRegistered(at: head.uri) else { return nil }
                 var headers = HTTPHeaders()
-                ///TODO: Handle multiple protocols
                 if let wsProtocol = head.headers["Sec-WebSocket-Protocol"].first {
                     headers.add(name: "Sec-WebSocket-Protocol", value: wsProtocol)
                 }
+                if let key =  head.headers["Sec-WebSocket-Key"].first {
+                    headers.add(name: "Sec-WebSocket-Key", value: key)
+                }
                 return headers
-
                 }, upgradePipelineHandler: { (channel: Channel, request: HTTPRequestHead) in
                     guard let ctx = channelHandlerCtx else { fatalError("Cannot create ServerRequest") }
                     ///TODO: Handle secure upgrade request ("wss://")

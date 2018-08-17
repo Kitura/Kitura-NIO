@@ -42,7 +42,12 @@ public struct ConnectionUpgrader {
 }
 
 public protocol ProtocolHandlerFactory {
+    //Name of the protocol
     var name: String { get }
 
+    //Supplies an NIO channel handler for the protocol. Every upgrade will return a single handler.
     func handler(for request: ServerRequest) -> ChannelHandler
+
+    //Checks if a service is available/registered at the given URI
+    func isServiceRegistered(at path: String) -> Bool
 }
