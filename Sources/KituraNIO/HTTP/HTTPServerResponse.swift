@@ -71,9 +71,16 @@ public class HTTPServerResponse: ServerResponse {
             fatalError("No channel handler context available.")
         }
         if buffer == nil {
-            buffer = ctx.channel.allocator.buffer(capacity: string.utf8.count)
+            if ctx.eventLoop.inEventLoop {
+                self.buffer = ctx.channel.allocator.buffer(capacity: string.utf8.count)
+                self.buffer!.write(string: string)
+            } else {
+                ctx.eventLoop.execute {
+                    self.buffer = ctx.channel.allocator.buffer(capacity: string.utf8.count)
+                    self.buffer!.write(string: string)
+                }
+            }
         }
-        buffer!.write(string: string)
     }
 
     /// Write data as a response.
@@ -84,9 +91,16 @@ public class HTTPServerResponse: ServerResponse {
             fatalError("No channel handler context available.")
         }
         if buffer == nil {
-            buffer = ctx.channel.allocator.buffer(capacity: data.count)
-         }
-        buffer!.write(bytes: data)
+            if ctx.eventLoop.inEventLoop {
+                self.buffer = ctx.channel.allocator.buffer(capacity: data.count)
+                self.buffer!.write(bytes: data)
+            } else {
+                ctx.eventLoop.execute {
+                    self.buffer = ctx.channel.allocator.buffer(capacity: data.count)
+                    self.buffer!.write(bytes: data)
+                }
+            }
+        }
     }
 
     /// Write a string and end sending the response.
@@ -103,7 +117,16 @@ public class HTTPServerResponse: ServerResponse {
         guard let ctx = self.ctx else {
             fatalError("No channel handler context available.")
         }
+        if ctx.eventLoop.inEventLoop {
+            try end0(ctx: ctx)
+        } else {
+            ctx.eventLoop.execute {
+                try! self.end0(ctx: ctx)
+            }
+        }
+    }
 
+    func end0(ctx: ChannelHandlerContext) throws {
         guard let handler = self.handler else {
             fatalError("No HTTP handler available")
         }
@@ -136,7 +159,16 @@ public class HTTPServerResponse: ServerResponse {
         guard let ctx = self.ctx else {
             fatalError("No channel handler context available.")
         }
+        if ctx.eventLoop.inEventLoop {
+            try end0(with: errorCode, ctx: ctx)
+        } else {
+            ctx.eventLoop.execute {
+                try! self.end0(with: errorCode, ctx: ctx)
+            }
+        }
+    }
 
+    func end0(with errorCode: HTTPStatusCode, ctx: ChannelHandlerContext) throws {
         guard let handler = self.handler else {
             fatalError("No HTTP handler available")
         }
