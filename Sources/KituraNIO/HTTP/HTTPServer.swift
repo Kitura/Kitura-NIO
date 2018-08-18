@@ -309,6 +309,8 @@ private class HTTPDummyServerDelegate: ServerDelegate {
 //
 // A work-around suggested in the issue is to create a wrapper-upgrader around the existing upgrader and generate the more granular errors therein.
 // This work-around will have to be removed once the limitation is removed from swift-nio, possibly in version 2.0
+
+// TODO: Re-evaluate the need for this class when swift-nio 2.0 is released.
 final class KituraWebSocketUpgrader: HTTPProtocolUpgrader {
     private let _wrappedUpgrader: WebSocketUpgrader
 
@@ -341,15 +343,15 @@ final class KituraWebSocketUpgrader: HTTPProtocolUpgrader {
                 let versionHeader = upgradeRequest.headers[canonicalForm: "Sec-WebSocket-Version"]
 
                 if keyHeader.count == 0 {
-                    throw KituraWebSocketError.noWebSocketKeyHeader
+                    throw KituraWebSocketUpgradeError.noWebSocketKeyHeader
                 } else if keyHeader.count > 1 {
-                    throw KituraWebSocketError.invalidKeyHeaderCount(keyHeader.count)
+                    throw KituraWebSocketUpgradeError.invalidKeyHeaderCount(keyHeader.count)
                 } else if versionHeader.count == 0 {
-                    throw KituraWebSocketError.noWebSocketVersionHeader
+                    throw KituraWebSocketUpgradeError.noWebSocketVersionHeader
                 } else if versionHeader.count > 1 {
-                    throw KituraWebSocketError.invalidVersionHeaderCount(versionHeader.count)
+                    throw KituraWebSocketUpgradeError.invalidVersionHeaderCount(versionHeader.count)
                 } else if versionHeader.first! != "13" {
-                    throw KituraWebSocketError.invalidVersionHeader(versionHeader.first!)
+                    throw KituraWebSocketUpgradeError.invalidVersionHeader(versionHeader.first!)
                 } else {
                     throw error
                 }
@@ -364,7 +366,9 @@ final class KituraWebSocketUpgrader: HTTPProtocolUpgrader {
     }
 }
 
-enum KituraWebSocketError: Error {
+// Detailed WebSocket upgrade errors
+// TODO: Re-evaluate the need for this enum after swift-nio 2.0 is released.
+enum KituraWebSocketUpgradeError: Error {
     // The upgrade request had no Sec-WebSocket-Key header
     case noWebSocketKeyHeader
 
