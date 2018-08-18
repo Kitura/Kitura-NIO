@@ -16,6 +16,7 @@
 
 import NIO
 import NIOHTTP1
+import NIOWebSocket
 import LoggerAPI
 import Foundation
 
@@ -55,6 +56,11 @@ public class HTTPHandler: ChannelInboundHandler {
     public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
         let request = self.unwrapInboundIn(data)
 
+        // If an error response was already sent, we'd want to spare running through this for now.
+        // If an upgrade to WebSocket fails, both `errorCaught` and `channelRead` are triggered.
+        // We'd want to return the error via `errorCaught`.
+        if errorResponseSent { return }
+
         switch request {
         case .head(let header):
             serverRequest = HTTPServerRequest(ctx: ctx, requestHead: header, enableSSL: enableSSLVerfication)
@@ -87,17 +93,38 @@ public class HTTPHandler: ChannelInboundHandler {
     }
 
     public func errorCaught(ctx: ChannelHandlerContext, error: Error) {
-        //Check for parser errors
         guard !errorResponseSent else { return }
-        if error is HTTPParserError {
-           do {
-              errorResponseSent = true
-              serverResponse = HTTPServerResponse(ctx: ctx, handler: self)
-              try serverResponse.end(with: .badRequest)
-           } catch { 
-              Log.error("Failed to send error response")
-           }
-       }
+        var message: String?
+        switch error {
+        case KituraWebSocketError.noWebSocketKeyHeader:
+            message = "Sec-WebSocket-Version header missing in the upgrade request"
+        case KituraWebSocketError.noWebSocketVersionHeader:
+            message = "Sec-WebSocket-Key header missing in the upgrade request"
+        case KituraWebSocketError.invalidKeyHeaderCount(_):
+            break
+        case KituraWebSocketError.invalidVersionHeaderCount(_):
+            break
+        case KituraWebSocketError.invalidVersionHeader(_):
+            message = "Only WebSocket protocol version 13 is supported"
+        case NIOWebSocketUpgradeError.unsupportedWebSocketTarget:
+            let target = String(data: serverRequest.url , encoding: String.Encoding.utf8) ?? "/<unknown>"
+            message = "No service has been registered for the path \(target)"
+        default:
+            if error is HTTPParserError {
+                break
+            }
+            // Don't handle any other errors for now!
+            return
+        }
+
+        do {
+            errorResponseSent = true
+            serverResponse = HTTPServerResponse(ctx: ctx, handler: self)
+            try serverResponse.end(with: .badRequest, message: message)
+        } catch {
+            Log.error("Failed to send error response")
+        }
+
     }
 
     func updateKeepAliveState() {
