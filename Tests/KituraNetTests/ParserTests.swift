@@ -17,9 +17,9 @@
 import Foundation
 import XCTest
 
-@testable import KituraNIO
+@testable import KituraNet
 
-class ParserTests: KituraNIOTest {
+class ParserTests: KituraNetTest {
     static var allTests : [(String, (ParserTests) -> () throws -> Void)] {
         return [
             ("testParseComplexUrl", testParseComplexUrl),

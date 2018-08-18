@@ -19,9 +19,9 @@ import Foundation
 
 import XCTest
 
-@testable import KituraNIO
+@testable import KituraNet
 
-class LifecycleListenerTests: KituraNIOTest {
+class LifecycleListenerTests: KituraNetTest {
 
     static var allTests : [(String, (LifecycleListenerTests) -> () throws -> Void)] {
         return [

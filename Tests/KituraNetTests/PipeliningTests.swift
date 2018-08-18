@@ -18,7 +18,7 @@ import NIO
 import NIOHTTP1
 import Dispatch
 import XCTest
-@testable import KituraNIO
+@testable import KituraNet
 
 func randomNumber(limit: Int) -> Int {
     #if os(OSX)
@@ -29,7 +29,7 @@ func randomNumber(limit: Int) -> Int {
     #endif
 }
 
-class PipeliningTests : KituraNIOTest {
+class PipeliningTests : KituraNetTest {
 
     static var allTests : [(String, (PipeliningTests) -> () throws -> Void)] {
         return [
