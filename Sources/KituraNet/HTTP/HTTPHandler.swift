@@ -107,7 +107,7 @@ public class HTTPHandler: ChannelInboundHandler {
         case KituraWebSocketUpgradeError.invalidVersionHeader(_):
             message = "Only WebSocket protocol version 13 is supported"
         case NIOWebSocketUpgradeError.unsupportedWebSocketTarget:
-            let target = String(data: serverRequest.url , encoding: String.Encoding.utf8) ?? "/<unknown>"
+            let target = server.latestWebSocketURI ?? "/<unknown>"
             message = "No service has been registered for the path \(target)"
         default:
             if error is HTTPParserError {

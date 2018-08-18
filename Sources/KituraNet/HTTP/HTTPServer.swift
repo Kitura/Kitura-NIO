@@ -87,6 +87,8 @@ public class HTTPServer : Server {
     /// The SSLContext built using the TLSConfiguration
     private var sslContext: NIOOpenSSL.SSLContext?
 
+    /// URI for which the latest WebSocket upgrade was requested by a client
+    var latestWebSocketURI: String?
 
     /// Listens for connections on a socket
     ///
@@ -103,6 +105,7 @@ public class HTTPServer : Server {
         if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
             ///TODO: Should `maxFrameSize` be configurable?
             let upgrader = WebSocketUpgrader(maxFrameSize: 1 << 24, automaticErrorHandling: false, shouldUpgrade: { (head: HTTPRequestHead) in
+                self.latestWebSocketURI = head.uri
                 guard webSocketHandlerFactory.isServiceRegistered(at: head.uri) else { return nil }
                 var headers = HTTPHeaders()
                 if let wsProtocol = head.headers["Sec-WebSocket-Protocol"].first {
