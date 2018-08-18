@@ -16,13 +16,13 @@
 
 import XCTest
 
-@testable import KituraNIO
+@testable import KituraNet
 import Foundation
 import NIO
 import NIOHTTP1
 import NIOOpenSSL
 
-class RegressionTests: KituraNIOTest {
+class RegressionTests: KituraNetTest {
 
     static var allTests : [(String, (RegressionTests) -> () throws -> Void)] {
         return [

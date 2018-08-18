@@ -15,7 +15,7 @@
  */
 
 import XCTest
-@testable import KituraNIOTests
+@testable import KituraNetTests
 
 // http://stackoverflow.com/questions/24026510/how-do-i-shuffle-an-array-in-swift
 extension MutableCollection {

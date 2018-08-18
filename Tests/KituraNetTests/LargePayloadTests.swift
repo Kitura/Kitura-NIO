@@ -18,9 +18,9 @@ import Foundation
 
 import XCTest
 
-@testable import KituraNIO
+@testable import KituraNet
 
-class LargePayloadTests: KituraNIOTest {
+class LargePayloadTests: KituraNetTest {
 
     static var allTests : [(String, (LargePayloadTests) -> () throws -> Void)] {
         return [

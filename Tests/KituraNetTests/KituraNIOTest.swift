@@ -16,17 +16,17 @@
 
 import XCTest
 
-@testable import KituraNIO
+@testable import KituraNet
 
 import Foundation
 import Dispatch
 import SSLService
 
-struct KituraNIOTestError: Swift.Error {
+struct KituraNetTestError: Swift.Error {
     let message: String
 }
 
-class KituraNIOTest: XCTestCase {
+class KituraNetTest: XCTestCase {
 
     static let useSSLDefault = true
     static let portDefault = 8080
@@ -56,7 +56,7 @@ class KituraNIOTest: XCTestCase {
     //private static let initOnce: () = PrintLogger.use(colored: true)
 
     func doSetUp() {
-        //KituraNIOTest.initOnce
+        //KituraNetTest.initOnce
     }
 
     func doTearDown() {
@@ -68,7 +68,7 @@ class KituraNIOTest: XCTestCase {
         server.delegate = delegate
         server.allowPortReuse = allowPortReuse
         if useSSL {
-            server.sslConfig = KituraNIOTest.sslConfig
+            server.sslConfig = KituraNetTest.sslConfig
         }
         try server.listen(on: port)
         return server
@@ -79,10 +79,10 @@ class KituraNIOTest: XCTestCase {
     func startEphemeralServer(_ delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault) throws -> (server: HTTPServer, port: Int) {
         let server = try startServer(delegate, port: 0, useSSL: useSSL, allowPortReuse: allowPortReuse)
         guard let serverPort = server.port else {
-            throw KituraNIOTestError(message: "Server port was not initialized")
+            throw KituraNetTestError(message: "Server port was not initialized")
         }
         guard serverPort != 0 else {
-            throw KituraNIOTestError(message: "Ephemeral server port not set (was zero)")
+            throw KituraNetTestError(message: "Ephemeral server port not set (was zero)")
         }
         return (server, serverPort)
     }

@@ -18,9 +18,9 @@ import Foundation
 
 import XCTest
 
-@testable import KituraNIO
+@testable import KituraNet
 
-class MiscellaneousTests: KituraNIOTest {
+class MiscellaneousTests: KituraNetTest {
     
     static var allTests : [(String, (MiscellaneousTests) -> () throws -> Void)] {
         return [

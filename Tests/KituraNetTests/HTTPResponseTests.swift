@@ -17,9 +17,9 @@
 import Foundation
 import XCTest
 
-@testable import KituraNIO
+@testable import KituraNet
 
-class HTTPResponseTests: KituraNIOTest {
+class HTTPResponseTests: KituraNetTest {
     static var allTests : [(String, (HTTPResponseTests) -> () throws -> Void)] {
         return [
             ("testContentTypeHeaders", testContentTypeHeaders)

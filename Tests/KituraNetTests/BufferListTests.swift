@@ -15,7 +15,7 @@
  */
 
 import XCTest
-@testable import KituraNIO
+@testable import KituraNet
 
 class BufferListTests: XCTestCase {
     var bufferList = BufferList()

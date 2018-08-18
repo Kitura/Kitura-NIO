@@ -17,9 +17,9 @@
 import Foundation
 import XCTest
 
-@testable import KituraNIO
+@testable import KituraNet
 
-class ClientRequestTests: KituraNIOTest {
+class ClientRequestTests: KituraNetTest {
     let testCallback: ClientRequest.Callback = {_ in }
     // 1 test URL that is build when initializing with ClientRequestOptions
 
