@@ -160,15 +160,15 @@ public class HTTPServerResponse: ServerResponse {
             fatalError("No channel handler context available.")
         }
         if ctx.eventLoop.inEventLoop {
-            try end0(with: errorCode, ctx: ctx)
+            try end0(with: errorCode, ctx: ctx, withBody: withBody)
         } else {
             ctx.eventLoop.execute {
-                try! self.end0(with: errorCode, ctx: ctx)
+                try! self.end0(with: errorCode, ctx: ctx, withBody: withBody)
             }
         }
     }
 
-    func end0(with errorCode: HTTPStatusCode, ctx: ChannelHandlerContext) throws {
+    private func end0(with errorCode: HTTPStatusCode, ctx: ChannelHandlerContext, withBody: Bool = false) throws {
         guard let handler = self.handler else {
             fatalError("No HTTP handler available")
         }
@@ -187,7 +187,7 @@ public class HTTPServerResponse: ServerResponse {
         handler.updateKeepAliveState()
 
         if let request = handler.serverRequest {
-                Monitor.delegate?.finished(request: request, response: self)
+            Monitor.delegate?.finished(request: request, response: self)
         }
     }
 
