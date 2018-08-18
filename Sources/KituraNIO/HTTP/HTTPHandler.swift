@@ -96,15 +96,15 @@ public class HTTPHandler: ChannelInboundHandler {
         guard !errorResponseSent else { return }
         var message: String?
         switch error {
-        case KituraWebSocketError.noWebSocketKeyHeader:
+        case KituraWebSocketUpgradeError.noWebSocketKeyHeader:
             message = "Sec-WebSocket-Version header missing in the upgrade request"
-        case KituraWebSocketError.noWebSocketVersionHeader:
+        case KituraWebSocketUpgradeError.noWebSocketVersionHeader:
             message = "Sec-WebSocket-Key header missing in the upgrade request"
-        case KituraWebSocketError.invalidKeyHeaderCount(_):
+        case KituraWebSocketUpgradeError.invalidKeyHeaderCount(_):
             break
-        case KituraWebSocketError.invalidVersionHeaderCount(_):
+        case KituraWebSocketUpgradeError.invalidVersionHeaderCount(_):
             break
-        case KituraWebSocketError.invalidVersionHeader(_):
+        case KituraWebSocketUpgradeError.invalidVersionHeader(_):
             message = "Only WebSocket protocol version 13 is supported"
         case NIOWebSocketUpgradeError.unsupportedWebSocketTarget:
             let target = String(data: serverRequest.url , encoding: String.Encoding.utf8) ?? "/<unknown>"
