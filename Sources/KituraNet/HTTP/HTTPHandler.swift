@@ -97,9 +97,9 @@ public class HTTPHandler: ChannelInboundHandler {
         var message: String?
         switch error {
         case KituraWebSocketUpgradeError.noWebSocketKeyHeader:
-            message = "Sec-WebSocket-Version header missing in the upgrade request"
-        case KituraWebSocketUpgradeError.noWebSocketVersionHeader:
             message = "Sec-WebSocket-Key header missing in the upgrade request"
+        case KituraWebSocketUpgradeError.noWebSocketVersionHeader:
+            message = "Sec-WebSocket-Version header missing in the upgrade request"
         case KituraWebSocketUpgradeError.invalidKeyHeaderCount(_):
             break
         case KituraWebSocketUpgradeError.invalidVersionHeaderCount(_):
