@@ -380,6 +380,14 @@ public class ClientRequest {
             self.port = isHTTPS ? 443 : 80
         }
 
+        defer {
+            do {
+                try group.syncShutdownGracefully()
+            } catch {
+                Log.error("ClientRequest failed to shut down the EventLoopGroup for the requested URL: \(url)")
+            }
+        }
+
         do {
             channel = try bootstrap.connect(host: hostName, port: Int(self.port ?? 80)).wait()
         } catch let error {
