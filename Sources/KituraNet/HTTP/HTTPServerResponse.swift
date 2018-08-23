@@ -22,8 +22,8 @@ import Foundation
 /// responses via the HTTP protocol.
 public class HTTPServerResponse: ServerResponse {
 
-    /// The channel handler context on which an HTTP response should be written
-    private weak var ctx: ChannelHandlerContext?
+    /// The channel to which the HTTP response should be written
+    private weak var channel: Channel?
 
     /// The handler that processed the HTTP request
     private weak var handler: HTTPHandler?
@@ -54,8 +54,8 @@ public class HTTPServerResponse: ServerResponse {
     /// The data to be written as a part of the response.
     private var buffer: ByteBuffer?
     
-    init(ctx: ChannelHandlerContext, handler: HTTPHandler) {
-        self.ctx = ctx
+    init(channel: Channel, handler: HTTPHandler) {
+        self.channel = channel
         self.handler = handler
         let httpVersionMajor = handler.serverRequest?.httpVersionMajor ?? 0
         let httpVersionMinor = handler.serverRequest?.httpVersionMinor ?? 0
@@ -67,16 +67,16 @@ public class HTTPServerResponse: ServerResponse {
     ///
     /// - Parameter from: String data to be written.
     public func write(from string: String) throws {
-        guard let ctx = ctx else {
-            fatalError("No channel handler context available.")
+        guard let channel = channel else {
+            fatalError("No channel available to write.")
         }
         if buffer == nil {
-            if ctx.eventLoop.inEventLoop {
-                self.buffer = ctx.channel.allocator.buffer(capacity: string.utf8.count)
+            if channel.eventLoop.inEventLoop {
+                self.buffer = channel.allocator.buffer(capacity: string.utf8.count)
                 self.buffer!.write(string: string)
             } else {
-                ctx.eventLoop.execute {
-                    self.buffer = ctx.channel.allocator.buffer(capacity: string.utf8.count)
+                channel.eventLoop.execute {
+                    self.buffer = channel.allocator.buffer(capacity: string.utf8.count)
                     self.buffer!.write(string: string)
                 }
             }
@@ -87,16 +87,16 @@ public class HTTPServerResponse: ServerResponse {
     ///
     /// - Parameter from: Data object that contains the data to be written.
     public func write(from data: Data) throws {
-        guard let ctx = ctx else {
-            fatalError("No channel handler context available.")
+        guard let channel = channel else {
+            fatalError("No channel available to write.")
         }
         if buffer == nil {
-            if ctx.eventLoop.inEventLoop {
-                self.buffer = ctx.channel.allocator.buffer(capacity: data.count)
+            if channel.eventLoop.inEventLoop {
+                self.buffer = channel.allocator.buffer(capacity: data.count)
                 self.buffer!.write(bytes: data)
             } else {
-                ctx.eventLoop.execute {
-                    self.buffer = ctx.channel.allocator.buffer(capacity: data.count)
+                channel.eventLoop.execute {
+                    self.buffer = channel.allocator.buffer(capacity: data.count)
                     self.buffer!.write(bytes: data)
                 }
             }
@@ -114,19 +114,19 @@ public class HTTPServerResponse: ServerResponse {
     /// End sending the response.
     ///
     public func end() throws {
-        guard let ctx = self.ctx else {
+        guard let channel = self.channel else {
             fatalError("No channel handler context available.")
         }
-        if ctx.eventLoop.inEventLoop {
-            try end0(ctx: ctx)
+        if channel.eventLoop.inEventLoop {
+            try end0(channel: channel)
         } else {
-            ctx.eventLoop.execute {
-                try! self.end0(ctx: ctx)
+            channel.eventLoop.execute {
+                try! self.end0(channel: channel)
             }
         }
     }
 
-    func end0(ctx: ChannelHandlerContext) throws {
+    func end0(channel: Channel) throws {
         guard let handler = self.handler else {
             fatalError("No HTTP handler available")
         }
@@ -140,13 +140,12 @@ public class HTTPServerResponse: ServerResponse {
                 headers["Keep-Alive"] = ["timeout=\(HTTPHandler.keepAliveTimeout)"]
             }
         }
-
         let response = HTTPResponseHead(version: httpVersion, status: status, headers: headers.httpHeaders())
-        ctx.write(handler.wrapOutboundOut(.head(response)), promise: nil)
+        channel.write(handler.wrapOutboundOut(.head(response)), promise: nil)
         if let buffer = buffer {
-            ctx.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
+            channel.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
         }
-        ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
+        channel.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
         handler.updateKeepAliveState()
 
         if let request = handler.serverRequest {
@@ -156,19 +155,19 @@ public class HTTPServerResponse: ServerResponse {
 
     /// End sending the response on an HTTP error
     private func end(with errorCode: HTTPStatusCode, withBody: Bool = false) throws {
-        guard let ctx = self.ctx else {
+        guard let channel = self.channel else {
             fatalError("No channel handler context available.")
         }
-        if ctx.eventLoop.inEventLoop {
-            try end0(with: errorCode, ctx: ctx, withBody: withBody)
+        if channel.eventLoop.inEventLoop {
+            try end0(with: errorCode, channel: channel, withBody: withBody)
         } else {
-            ctx.eventLoop.execute {
-                try! self.end0(with: errorCode, ctx: ctx, withBody: withBody)
+            channel.eventLoop.execute {
+                try! self.end0(with: errorCode, channel: channel, withBody: withBody)
             }
         }
     }
 
-    private func end0(with errorCode: HTTPStatusCode, ctx: ChannelHandlerContext, withBody: Bool = false) throws {
+    private func end0(with errorCode: HTTPStatusCode, channel: Channel, withBody: Bool = false) throws {
         guard let handler = self.handler else {
             fatalError("No HTTP handler available")
         }
@@ -179,11 +178,11 @@ public class HTTPServerResponse: ServerResponse {
         //We don't keep the connection alive on an HTTP error
         headers["Connection"] = ["Close"]
         let response = HTTPResponseHead(version: HTTPVersion(major: 1, minor: 1), status: status, headers: headers.httpHeaders())
-        ctx.write(handler.wrapOutboundOut(.head(response)), promise: nil)
+        channel.write(handler.wrapOutboundOut(.head(response)), promise: nil)
         if withBody && buffer != nil {
-            ctx.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer!))), promise: nil)
+            channel.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer!))), promise: nil)
         }
-        ctx.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
+        channel.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
         handler.updateKeepAliveState()
 
         if let request = handler.serverRequest {

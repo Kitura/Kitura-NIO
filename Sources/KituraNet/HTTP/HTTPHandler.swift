@@ -19,6 +19,7 @@ import NIOHTTP1
 import NIOWebSocket
 import LoggerAPI
 import Foundation
+import Dispatch
 
 public class HTTPHandler: ChannelInboundHandler {
 
@@ -72,12 +73,13 @@ public class HTTPHandler: ChannelInboundHandler {
                 serverRequest.buffer!.byteBuffer.write(buffer: &buffer)
             }
         case .end(_):
-            serverResponse = HTTPServerResponse(ctx: ctx, handler: self)
+            serverResponse = HTTPServerResponse(channel: ctx.channel, handler: self)
             //Make sure we use the latest delegate registered with the server
-            if let delegate = server.delegate {
-                Monitor.delegate?.started(request: serverRequest, response: serverResponse)
-                delegate.handle(request: serverRequest, response: serverResponse)
-            } //TODO: failure path
+            DispatchQueue.global().async {
+                let delegate = self.server.delegate ?? HTTPDummyServerDelegate()
+                Monitor.delegate?.started(request: self.serverRequest, response: self.serverResponse)
+                delegate.handle(request: self.serverRequest, response: self.serverResponse)
+            }
         }
     }
 
@@ -110,16 +112,13 @@ public class HTTPHandler: ChannelInboundHandler {
             let target = server.latestWebSocketURI ?? "/<unknown>"
             message = "No service has been registered for the path \(target)"
         default:
-            if error is HTTPParserError {
-                break
-            }
-            // Don't handle any other errors for now!
+            // Don't handle any other errors, including `HTTPParserError`s
             return
         }
 
         do {
+            serverResponse = HTTPServerResponse(channel: ctx.channel, handler: self)
             errorResponseSent = true
-            serverResponse = HTTPServerResponse(ctx: ctx, handler: self)
             try serverResponse.end(with: .badRequest, message: message)
         } catch {
             Log.error("Failed to send error response")

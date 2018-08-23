@@ -138,7 +138,7 @@ public class HTTPServer : Server {
                     _ = channel.pipeline.remove(handler: httpHandler)
                 })
                 return channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {
-                    return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config).then { () -> EventLoopFuture<Void> in
+                    return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).then { () -> EventLoopFuture<Void> in
                         if let sslContext = self.sslContext {
                             _ = channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslContext), first: true)
                         }
@@ -275,7 +275,7 @@ public class HTTPServer : Server {
     }
 }
 
-private class HTTPDummyServerDelegate: ServerDelegate {
+class HTTPDummyServerDelegate: ServerDelegate {
     /// Handle new incoming requests to the server
     ///
     /// - Parameter request: The ServerRequest class instance for working with this request.

@@ -167,7 +167,7 @@ class RegressionTests: KituraNetTest {
     /// This is to verify the fix introduced in Kitura-net PR #229, where a malformed
     /// request sent during a Keep-Alive session could cause the server to crash.
     func testBadRequestFollowingGoodRequest() {
-       do {
+        do {
             let server: HTTPServer = try startServer(nil, port: 0, useSSL: false, allowPortReuse: false)
             defer {
                 server.stop()
@@ -178,15 +178,12 @@ class RegressionTests: KituraNetTest {
                 return
             }
             XCTAssertTrue(serverPort != 0, "Ephemeral server port not set")
-
             var goodClient = GoodClient(with: HTTPClient(with: self.expectation(description: "Bad request error")))
             try! goodClient.makeGoodRequestFollowedByBadRequest(serverPort)
             waitForExpectations(timeout: 10)
-
         } catch {
             XCTFail("Couldn't start server")
         }
-
     }
 
 
@@ -270,10 +267,10 @@ class RegressionTests: KituraNetTest {
             httpHeaders.add(name: "Connection", value: "Keep-Alive")
             _ = channel.write(NIOAny(HTTPClientRequestPart.head(request)))
             _ = channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
+            sleep(1) //workaround for an apparent swift-nio issue
             let request0 = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET,  uri: "#/") 
             _ = channel.write(NIOAny(HTTPClientRequestPart.head(request0)))
             _ = channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
-            
         }    
 
     }
