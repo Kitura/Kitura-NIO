@@ -380,6 +380,9 @@ public class ClientRequest {
             self.port = isHTTPS ? 443 : 80
         }
 
+        //If the path is empty, set it to /
+        let path = self.path == "" ? "/" : self.path
+
         defer {
             do {
                 try group.syncShutdownGracefully()
@@ -396,20 +399,40 @@ public class ClientRequest {
             return
         }
 
-        //If the path is empty, set it to /
-        let path = self.path == "" ? "/" : self.path
-
-        //Make the HTTP request, the response callbacks will be received on the HTTPClientHandler
         var request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: HTTPMethod.method(from: self.method), uri: path)
         request.headers = HTTPHeaders.from(dictionary: self.headers)
+
+        // Make the HTTP request, the response callbacks will be received on the HTTPClientHandler.
+        // We are mostly not running on the event loop. Let's make sure we send the request over the event loop.
+        if channel.eventLoop.inEventLoop {
+            self.sendRequest(request: request, on: self.channel)
+        } else {
+            channel.eventLoop.execute {
+                self.sendRequest(request: request, on: self.channel)
+            }
+        }
+        waitSemaphore.wait()
+
+        // We are now free to close the connection if asked for.
+        if closeConnection {
+            if channel.eventLoop.inEventLoop {
+                self.channel.close(promise: nil)
+            } else {
+                channel.eventLoop.execute {
+                    self.channel.close(promise: nil)
+                }
+            }
+        }
+    }
+
+    private func sendRequest(request: HTTPRequestHead, on channel: Channel) {
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
         if let bodyData = bodyData {
             let buffer = BufferList()
             buffer.append(data: bodyData)
             channel.write(NIOAny(HTTPClientRequestPart.body(.byteBuffer(buffer.byteBuffer))), promise: nil)
         }
-        try! channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
-        waitSemaphore.wait()
+        _ = channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
     }
 
     private func initializeClientBootstrapWithSSL(eventLoopGroup: EventLoopGroup) {
@@ -577,21 +600,34 @@ class HTTPClientHandler: ChannelInboundHandler {
                                                               .path(url)],
                                                     callback: clientRequest.callback)
                         request.maxRedirects = self.clientRequest.maxRedirects - 1
-                        request.end()
+                        // The next request can be asynchronously moved to a DispatchQueue.
+                        // ClientRequest.end() calls connect().wait(), so we better move this to a dispatch queue.
+                        // Because ClientRequest.end() is blocking, we mark the current task complete after the new task also completes.
+                        DispatchQueue.global().async {
+                            request.end()
+                            self.clientRequest.waitSemaphore.signal()
+                        }
                     } else {
                         let request = ClientRequest(url: url, callback: clientRequest.callback)
                         request.maxRedirects = self.clientRequest.maxRedirects - 1
-                        request.end()
+                        DispatchQueue.global().async {
+                            request.end()
+                            self.clientRequest.waitSemaphore.signal()
+                        }
                     }
                 } else {
-                    clientRequest.callback(clientResponse)
+                    // The callback may start a new ClientRequest eventually calling wait(), lets invoke the callback on a DispatchQueue
+                    DispatchQueue.global().async {
+                        self.clientRequest.callback(self.clientResponse)
+                        self.clientRequest.waitSemaphore.signal()
+                    }
                 }
             } else {
-                clientRequest.callback(clientResponse)
+                DispatchQueue.global().async {
+                    self.clientRequest.callback(self.clientResponse)
+                    self.clientRequest.waitSemaphore.signal()
+                }
             }
-            clientRequest.waitSemaphore.signal()
-            clientRequest.channel.close(promise: nil)
          }
      }
 }
-
