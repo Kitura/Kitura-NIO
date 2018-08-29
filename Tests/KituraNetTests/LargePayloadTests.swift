@@ -40,7 +40,7 @@ class LargePayloadTests: KituraNetTest {
     private let delegate = TestServerDelegate()
 
     func testLargePosts() {
-        performServerTest(delegate, useSSL: false, allowPortReuse: true, asyncTasks: { expectation in
+        performServerTest(delegate, useSSL: false, asyncTasks: { expectation in
             let payload = "[" + contentTypesString + "," + contentTypesString + contentTypesString + "," + contentTypesString + "]"
             self.performRequest("post", path: "/largepost", callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
@@ -68,7 +68,7 @@ class LargePayloadTests: KituraNetTest {
     }
 
     func testLargeGets() {
-        performServerTest(delegate, useSSL: false, allowPortReuse: true, asyncTasks: { expectation in
+        performServerTest(delegate, useSSL: false, asyncTasks: { expectation in
             // This test is NOT using self.performRequest, in order to test an extra signature of HTTP.request
             let request = HTTP.request("http://localhost:\(self.port)/largepost") {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
