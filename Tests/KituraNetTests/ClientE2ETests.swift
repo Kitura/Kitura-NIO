@@ -50,7 +50,7 @@ class ClientE2ETests: KituraNetTest {
     let delegate = TestServerDelegate()
 
     func testHeadRequests() {
-        performServerTest(delegate, allowPortReuse: true) { expectation in
+        performServerTest(delegate) { expectation in
             self.performRequest("head", path: "/headtest", callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
                 do {
@@ -69,7 +69,7 @@ class ClientE2ETests: KituraNetTest {
     }
 
     func testKeepAlive() {
-        performServerTest(delegate, allowPortReuse: true, asyncTasks: { expectation in
+        performServerTest(delegate, asyncTasks: { expectation in
             self.performRequest("get", path: "/posttest", callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .OK was \(String(describing: response?.statusCode))")
                 if let connectionHeader = response?.headers["Connection"] {
@@ -117,7 +117,7 @@ class ClientE2ETests: KituraNetTest {
     }
 
     func testPostRequests() {
-        performServerTest(delegate, allowPortReuse: true, asyncTasks: { expectation in
+        performServerTest(delegate, asyncTasks: { expectation in
             self.performRequest("post", path: "/posttest", callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
                 do {
@@ -164,7 +164,7 @@ class ClientE2ETests: KituraNetTest {
     }
 
     func testPutRequests() {
-        performServerTest(delegate, allowPortReuse: true, asyncTasks: { expectation in
+        performServerTest(delegate, asyncTasks: { expectation in
             self.performRequest("put", path: "/puttest", callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
                 do {
@@ -211,7 +211,7 @@ class ClientE2ETests: KituraNetTest {
     }
 
     func testPatchRequests() {
-        performServerTest(delegate, allowPortReuse: true, asyncTasks: { expectation in
+        performServerTest(delegate, asyncTasks: { expectation in
             self.performRequest("patch", path: "/patchtest", callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
                 do {
@@ -258,7 +258,7 @@ class ClientE2ETests: KituraNetTest {
     }
 
     func testErrorRequests() {
-        performServerTest(delegate, allowPortReuse: true, asyncTasks: { expectation in
+        performServerTest(delegate, asyncTasks: { expectation in
             self.performRequest("plover", path: "/xzzy", callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.badRequest, "Status code wasn't .badrequest was \(String(describing: response?.statusCode))")
                 expectation.fulfill()
@@ -267,7 +267,7 @@ class ClientE2ETests: KituraNetTest {
     }
 
     func testUrlURL() {
-        performServerTest(TestURLDelegate(), allowPortReuse: true) { expectation in
+        performServerTest(TestURLDelegate()) { expectation in
             self.performRequest("post", path: ClientE2ETests.urlPath, callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
                 expectation.fulfill()

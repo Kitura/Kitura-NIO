@@ -46,7 +46,6 @@ class MonitoringTests: KituraNetTest {
 
         let server = HTTP.createServer()
         server.delegate = TestServerDelegate()
-        server.allowPortReuse = true
         if KituraNetTest.useSSLDefault {
             server.sslConfig = KituraNetTest.sslConfig
         }

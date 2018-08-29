@@ -56,7 +56,7 @@ class RegressionTests: KituraNetTest {
         do {
             let server: HTTPServer
             let serverPort: Int
-            (server, serverPort) = try startEphemeralServer(ClientE2ETests.TestServerDelegate(), useSSL: true, allowPortReuse: true)
+            (server, serverPort) = try startEphemeralServer(ClientE2ETests.TestServerDelegate(), useSSL: true)
             defer {
                 server.stop()
             }
@@ -85,7 +85,7 @@ class RegressionTests: KituraNetTest {
         do {
             let server: HTTPServer
             let serverPort: Int
-            (server, serverPort) = try startEphemeralServer(ClientE2ETests.TestServerDelegate(), useSSL: false, allowPortReuse: true)
+            (server, serverPort) = try startEphemeralServer(ClientE2ETests.TestServerDelegate(), useSSL: false)
             defer {
                 server.stop()
             }

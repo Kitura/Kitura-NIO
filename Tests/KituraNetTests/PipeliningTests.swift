@@ -45,7 +45,6 @@ class PipeliningTests : KituraNetTest {
     func testPipelining() {
         let server = HTTPServer()
         server.delegate = Delegate()
-        server.allowPortReuse = true
         try! server.listen(on: 0)
         let expectation = self.expectation(description: "test pipelining")
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
@@ -74,7 +73,6 @@ class PipeliningTests : KituraNetTest {
     func testPipeliningSpanningPackets() {
         let server = HTTPServer()
         server.delegate = Delegate()
-        server.allowPortReuse = true
         try! server.listen(on: 0)
         let expectation = self.expectation(description: "test pipelining spanning packets")
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)

@@ -45,7 +45,6 @@ class LifecycleListenerTests: KituraNetTest {
         let startExpectation = self.expectation(description: "start")
 
         let server = HTTP.createServer()
-        server.allowPortReuse = true
         server.started {
             started = true
             startExpectation.fulfill()
@@ -123,7 +122,6 @@ class LifecycleListenerTests: KituraNetTest {
         let startExpectation = self.expectation(description: "start")
 
         let server = HTTP.createServer()
-        server.allowPortReuse = true
         server.started {
             startExpectation.fulfill()
         }
@@ -152,7 +150,6 @@ class LifecycleListenerTests: KituraNetTest {
         let failedCallbackExpectation = self.expectation(description: "failedCallback")
         
         let server = HTTP.createServer()
-        server.allowPortReuse = true
         server.failed(callback: { error in
             failedCallbackExpectation.fulfill()
         })
