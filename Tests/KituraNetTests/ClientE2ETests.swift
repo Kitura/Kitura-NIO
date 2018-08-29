@@ -105,7 +105,10 @@ class ClientE2ETests: KituraNetTest {
     }
 
     func testSimpleHTTPClient() {
-        _ = HTTP.get("http://httpbin.org") {response in
+        let expectation = self.expectation(description: "HTTP client response completed")
+        let url = "http://httpbin.org"
+
+        _ = HTTP.get(url) { response in
             XCTAssertNotNil(response, "ERROR!!! ClientRequest response object was nil")
             XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "HTTP Status code was \(String(describing: response?.statusCode))")
             let contentType = response?.headers["Content-Type"]
@@ -113,6 +116,11 @@ class ClientE2ETests: KituraNetTest {
             if let contentType = contentType {
                 XCTAssertEqual(contentType, ["text/html; charset=utf-8"], "Content-Type header wasn't `text/html`")
             }
+            expectation.fulfill()
+        }
+
+        waitExpectation(timeout: 10) { error in
+            XCTAssertNil(error)
         }
     }
 
