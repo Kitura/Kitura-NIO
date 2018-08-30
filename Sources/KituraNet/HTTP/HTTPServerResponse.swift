@@ -70,15 +70,11 @@ public class HTTPServerResponse: ServerResponse {
         guard let channel = channel else {
             fatalError("No channel available to write.")
         }
+
         if buffer == nil {
-            if channel.eventLoop.inEventLoop {
+            execute(on: channel.eventLoop) {
                 self.buffer = channel.allocator.buffer(capacity: string.utf8.count)
                 self.buffer!.write(string: string)
-            } else {
-                channel.eventLoop.execute {
-                    self.buffer = channel.allocator.buffer(capacity: string.utf8.count)
-                    self.buffer!.write(string: string)
-                }
             }
         }
     }
@@ -90,15 +86,22 @@ public class HTTPServerResponse: ServerResponse {
         guard let channel = channel else {
             fatalError("No channel available to write.")
         }
+
         if buffer == nil {
-            if channel.eventLoop.inEventLoop {
+            execute(on: channel.eventLoop) {
                 self.buffer = channel.allocator.buffer(capacity: data.count)
                 self.buffer!.write(bytes: data)
-            } else {
-                channel.eventLoop.execute {
-                    self.buffer = channel.allocator.buffer(capacity: data.count)
-                    self.buffer!.write(bytes: data)
-                }
+            }
+        }
+    }
+
+    /// Executes task on event loop
+    private func execute(on eventLoop: EventLoop, _ task: @escaping () -> Void) {
+        if eventLoop.inEventLoop {
+            task()
+        } else {
+            eventLoop.execute {
+                task()
             }
         }
     }
@@ -115,13 +118,14 @@ public class HTTPServerResponse: ServerResponse {
     ///
     public func end() throws {
         guard let channel = self.channel else {
-            fatalError("No channel handler context available.")
+            fatalError("No channel available.")
         }
-        if channel.eventLoop.inEventLoop {
-            try end0(channel: channel)
-        } else {
-            channel.eventLoop.execute {
-                try! self.end0(channel: channel)
+
+        execute(on: channel.eventLoop) {
+            do {
+                try self.end0(channel: channel)
+            } catch let error {
+                fatalError("Error: \(error)")
             }
         }
     }
@@ -156,13 +160,14 @@ public class HTTPServerResponse: ServerResponse {
     /// End sending the response on an HTTP error
     private func end(with errorCode: HTTPStatusCode, withBody: Bool = false) throws {
         guard let channel = self.channel else {
-            fatalError("No channel handler context available.")
+            fatalError("No channel available.")
         }
-        if channel.eventLoop.inEventLoop {
-            try end0(with: errorCode, channel: channel, withBody: withBody)
-        } else {
-            channel.eventLoop.execute {
-                try! self.end0(with: errorCode, channel: channel, withBody: withBody)
+
+        execute(on: channel.eventLoop) {
+            do {
+                try self.end0(with: errorCode, channel: channel, withBody: withBody)
+            } catch let error {
+                fatalError("Error: \(error)")
             }
         }
     }

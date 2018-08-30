@@ -404,23 +404,26 @@ public class ClientRequest {
 
         // Make the HTTP request, the response callbacks will be received on the HTTPClientHandler.
         // We are mostly not running on the event loop. Let's make sure we send the request over the event loop.
-        if channel.eventLoop.inEventLoop {
+        execute(on: channel.eventLoop) {
             self.sendRequest(request: request, on: self.channel)
-        } else {
-            channel.eventLoop.execute {
-                self.sendRequest(request: request, on: self.channel)
-            }
         }
         waitSemaphore.wait()
 
         // We are now free to close the connection if asked for.
         if closeConnection {
-            if channel.eventLoop.inEventLoop {
+            execute(on: channel.eventLoop) {
                 self.channel.close(promise: nil)
-            } else {
-                channel.eventLoop.execute {
-                    self.channel.close(promise: nil)
-                }
+            }
+        }
+    }
+
+    /// Executes task on event loop
+    private func execute(on eventLoop: EventLoop, _ task: @escaping () -> Void) {
+        if eventLoop.inEventLoop {
+            task()
+        } else {
+            eventLoop.execute {
+                task()
             }
         }
     }

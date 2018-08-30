@@ -157,7 +157,7 @@ public class HTTPServer : Server {
         } catch let error {
             self.state = .failed
             self.lifecycleListener.performFailCallbacks(with: error)
-            Log.error("Error trying to bing to \(port): \(error)")
+            Log.error("Error trying to bind to \(port): \(error)")
             throw error
         }
 
