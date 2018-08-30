@@ -133,12 +133,12 @@ public class HTTPServer : Server {
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .childChannelInitializer { channel in
-                let httpHandler = HTTPHandler(for: self)
+                let httpHandler = HTTPRequestHandler(for: self)
                 let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { ctx in
                     channelHandlerCtx = ctx
                     _ = channel.pipeline.remove(handler: httpHandler)
                 })
-                return channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPHandler.keepAliveTimeout)))).then {
+                return channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPRequestHandler.keepAliveTimeout)))).then {
                     return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).then { () -> EventLoopFuture<Void> in
                         if let sslContext = self.sslContext {
                             _ = channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslContext), first: true)
