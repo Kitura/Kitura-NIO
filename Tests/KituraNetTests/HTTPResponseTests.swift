@@ -22,7 +22,9 @@ import XCTest
 class HTTPResponseTests: KituraNetTest {
     static var allTests : [(String, (HTTPResponseTests) -> () throws -> Void)] {
         return [
-            ("testContentTypeHeaders", testContentTypeHeaders)
+            ("testContentTypeHeaders", testContentTypeHeaders),
+            ("testHeadersContainerHTTPHeaders", testHeadersContainerHTTPHeaders),
+            ("testMultipleWritesToResponse", testMultipleWritesToResponse),
         ]
     }
     
@@ -80,5 +82,39 @@ class HTTPResponseTests: KituraNetTest {
         XCTAssertEqual(headers.httpHeaders()["foo"], headers["foo"]!)
         headers.removeAll()
         XCTAssertFalse(headers.httpHeaders().contains(name: "foo"))
+    }
+
+    func testMultipleWritesToResponse() {
+        performServerTest(WriteTwiceServerDelegate(), useSSL: false) { expectation in
+            self.performRequest("get", path: "/writetwice", callback: { response in
+                XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
+                do {
+                    var data = Data()
+                    _ = try response?.readAllData(into: &data)
+                    let receivedString = String(data: data as Data, encoding: .utf8) ?? ""
+                    XCTAssertEqual("Hello, World!", receivedString, "The string received \(receivedString) is not Hello, World!")
+                } catch {
+                    XCTFail("Error: \(error)")
+                }
+                expectation.fulfill()
+            })
+        }
+    }
+}
+
+class WriteTwiceServerDelegate: ServerDelegate {
+    func handle(request: ServerRequest, response: ServerResponse) {
+        do {
+            response.statusCode = .OK
+            response.headers["Content-Type"] = ["text/plain"]
+            let helloData = "Hello, ".data(using: .utf8)!
+            let worldData = "World!".data(using: .utf8)!
+            response.headers["Content-Length"] = ["13"]
+            try response.write(from: helloData)
+            try response.write(from: worldData)
+            try response.end()
+        } catch {
+            print("Could not send a response")
+        }
     }
 }
