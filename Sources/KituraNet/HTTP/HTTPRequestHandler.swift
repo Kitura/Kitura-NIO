@@ -21,7 +21,7 @@ import LoggerAPI
 import Foundation
 import Dispatch
 
-public class HTTPHandler: ChannelInboundHandler {
+internal class HTTPRequestHandler: ChannelInboundHandler {
 
     /// The HTTPServer instance on which this handler is installed
     var server: HTTPServer 

@@ -26,7 +26,7 @@ public class HTTPServerResponse: ServerResponse {
     private weak var channel: Channel?
 
     /// The handler that processed the HTTP request
-    private weak var handler: HTTPHandler?
+    private weak var handler: HTTPRequestHandler?
 
     /// Status code
     private var status = HTTPStatusCode.OK.rawValue
@@ -54,7 +54,7 @@ public class HTTPServerResponse: ServerResponse {
     /// The data to be written as a part of the response.
     private var buffer: ByteBuffer?
     
-    init(channel: Channel, handler: HTTPHandler) {
+    init(channel: Channel, handler: HTTPRequestHandler) {
         self.channel = channel
         self.handler = handler
         let httpVersionMajor = handler.serverRequest?.httpVersionMajor ?? 0
@@ -139,9 +139,9 @@ public class HTTPServerResponse: ServerResponse {
         if handler.clientRequestedKeepAlive {
             headers["Connection"] = ["Keep-Alive"]
             if let maxConnections = handler.keepAliveState.requestsRemaining {
-                headers["Keep-Alive"] = ["timeout=\(HTTPHandler.keepAliveTimeout), max=\(Int(maxConnections))"]
+                headers["Keep-Alive"] = ["timeout=\(HTTPRequestHandler.keepAliveTimeout), max=\(Int(maxConnections))"]
             } else {
-                headers["Keep-Alive"] = ["timeout=\(HTTPHandler.keepAliveTimeout)"]
+                headers["Keep-Alive"] = ["timeout=\(HTTPRequestHandler.keepAliveTimeout)"]
             }
         }
         let response = HTTPResponseHead(version: httpVersion, status: status, headers: headers.httpHeaders())
