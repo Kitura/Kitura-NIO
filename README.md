@@ -25,7 +25,7 @@
 
 Kitura-NIO is a SwiftNIO based networking library for Kitura. Other than an additive change to the HTTPServer API around IPv6 support, Kitura-NIO adopts the same API as KituraNet, making the transition to using the NIO port almost seamless. While Kitura-NIO shares some code with Kitura-Net, the core comprising of HTTPServer, ClientRequest/ClientResponse and TLS support have been implemented using SwiftNIO.
 
-We expect most of our users to require higher level concepts such as routing, templates and middleware, these are not provided in Kitura-NIO, if you want to use those facilities you should be coding at the Kitura level, for this please see the [Kitura](https://github.com/IBM-Swift/Kitura) project. Kitura-NIO, like  Kitura-net, underpins Kitura which offers a higher abstraction level to users.
+We expect most of our users to require higher level concepts such as routing, templates and middleware, these are not provided in Kitura-NIO, if you want to use those facilities you should be coding at the Kitura level, for this please see the [Kitura](https://github.com/IBM-Swift/Kitura) project. Kitura-NIO, like  [Kitura-net](https://github.com/IBM-Swift/Kitura-net), underpins Kitura which offers a higher abstraction level to users.
 
 Kitura-NIO utilises [SwiftNIO](https://github.com/apple/swift-nio) and [NIOOpenSSL](https://github.com/apple/swift-nio-ssl).
 
@@ -38,16 +38,22 @@ Kitura-NIO works with Swift 4.1. It is also being tested with the development bi
 
 ## Using Kitura-NIO
 
-To test your Kitura app with the very early version of the Kitura-NIO networking framework, all you need to do is point to the [kitura-nio](https://github.com/IBM-Swift/Kitura/tree/kitura-nio) branch from your `Package.swift`:
+With Kitura 2.5 and future releases, to run on top of Kitura-NIO (instead of Kitura-Net) all you need to do is set an environment variable called `KITURA_NIO` before building your Kitura appilication:
 
-```swift
-    dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/IBM-Swift/Kitura", .branch("kitura-nio")),
-    ],
+```shell
+    export KITURA_NIO=1 && swift build
 ```
 
-Kitura will then use Kitura-NIO instead of Kitura-net for, networking.
+If you have already built your Kitura application using Kitura-Net and want to switch to using `KITURA_NIO`, you need to update the package before building:
+
+```shell
+    export KITURA_NIO=1 && swift package update && swift build
+```
+
+Using the environment variable we make sure that only one out of Kitura-NIO and Kitura-Net is linked into the final binary.
+
+Please note that though Kitura-NIO has its own GitHub repository, the package name is `KituraNet`. This is because the Kitura-NIO and Kitura-Net are expected to provide identical APIs, and it make sense if they share the package name too.
+
 
 ## Getting Started
 
