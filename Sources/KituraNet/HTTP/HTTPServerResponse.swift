@@ -41,12 +41,11 @@ public class HTTPServerResponse: ServerResponse {
             if let newValue = newValue {
                 status = newValue.rawValue
             }
-        } 
+        }
     }
 
     /// The HTTP headers to be sent to the client as part of the response.
     public var headers : HeadersContainer = HeadersContainer()
-
 
     /// The HTTP version to be sent in the response.
     private var httpVersion: HTTPVersion
@@ -56,7 +55,7 @@ public class HTTPServerResponse: ServerResponse {
 
     /// Initial size of the response buffer (inherited from KituraNet)
     private static let bufferSize = 2000
-    
+
     init(channel: Channel, handler: HTTPRequestHandler) {
         self.channel = channel
         self.handler = handler
@@ -65,7 +64,7 @@ public class HTTPServerResponse: ServerResponse {
         let httpVersionMinor = handler.serverRequest?.httpVersionMinor ?? 0
         self.httpVersion = HTTPVersion(major: httpVersionMajor, minor: httpVersionMinor)
         headers["Date"] = [SPIUtils.httpDate()]
-    } 
+    }
 
     /// Write a string as a response.
     ///
@@ -119,16 +118,6 @@ public class HTTPServerResponse: ServerResponse {
             fatalError("No channel available.")
         }
 
-        execute(on: channel.eventLoop) {
-            do {
-                try self.end0(channel: channel)
-            } catch let error {
-                fatalError("Error: \(error)")
-            }
-        }
-    }
-
-    func end0(channel: Channel) throws {
         guard let handler = self.handler else {
             fatalError("No HTTP handler available")
         }
@@ -142,16 +131,13 @@ public class HTTPServerResponse: ServerResponse {
                 headers["Keep-Alive"] = ["timeout=\(HTTPRequestHandler.keepAliveTimeout)"]
             }
         }
-        let response = HTTPResponseHead(version: httpVersion, status: status, headers: headers.httpHeaders())
-        channel.write(handler.wrapOutboundOut(.head(response)), promise: nil)
-        if buffer.readableBytes > 0 {
-            channel.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
-        }
-        channel.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
-        handler.updateKeepAliveState()
 
-        if let request = handler.serverRequest {
-            Monitor.delegate?.finished(request: request, response: self)
+        execute(on: channel.eventLoop) {
+            do {
+                try self.sendResponse(channel: channel, handler: handler, status: status)
+            } catch let error {
+                fatalError("Error: \(error)")
+            }
         }
     }
 
@@ -161,16 +147,6 @@ public class HTTPServerResponse: ServerResponse {
             fatalError("No channel available.")
         }
 
-        execute(on: channel.eventLoop) {
-            do {
-                try self.end0(with: errorCode, channel: channel, withBody: withBody)
-            } catch let error {
-                fatalError("Error: \(error)")
-            }
-        }
-    }
-
-    private func end0(with errorCode: HTTPStatusCode, channel: Channel, withBody: Bool = false) throws {
         guard let handler = self.handler else {
             fatalError("No HTTP handler available")
         }
@@ -180,11 +156,24 @@ public class HTTPServerResponse: ServerResponse {
 
         //We don't keep the connection alive on an HTTP error
         headers["Connection"] = ["Close"]
-        let response = HTTPResponseHead(version: HTTPVersion(major: 1, minor: 1), status: status, headers: headers.httpHeaders())
+
+        execute(on: channel.eventLoop) {
+            do {
+                try self.sendResponse(channel: channel, handler: handler, status: status, withBody: withBody)
+            } catch let error {
+                fatalError("Error: \(error)")
+            }
+        }
+    }
+
+    /// Send response to the client
+    private func sendResponse(channel: Channel, handler: HTTPRequestHandler, status: HTTPResponseStatus, withBody: Bool = true) throws {
+        let response = HTTPResponseHead(version: httpVersion, status: status, headers: headers.httpHeaders())
         channel.write(handler.wrapOutboundOut(.head(response)), promise: nil)
         if withBody && buffer.readableBytes > 0 {
             channel.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
         }
+
         channel.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
         handler.updateKeepAliveState()
 
