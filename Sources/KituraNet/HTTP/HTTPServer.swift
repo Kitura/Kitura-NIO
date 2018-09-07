@@ -68,6 +68,8 @@ public class HTTPServer : Server {
     /// The event loop group on which the HTTP handler runs
     let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 
+    private var ctx: ChannelHandlerContext?
+
     public init() { }
 
     /// SSL cert configs for handling client requests
@@ -90,6 +92,28 @@ public class HTTPServer : Server {
     /// URI for which the latest WebSocket upgrade was requested by a client
     var latestWebSocketURI: String?
 
+    /// Determines if the request should be upgraded and adds additional upgrade headers to the request
+    private func shouldUpgradeToWebSocket(webSocketHandlerFactory: ProtocolHandlerFactory, head: HTTPRequestHead) -> HTTPHeaders? {
+        self.latestWebSocketURI = head.uri
+        guard webSocketHandlerFactory.isServiceRegistered(at: head.uri) else { return nil }
+        var headers = HTTPHeaders()
+        if let wsProtocol = head.headers["Sec-WebSocket-Protocol"].first {
+            headers.add(name: "Sec-WebSocket-Protocol", value: wsProtocol)
+        }
+        if let key =  head.headers["Sec-WebSocket-Key"].first {
+            headers.add(name: "Sec-WebSocket-Key", value: key)
+        }
+        return headers
+    }
+
+    /// Creates upgrade request and adds WebSocket handler to pipeline
+    private func upgradeHandler(webSocketHandlerFactory: ProtocolHandlerFactory, request: HTTPRequestHead) -> EventLoopFuture<Void> {
+        guard let ctx = self.ctx else { fatalError("Cannot create ServerRequest") }
+        ///TODO: Handle secure upgrade request ("wss://")
+        let serverRequest = HTTPServerRequest(ctx: ctx, requestHead: request, enableSSL: false)
+        return ctx.channel.pipeline.add(handler: webSocketHandlerFactory.handler(for: serverRequest))
+    }
+
     /// Listens for connections on a socket
     ///
     /// - Parameter on: port number for new connections (eg. 8080)
@@ -100,26 +124,13 @@ public class HTTPServer : Server {
             self.sslContext = try! SSLContext(configuration: tlsConfig)
         }
 
-        var channelHandlerCtx: ChannelHandlerContext?
         var upgraders: [HTTPProtocolUpgrader] = []
         if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
             ///TODO: Should `maxFrameSize` be configurable?
             let upgrader = KituraWebSocketUpgrader(maxFrameSize: 1 << 24, automaticErrorHandling: false, shouldUpgrade: { (head: HTTPRequestHead) in
-                self.latestWebSocketURI = head.uri
-                guard webSocketHandlerFactory.isServiceRegistered(at: head.uri) else { return nil }
-                var headers = HTTPHeaders()
-                if let wsProtocol = head.headers["Sec-WebSocket-Protocol"].first {
-                    headers.add(name: "Sec-WebSocket-Protocol", value: wsProtocol)
-                }
-                if let key =  head.headers["Sec-WebSocket-Key"].first {
-                    headers.add(name: "Sec-WebSocket-Key", value: key)
-                }
-                return headers
+                return self.shouldUpgradeToWebSocket(webSocketHandlerFactory: webSocketHandlerFactory, head: head)
                 }, upgradePipelineHandler: { (channel: Channel, request: HTTPRequestHead) in
-                    guard let ctx = channelHandlerCtx else { fatalError("Cannot create ServerRequest") }
-                    ///TODO: Handle secure upgrade request ("wss://")
-                    let serverRequest = HTTPServerRequest(ctx: ctx, requestHead: request, enableSSL: false)
-                    return channel.pipeline.add(handler: webSocketHandlerFactory.handler(for: serverRequest))
+                    return self.upgradeHandler(webSocketHandlerFactory: webSocketHandlerFactory, request: request)
             })
             upgraders.append(upgrader)
         }
@@ -135,7 +146,7 @@ public class HTTPServer : Server {
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
                 let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { ctx in
-                    channelHandlerCtx = ctx
+                    self.ctx = ctx
                     _ = channel.pipeline.remove(handler: httpHandler)
                 })
                 return channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPRequestHandler.keepAliveTimeout)))).then {
