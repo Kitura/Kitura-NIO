@@ -60,8 +60,8 @@ public class HTTPServerResponse: ServerResponse {
         self.channel = channel
         self.handler = handler
         self.buffer = channel.allocator.buffer(capacity: HTTPServerResponse.bufferSize)
-        let httpVersionMajor = handler.serverRequest?.httpVersionMajor ?? 0
-        let httpVersionMinor = handler.serverRequest?.httpVersionMinor ?? 0
+        let httpVersionMajor = handler.serverRequest?.httpVersionMajor ?? 1
+        let httpVersionMinor = handler.serverRequest?.httpVersionMinor ?? 1
         self.httpVersion = HTTPVersion(major: httpVersionMajor, minor: httpVersionMinor)
         headers["Date"] = [SPIUtils.httpDate()]
     }
