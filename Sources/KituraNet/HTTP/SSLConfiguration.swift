@@ -16,6 +16,7 @@
 
 import NIOOpenSSL
 import SSLService
+import LoggerAPI
 
 /// A helper class to bridge betweem SSLService.Configuration (used by Kitura) and TLSConfiguration required by NIOOpenSSL
 internal class SSLConfiguration {
@@ -54,7 +55,8 @@ internal class SSLConfiguration {
                     }
                     return TLSConfiguration.forServer(certificateChain: sslCertificateSource, privateKey: .privateKey(pkcs12Bundle.privateKey))
                 } catch let error {
-                    fatalError("Error: \(error)")
+                    Log.error("Error creating the TLS server configuration: \(error)")
+                    return nil
                 }
             }
     }

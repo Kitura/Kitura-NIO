@@ -16,6 +16,7 @@
 
 import NIO
 import NIOHTTP1
+import LoggerAPI
 import Foundation
 
 /// This class implements the `ServerResponse` protocol for outgoing server
@@ -71,7 +72,9 @@ public class HTTPServerResponse: ServerResponse {
     /// - Parameter from: String data to be written.
     public func write(from string: String) throws {
         guard let channel = channel else {
-            fatalError("No channel available to write.")
+            Log.error("No channel available to write")
+            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            return
         }
 
         execute(on: channel.eventLoop) {
@@ -84,7 +87,9 @@ public class HTTPServerResponse: ServerResponse {
     /// - Parameter from: Data object that contains the data to be written.
     public func write(from data: Data) throws {
         guard let channel = channel else {
-            fatalError("No channel available to write.")
+            Log.error("No channel available to write")
+            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            return
         }
 
         execute(on: channel.eventLoop) {
@@ -115,11 +120,15 @@ public class HTTPServerResponse: ServerResponse {
     ///
     public func end() throws {
         guard let channel = self.channel else {
-            fatalError("No channel available.")
+            Log.error("No channel available to end the response")
+            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            return
         }
 
         guard let handler = self.handler else {
-            fatalError("No HTTP handler available")
+            Log.error("No HTTP handler available to end the response")
+            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            return
         }
 
         let status = HTTPResponseStatus(statusCode: statusCode?.rawValue ?? 0)
@@ -136,7 +145,8 @@ public class HTTPServerResponse: ServerResponse {
             do {
                 try self.sendResponse(channel: channel, handler: handler, status: status)
             } catch let error {
-                fatalError("Error: \(error)")
+                Log.error("Error sending response: \(error)")
+                //TODO: We must be rethrowing/throwing from here, for which we'd need to add a new Error type to the API
             }
         }
     }
@@ -144,11 +154,15 @@ public class HTTPServerResponse: ServerResponse {
     /// End sending the response on an HTTP error
     private func end(with errorCode: HTTPStatusCode, withBody: Bool = false) throws {
         guard let channel = self.channel else {
-            fatalError("No channel available.")
+            Log.error("No channel available to end the response")
+            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            return
         }
 
         guard let handler = self.handler else {
-            fatalError("No HTTP handler available")
+            Log.error("No HTTP handler available to end the response")
+            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            return
         }
 
         self.statusCode = errorCode
@@ -161,7 +175,8 @@ public class HTTPServerResponse: ServerResponse {
             do {
                 try self.sendResponse(channel: channel, handler: handler, status: status, withBody: withBody)
             } catch let error {
-                fatalError("Error: \(error)")
+                Log.error("Error sending response: \(error)")
+                //TODO: We must be rethrowing/throwing from here, for which we'd need to add a new Error type to the API
             }
         }
     }

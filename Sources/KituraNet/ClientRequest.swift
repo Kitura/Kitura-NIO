@@ -594,7 +594,10 @@ class HTTPClientHandler: ChannelInboundHandler {
             if clientResponse.statusCode == .movedTemporarily || clientResponse.statusCode == .movedPermanently {
                 self.clientRequest.redirectCount += 1
                 if self.clientRequest.redirectCount < self.clientRequest.maxRedirects {
-                    guard let url = clientResponse.headers["Location"]?.first else { fatalError("Redirected but no Location header") }
+                    guard let url = clientResponse.headers["Location"]?.first else {
+                        Log.error("The server redirected but sent no Location header")
+                        return
+                    }
                     if url.starts(with: "/") {
                         let scheme = URL(string: clientRequest.url)?.scheme
                         let request = ClientRequest(options: [.schema(scheme!),
