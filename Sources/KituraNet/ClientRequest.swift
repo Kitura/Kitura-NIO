@@ -392,7 +392,7 @@ public class ClientRequest {
         }
 
         do {
-            channel = try bootstrap.connect(host: hostName, port: Int(self.port ?? 80)).wait()
+            channel = try bootstrap.connect(host: hostName, port: Int(self.port!)).wait()
         } catch let error {
             Log.error("Connection to \(hostName):\(self.port ?? 80) failed with error: \(error)")
             callback(nil)
