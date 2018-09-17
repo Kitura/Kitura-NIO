@@ -114,6 +114,21 @@ public class HTTPServer : Server {
         return ctx.channel.pipeline.add(handler: webSocketHandlerFactory.handler(for: serverRequest))
     }
 
+    private typealias ShouldUpgradeFunction = (HTTPRequestHead) -> HTTPHeaders?
+    private typealias UpgradePipelineHandlerFunction = (Channel, HTTPRequestHead) -> EventLoopFuture<Void>
+
+    private func generateShouldUpgrade(_ webSocketHandlerFactory: ProtocolHandlerFactory) -> ShouldUpgradeFunction {
+        return { (head: HTTPRequestHead) in
+            return self.shouldUpgradeToWebSocket(webSocketHandlerFactory: webSocketHandlerFactory, head: head)
+        }
+    }
+
+    private func generateUpgradePipelineHandler(_ webSocketHandlerFactory: ProtocolHandlerFactory) -> UpgradePipelineHandlerFunction {
+        return { (channel: Channel, request: HTTPRequestHead) in
+            return self.upgradeHandler(webSocketHandlerFactory: webSocketHandlerFactory, request: request)
+        }
+    }
+
     /// Listens for connections on a socket
     ///
     /// - Parameter on: port number for new connections (eg. 8080)
@@ -127,11 +142,10 @@ public class HTTPServer : Server {
         var upgraders: [HTTPProtocolUpgrader] = []
         if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
             ///TODO: Should `maxFrameSize` be configurable?
-            let upgrader = KituraWebSocketUpgrader(maxFrameSize: 1 << 24, automaticErrorHandling: false, shouldUpgrade: { (head: HTTPRequestHead) in
-                return self.shouldUpgradeToWebSocket(webSocketHandlerFactory: webSocketHandlerFactory, head: head)
-                }, upgradePipelineHandler: { (channel: Channel, request: HTTPRequestHead) in
-                    return self.upgradeHandler(webSocketHandlerFactory: webSocketHandlerFactory, request: request)
-            })
+            let upgrader = KituraWebSocketUpgrader(maxFrameSize: 1 << 24,
+                                                   automaticErrorHandling: false,
+                                                   shouldUpgrade: generateShouldUpgrade(webSocketHandlerFactory),
+                                                   upgradePipelineHandler: generateUpgradePipelineHandler(webSocketHandlerFactory))
             upgraders.append(upgrader)
         }
 
