@@ -129,6 +129,17 @@ public class HTTPServer : Server {
         }
     }
 
+    private func createOpenSSLServerHandler() -> OpenSSLServerHandler? {
+        if let sslContext = self.sslContext {
+            do {
+                return try OpenSSLServerHandler(context: sslContext)
+            } catch let error {
+                Log.error("Failed to create OpenSSLServerHandler. Error: \(error)")
+            }
+        }
+        return nil
+    }
+
     /// Listens for connections on a socket
     ///
     /// - Parameter on: port number for new connections (eg. 8080)
@@ -165,8 +176,8 @@ public class HTTPServer : Server {
                 })
                 return channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPRequestHandler.keepAliveTimeout)))).then {
                     return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).then { () -> EventLoopFuture<Void> in
-                        if let sslContext = self.sslContext {
-                            _ = channel.pipeline.add(handler: try! OpenSSLServerHandler(context: sslContext), first: true)
+                        if let openSSLServerHandler = self.createOpenSSLServerHandler() {
+                            _ = channel.pipeline.add(handler: openSSLServerHandler, first: true)
                         }
                         return channel.pipeline.add(handler: httpHandler)
                     }
