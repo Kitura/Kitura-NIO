@@ -18,6 +18,7 @@ import NIO
 import NIOHTTP1
 import Dispatch
 import XCTest
+import LoggerAPI
 @testable import KituraNet
 
 func randomNumber(limit: Int) -> Int {
@@ -45,10 +46,16 @@ class PipeliningTests : KituraNetTest {
     func testPipelining() {
         let server = HTTPServer()
         server.delegate = Delegate()
-        try! server.listen(on: 0)
+        do {
+            try server.listen(on: 0)
+        } catch let error {
+            Log.error("Server failed to listen. Error: \(error)")
+        }
+
         let expectation = self.expectation(description: "test pipelining")
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        let clientChannel = try! ClientBootstrap(group: group)
+        do {
+           let clientChannel = try ClientBootstrap(group: group)
             .channelInitializer { channel in
                 channel.pipeline.addHTTPClientHandlers().then {
                     channel.pipeline.add(handler: PipelinedRequestsHandler(with: expectation))
@@ -56,13 +63,16 @@ class PipeliningTests : KituraNetTest {
             }
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
             .connect(host: "localhost", port: server.port!).wait()
-        let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET,  uri: "/")
-        for _ in 0...4 {
+            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET,  uri: "/")
+            for _ in 0...4 {
+                clientChannel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
+                _ = clientChannel.write(NIOAny(HTTPClientRequestPart.end(nil)))
+            }
             clientChannel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
-            _ = clientChannel.write(NIOAny(HTTPClientRequestPart.end(nil)))
+            try clientChannel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
+        } catch let error {
+            Log.error("Error: \(error)")
         }
-        clientChannel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
-        try! clientChannel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
         waitForExpectations(timeout: 10)
     }
 
@@ -73,25 +83,35 @@ class PipeliningTests : KituraNetTest {
     func testPipeliningSpanningPackets() {
         let server = HTTPServer()
         server.delegate = Delegate()
-        try! server.listen(on: 0)
+        server.delegate = Delegate()
+        do {
+            try server.listen(on: 0)
+        } catch let error {
+            Log.error("Server failed to listen. Error: \(error)")
+        }
+
         let expectation = self.expectation(description: "test pipelining spanning packets")
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        let clientChannel = try! ClientBootstrap(group: group)
-            .channelInitializer { channel in
-                channel.pipeline.addHTTPClientHandlers().then {
-                    channel.pipeline.add(handler: PipelinedRequestsHandler(with: expectation))
+        do {
+            let clientChannel = try ClientBootstrap(group: group)
+                .channelInitializer { channel in
+                    channel.pipeline.addHTTPClientHandlers().then {
+                        channel.pipeline.add(handler: PipelinedRequestsHandler(with: expectation))
+                    }
                 }
+                .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
+                .connect(host: "localhost", port: server.port!).wait()
+            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .POST,  uri: "/")
+            for _ in 0...5 {
+                clientChannel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
+                let buffer = BufferList()
+                buffer.append(data: Data(count: randomNumber(limit: 8*1024)))
+                clientChannel.write(NIOAny(HTTPClientRequestPart.body(.byteBuffer(buffer.byteBuffer))), promise: nil)
+                _ = clientChannel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
+                usleep(100)
             }
-            .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
-            .connect(host: "localhost", port: server.port!).wait()
-        let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .POST,  uri: "/")
-        for _ in 0...5 {
-            clientChannel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
-            let buffer = BufferList()
-            buffer.append(data: Data(count: randomNumber(limit: 8*1024)))
-            clientChannel.write(NIOAny(HTTPClientRequestPart.body(.byteBuffer(buffer.byteBuffer))), promise: nil)
-            _ = clientChannel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
-            usleep(100)
+        } catch let error {
+            Log.error("Error: \(error)")
         }
         waitForExpectations(timeout: 10)
     }
@@ -102,7 +122,11 @@ private class Delegate: ServerDelegate {
     var count = 0
     func handle(request: ServerRequest, response: ServerResponse) {
         response.statusCode = .OK
-        try! response.end(text: "\(count)")
+        do {
+            try response.end(text: "\(count)")
+        } catch let error {
+            Log.error("Error: \(error)")
+        }
         count += 1
     }
 }

@@ -21,6 +21,7 @@ import Foundation
 import NIO
 import NIOHTTP1
 import NIOOpenSSL
+import LoggerAPI
 
 class RegressionTests: KituraNetTest {
 
@@ -152,7 +153,11 @@ class RegressionTests: KituraNetTest {
             XCTAssertTrue(serverPort != 0, "Ephemeral server port not set")
 
             var goodClient = GoodClient(with: HTTPClient(with: self.expectation(description: "Bad request error")))
-            try! goodClient.makeBadRequest(serverPort)
+            do {
+                try goodClient.makeBadRequest(serverPort)
+            } catch {
+                Log.error("Failed to make bad request")
+            }
             waitForExpectations(timeout: 10)
 
         } catch {
@@ -179,7 +184,11 @@ class RegressionTests: KituraNetTest {
             }
             XCTAssertTrue(serverPort != 0, "Ephemeral server port not set")
             var goodClient = GoodClient(with: HTTPClient(with: self.expectation(description: "Bad request error")))
-            try! goodClient.makeGoodRequestFollowedByBadRequest(serverPort)
+            do {
+                try goodClient.makeGoodRequestFollowedByBadRequest(serverPort)
+            } catch {
+                Log.error("Failed to make request")
+            }
             waitForExpectations(timeout: 10)
         } catch {
             XCTFail("Couldn't start server")
@@ -205,7 +214,11 @@ class RegressionTests: KituraNetTest {
         }
         
         mutating func connect(_ port: Int, expectation: XCTestExpectation) throws {
-            channel = try! clientBootstrap.connect(host: "localhost", port: port).wait()
+            do {
+                channel = try clientBootstrap.connect(host: "localhost", port: port).wait()
+            } catch {
+                Log.error("Failed to connect to port \(port)")
+            }
             if channel.remoteAddress != nil {
                 expectation.fulfill()
             }
@@ -225,14 +238,24 @@ class RegressionTests: KituraNetTest {
         }
         
         init() throws {
-            let sslConfig = TLSConfiguration.forClient(certificateVerification: .none)
-            let sslContext = try! SSLContext(configuration: sslConfig)
+            var openSSLClientHandler: OpenSSLHandler? {
+                let sslConfig = TLSConfiguration.forClient(certificateVerification: .none)
+                do {
+                    let sslContext = try SSLContext(configuration: sslConfig)
+                    return try OpenSSLClientHandler(context: sslContext)
+                } catch let error {
+                    Log.error("Failed to create OpenSSLClientHandler. Error: \(error)")
+                    return nil
+                }
+            }
+
             clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
                 .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
                 .channelInitializer { channel in
-                    channel.pipeline.add(handler: try! OpenSSLClientHandler(context: sslContext)).then {
-                        channel.pipeline.addHTTPClientHandlers()
+                    if let openSSLClientHandler = openSSLClientHandler {
+                        _ = channel.pipeline.add(handler: openSSLClientHandler)
                     }
+                    return channel.pipeline.addHTTPClientHandlers()
                 }
         }
 
@@ -247,21 +270,33 @@ class RegressionTests: KituraNetTest {
         }
 
         mutating func connect(_ port: Int, expectation: XCTestExpectation) throws {
-            channel = try! clientBootstrap.connect(host: "localhost", port: port).wait()
+            do {
+                channel = try clientBootstrap.connect(host: "localhost", port: port).wait()
+            } catch {
+                Log.error("Failed to connect to port \(port)")
+            }
             if channel.remoteAddress != nil {
                expectation.fulfill()
             }
         }
         
         mutating func makeBadRequest(_ port: Int) throws {
-            channel = try! clientBootstrap.connect(host: "localhost", port: port).wait()
+            do {
+                channel = try clientBootstrap.connect(host: "localhost", port: port).wait()
+            } catch {
+                Log.error("Failed to connect to port \(port)")
+            }
             let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET,  uri: "#/")
             _ = channel.write(NIOAny(HTTPClientRequestPart.head(request)))
             _ = channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
         }
 
         mutating func makeGoodRequestFollowedByBadRequest(_ port: Int) throws {
-            channel = try! clientBootstrap.connect(host: "localhost", port: port).wait()
+            do {
+                channel = try clientBootstrap.connect(host: "localhost", port: port).wait()
+            } catch {
+                Log.error("Failed to connect to port \(port)")
+            }
             let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET,  uri: "/")
             var httpHeaders = HTTPHeaders()
             httpHeaders.add(name: "Connection", value: "Keep-Alive")

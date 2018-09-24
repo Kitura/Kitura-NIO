@@ -440,8 +440,13 @@ public class ClientRequest {
 
     private func initializeClientBootstrapWithSSL(eventLoopGroup: EventLoopGroup) {
         if let sslConfig = self.sslConfig {
-            sslContext = try! SSLContext(configuration: sslConfig)
+            do {
+                sslContext = try SSLContext(configuration: sslConfig)
+            } catch let error {
+                Log.error("Failed to create SSLContext. Error: \(error)")
+            }
         }
+
         bootstrap = ClientBootstrap(group: eventLoopGroup)
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .channelInitializer { channel in
