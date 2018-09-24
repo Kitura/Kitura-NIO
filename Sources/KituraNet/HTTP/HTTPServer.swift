@@ -147,7 +147,11 @@ public class HTTPServer : Server {
         self.port = port
 
         if let tlsConfig = tlsConfig {
-            self.sslContext = try! SSLContext(configuration: tlsConfig)
+            do {
+                self.sslContext = try SSLContext(configuration: tlsConfig)
+            } catch let error {
+                Log.error("Failed to create SSLContext. Error: \(error)")
+            }
         }
 
         var upgraders: [HTTPProtocolUpgrader] = []
@@ -256,14 +260,22 @@ public class HTTPServer : Server {
         return server
     }
     
-    deinit { 
-        try! eventLoopGroup.syncShutdownGracefully()
+    deinit {
+        do {
+            try eventLoopGroup.syncShutdownGracefully()
+        } catch {
+            Log.error("Failed to shutdown eventLoopGroup")
+        }
     }
 
     /// Stop listening for new connections.
     public func stop() {
         guard serverChannel != nil else { return }
-        try! serverChannel.close().wait()
+        do {
+            try serverChannel.close().wait()
+        } catch let error {
+            Log.error("Failed to close the server channel. Error: \(error)")
+        }
         self.state = .stopped
     }
 
