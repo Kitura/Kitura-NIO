@@ -27,10 +27,10 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
     var server: HTTPServer 
 
     /// The serverRequest related to this handler instance
-    var serverRequest: HTTPServerRequest!
+    var serverRequest: HTTPServerRequest?
 
     /// The serverResponse related to this handler instance
-    var serverResponse: HTTPServerResponse!
+    var serverResponse: HTTPServerResponse?
 
     /// We'd want to send an error response only once
     var errorResponseSent = false
@@ -67,6 +67,10 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
             serverRequest = HTTPServerRequest(ctx: ctx, requestHead: header, enableSSL: enableSSLVerfication)
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
+            guard let serverRequest = serverRequest else {
+                Log.error("No ServerRequest available")
+                return
+            }
             if serverRequest.buffer == nil {
                 serverRequest.buffer = BufferList(with: buffer)
             } else {
@@ -76,9 +80,10 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
             serverResponse = HTTPServerResponse(channel: ctx.channel, handler: self)
             //Make sure we use the latest delegate registered with the server
             DispatchQueue.global().async {
+                guard let serverRequest = self.serverRequest, let serverResponse = self.serverResponse else { return }
                 let delegate = self.server.delegate ?? HTTPDummyServerDelegate()
-                Monitor.delegate?.started(request: self.serverRequest, response: self.serverResponse)
-                delegate.handle(request: self.serverRequest, response: self.serverResponse)
+                Monitor.delegate?.started(request: serverRequest, response: serverResponse)
+                delegate.handle(request: serverRequest, response: serverResponse)
             }
         }
     }
@@ -119,7 +124,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
         do {
             serverResponse = HTTPServerResponse(channel: ctx.channel, handler: self)
             errorResponseSent = true
-            try serverResponse.end(with: .badRequest, message: message)
+            try serverResponse?.end(with: .badRequest, message: message)
         } catch {
             Log.error("Failed to send error response")
         }

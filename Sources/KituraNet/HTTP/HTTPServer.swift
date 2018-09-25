@@ -57,7 +57,7 @@ public class HTTPServer : Server {
     public var keepAliveState: KeepAliveState = .unlimited
 
     /// The channel used to listen for new connections
-    var serverChannel: Channel!
+    var serverChannel: Channel?
 
     /// Whether or not this server allows port reuse (default: disallowed)
     public var allowPortReuse = false
@@ -204,8 +204,9 @@ public class HTTPServer : Server {
         Log.info("Listening on port \(self.port!)")
         Log.verbose("Options for port \(self.port!): maxPendingConnections: \(maxPendingConnections), allowPortReuse: \(self.allowPortReuse)")
 
-        let queuedBlock = DispatchWorkItem(block: { 
-            try! self.serverChannel.closeFuture.wait()
+        let queuedBlock = DispatchWorkItem(block: {
+            guard let serverChannel = self.serverChannel else { return } 
+            try! serverChannel.closeFuture.wait()
             self.state = .stopped
             self.lifecycleListener.performStopCallbacks()
         })
@@ -270,7 +271,7 @@ public class HTTPServer : Server {
 
     /// Stop listening for new connections.
     public func stop() {
-        guard serverChannel != nil else { return }
+        guard let serverChannel = serverChannel else { return }
         do {
             try serverChannel.close().wait()
         } catch let error {
