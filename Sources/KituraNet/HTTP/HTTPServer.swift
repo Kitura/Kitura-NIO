@@ -164,10 +164,6 @@ public class HTTPServer : Server {
             upgraders.append(upgrader)
         }
 
-        if self.delegate == nil {
-            self.delegate = HTTPDummyServerDelegate()
-        }
-
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
             .serverChannelOption(ChannelOptions.backlog, value: BacklogOption.OptionType(self.maxPendingConnections))
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
