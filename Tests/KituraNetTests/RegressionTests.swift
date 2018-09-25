@@ -200,10 +200,10 @@ class RegressionTests: KituraNetTest {
     struct BadClient {
         let clientBootstrap: ClientBootstrap
 
-        var channel: Channel!
+        var channel: Channel?
          
         var connectedPort: Int {
-            return Int(channel.remoteAddress?.port ?? 0)
+            return Int(channel?.remoteAddress?.port ?? 0)
         }
             
         init() throws {
@@ -219,7 +219,7 @@ class RegressionTests: KituraNetTest {
             } catch {
                 Log.error("Failed to connect to port \(port)")
             }
-            if channel.remoteAddress != nil {
+            if channel?.remoteAddress != nil {
                 expectation.fulfill()
             }
         }
@@ -231,10 +231,10 @@ class RegressionTests: KituraNetTest {
     struct GoodClient {
         let clientBootstrap: ClientBootstrap
     
-        var channel: Channel!
+        var channel: Channel?
  
         var connectedPort: Int {
-            return Int(channel.remoteAddress?.port ?? 0)
+            return Int(channel?.remoteAddress?.port ?? 0)
         }
         
         init() throws {
@@ -275,7 +275,7 @@ class RegressionTests: KituraNetTest {
             } catch {
                 Log.error("Failed to connect to port \(port)")
             }
-            if channel.remoteAddress != nil {
+            if channel?.remoteAddress != nil {
                expectation.fulfill()
             }
         }
@@ -287,8 +287,8 @@ class RegressionTests: KituraNetTest {
                 Log.error("Failed to connect to port \(port)")
             }
             let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET,  uri: "#/")
-            _ = channel.write(NIOAny(HTTPClientRequestPart.head(request)))
-            _ = channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
+            _ = channel?.write(NIOAny(HTTPClientRequestPart.head(request)))
+            _ = channel?.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
         }
 
         mutating func makeGoodRequestFollowedByBadRequest(_ port: Int) throws {
@@ -300,12 +300,12 @@ class RegressionTests: KituraNetTest {
             let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET,  uri: "/")
             var httpHeaders = HTTPHeaders()
             httpHeaders.add(name: "Connection", value: "Keep-Alive")
-            _ = channel.write(NIOAny(HTTPClientRequestPart.head(request)))
-            _ = channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
+            _ = channel?.write(NIOAny(HTTPClientRequestPart.head(request)))
+            _ = channel?.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
             sleep(1) //workaround for an apparent swift-nio issue
             let request0 = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET,  uri: "#/") 
-            _ = channel.write(NIOAny(HTTPClientRequestPart.head(request0)))
-            _ = channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
+            _ = channel?.write(NIOAny(HTTPClientRequestPart.head(request0)))
+            _ = channel?.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
         }    
 
     }

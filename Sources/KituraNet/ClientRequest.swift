@@ -334,10 +334,10 @@ public class ClientRequest {
     }
 
     /// The channel connecting to the remote server
-    var channel: Channel!
+    var channel: Channel?
 
     /// The client bootstrap used to connect to the remote server
-    var bootstrap: ClientBootstrap!
+    var bootstrap: ClientBootstrap?
 
 
     /// Send the request to the remote server
@@ -392,6 +392,7 @@ public class ClientRequest {
         }
 
         do {
+            guard let bootstrap = bootstrap else { return }
             channel = try bootstrap.connect(host: hostName, port: Int(self.port!)).wait()
         } catch let error {
             Log.error("Connection to \(hostName):\(self.port ?? 80) failed with error: \(error)")
@@ -404,15 +405,16 @@ public class ClientRequest {
 
         // Make the HTTP request, the response callbacks will be received on the HTTPClientHandler.
         // We are mostly not running on the event loop. Let's make sure we send the request over the event loop.
+        guard let channel = channel else { return }
         execute(on: channel.eventLoop) {
-            self.sendRequest(request: request, on: self.channel)
+            self.sendRequest(request: request, on: channel)
         }
         waitSemaphore.wait()
 
         // We are now free to close the connection if asked for.
         if closeConnection {
             execute(on: channel.eventLoop) {
-                self.channel.close(promise: nil)
+                channel.close(promise: nil)
             }
         }
     }

@@ -37,7 +37,7 @@ public class ClientResponse {
     /// Minor version of HTTP of the response
     public var httpVersionMinor: UInt16? 
     
-    internal var _headers: HTTPHeaders!
+    internal var _headers: HTTPHeaders?
 
     /// Set of HTTP headers of the response.
     public var headers: HeadersContainer {
