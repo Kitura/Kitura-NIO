@@ -35,8 +35,24 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
     /// We'd want to send an error response only once
     var errorResponseSent = false
 
-    var keepAliveState: KeepAliveState = .unlimited
-   
+    var keepAliveState: KeepAliveState {
+        set {
+            self.syncQueue.sync {
+                _keepAliveState = newValue
+            }
+        }
+
+        get {
+            return self.syncQueue.sync {
+                return _keepAliveState
+            }
+        }
+    }
+
+    private let syncQueue = DispatchQueue(label: "HTTPServer.keepAliveSync")
+
+    private var _keepAliveState: KeepAliveState = .unlimited
+
     static let keepAliveTimeout: TimeInterval = 60
   
     private(set) var clientRequestedKeepAlive = false
