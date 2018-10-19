@@ -57,13 +57,13 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
   
     private(set) var clientRequestedKeepAlive = false
 
-    private(set) var enableSSLVerfication = false
+    private(set) var enableSSLVerification = false
 
     public init(for server: HTTPServer) { 
         self.server = server
         self.keepAliveState = server.keepAliveState
         if let _ = server.sslConfig {
-            self.enableSSLVerfication = true
+            self.enableSSLVerification = true
         }
     }
 
@@ -80,7 +80,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
 
         switch request {
         case .head(let header):
-            serverRequest = HTTPServerRequest(ctx: ctx, requestHead: header, enableSSL: enableSSLVerfication)
+            serverRequest = HTTPServerRequest(ctx: ctx, requestHead: header, enableSSL: enableSSLVerification)
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
             guard let serverRequest = serverRequest else {
