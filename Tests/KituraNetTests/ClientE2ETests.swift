@@ -258,7 +258,9 @@ class ClientE2ETests: KituraNetTest {
     }
 
     func testUrlURL() {
-        performServerTest(TestURLDelegate()) { expectation in
+        let delegate = TestURLDelegate()
+        performServerTest(delegate) { expectation in
+            delegate.port = self.port
             self.performRequest("post", path: ClientE2ETests.urlPath, callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
                 expectation.fulfill()
@@ -311,12 +313,13 @@ class ClientE2ETests: KituraNetTest {
     }
 
     class TestURLDelegate: ServerDelegate {
+        var port = 0
 
         func handle(request: ServerRequest, response: ServerResponse) {
             XCTAssertEqual(request.httpVersionMajor, 1, "HTTP Major code from KituraNet should be 1, was \(String(describing: request.httpVersionMajor))")
             XCTAssertEqual(request.httpVersionMinor, 1, "HTTP Minor code from KituraNet should be 1, was \(String(describing: request.httpVersionMinor))")
             XCTAssertEqual(request.urlURL.path, urlPath, "Path in request.urlURL wasn't \(urlPath), it was \(request.urlURL.path)")
-            XCTAssertEqual(request.urlURL.port, KituraNetTest.portDefault)
+            XCTAssertEqual(request.urlURL.port, self.port)
             XCTAssertEqual(request.url, urlPath.data(using: .utf8))
             do {
                 response.statusCode = .OK

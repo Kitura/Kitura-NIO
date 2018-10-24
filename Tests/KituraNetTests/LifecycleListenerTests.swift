@@ -55,7 +55,7 @@ class LifecycleListenerTests: KituraNetTest {
         }
 
         do {
-            try server.listen(on: self.port)
+            try server.listen(on: 0)
 
             self.waitForExpectations(timeout: 5) { error in
                 XCTAssertNil(error)
@@ -127,7 +127,7 @@ class LifecycleListenerTests: KituraNetTest {
         }
 
         do {
-            try server.listen(on: self.port)
+            try server.listen(on: 0)
 
             self.waitForExpectations(timeout: 5) { error in
                 XCTAssertNil(error)
