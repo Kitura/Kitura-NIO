@@ -70,6 +70,8 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
     public typealias InboundIn = HTTPServerRequestPart
     public typealias OutboundOut = HTTPServerResponsePart
 
+    private var prevHTTPRequestHead: HTTPRequestHead? = nil
+
     public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
         let request = self.unwrapInboundIn(data)
 
@@ -80,8 +82,16 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
 
         switch request {
         case .head(let header):
-            serverRequest = HTTPServerRequest(ctx: ctx, requestHead: header, enableSSL: enableSSLVerification)
+            if prevHTTPRequestHead == nil || header != prevHTTPRequestHead {
+                serverRequest = HTTPServerRequest(ctx: ctx, requestHead: header, enableSSL: enableSSLVerification)
+                serverResponse = HTTPServerResponse(channel: ctx.channel, handler: self)
+                prevHTTPRequestHead = header
+            }
             self.clientRequestedKeepAlive = header.isKeepAlive
+            // If the server request holds a non-nil buffer at this point, we're reusing the former. Reset the buffer!
+            if serverRequest?.buffer != nil {
+                serverRequest?.buffer!.reset()
+            }
         case .body(var buffer):
             guard let serverRequest = serverRequest else {
                 Log.error("No ServerRequest available")
@@ -93,10 +103,13 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
                 serverRequest.buffer!.byteBuffer.write(buffer: &buffer)
             }
         case .end(_):
-            serverResponse = HTTPServerResponse(channel: ctx.channel, handler: self)
-            //Make sure we use the latest delegate registered with the server
+            // We might be reusing a previously used HTTPServerResponse. So, reset!
+            serverResponse?.reset()
+
+            // Move the handler invocation to a Dispatch queue. This ensures higher availabililty of the event loops to attend to newer HTTP requests.
             DispatchQueue.global().async {
                 guard let serverRequest = self.serverRequest, let serverResponse = self.serverResponse else { return }
+                // Make sure we use the latest delegate registered with the server
                 let delegate = self.server.delegate ?? HTTPDummyServerDelegate()
                 Monitor.delegate?.started(request: serverRequest, response: serverResponse)
                 delegate.handle(request: serverRequest, response: serverResponse)
