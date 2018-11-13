@@ -23,9 +23,11 @@ import Foundation
 /// are communicating via the HTTP protocol.
 public class HTTPServerRequest: ServerRequest {
 
+    private var _headersContainer: HeadersContainer
+
     /// Set of HTTP headers of the request.
     public var headers : HeadersContainer {
-        return HeadersContainer.create(from: _headers)
+        return _headersContainer
     }
 
     private var _headers: HTTPHeaders
@@ -128,6 +130,7 @@ public class HTTPServerRequest: ServerRequest {
 
     init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead, enableSSL: Bool) {
         self._headers = requestHead.headers
+        self._headersContainer = HeadersContainer.create(from: _headers)
         self.method = String(describing: requestHead.method)
         self.httpVersionMajor = requestHead.version.major
         self.httpVersionMinor = requestHead.version.minor
