@@ -35,14 +35,19 @@ public class HTTPServerRequest: ServerRequest {
         return _urlString
     }
 
+    private var _urlData: Data?
+
     /// The URL from the request in UTF-8 form
     /// This contains just the path and query parameters starting with '/'
     /// Use 'urlURL' for the full URL
     public var url : Data {
-        //The url needs to retain the percent encodings. URL.path doesn't, so we do this.
-        let components = urlURL.absoluteString.components(separatedBy: "/")
-        let path = "/" + components.dropFirst(3).joined(separator: "/")
-        return path.data(using: .utf8) ?? Data()
+        if _urlData == nil {
+            //The url needs to retain the percent encodings. URL.path doesn't, so we do this.
+            let components = urlURL.absoluteString.components(separatedBy: "/")
+            let path = "/" + components.dropFirst(3).joined(separator: "/")
+            _urlData = path.data(using: .utf8) ?? Data()
+        }
+        return _urlData!
     }
 
     @available(*, deprecated, message: "URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead")
