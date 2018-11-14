@@ -119,11 +119,28 @@ class PipeliningTests : KituraNetTest {
 
 
 private class Delegate: ServerDelegate {
-    var count = 0
+    var count: Int {
+        set {
+            self.syncQueue.sync {
+                _count = newValue
+            }
+        }
+
+        get {
+            return syncQueue.sync {
+                return _count
+            }
+        }
+    }
+
+    private var _count = 0
+
+    private let syncQueue = DispatchQueue(label: "PipeliningTests.syncCount")
+
     func handle(request: ServerRequest, response: ServerResponse) {
         response.statusCode = .OK
         do {
-            try response.end(text: "\(count)")
+            try response.end(text: "\(self.count)")
         } catch let error {
             Log.error("Error: \(error)")
         }
