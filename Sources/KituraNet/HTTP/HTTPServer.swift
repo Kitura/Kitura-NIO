@@ -174,13 +174,11 @@ public class HTTPServer : Server {
                     self.ctx = ctx
                     _ = channel.pipeline.remove(handler: httpHandler)
                 })
-                return channel.pipeline.add(handler: IdleStateHandler(allTimeout: TimeAmount.seconds(Int(HTTPRequestHandler.keepAliveTimeout)))).then {
-                    return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).then { () -> EventLoopFuture<Void> in
-                        if let openSSLServerHandler = self.createOpenSSLServerHandler() {
-                            _ = channel.pipeline.add(handler: openSSLServerHandler, first: true)
-                        }
-                        return channel.pipeline.add(handler: httpHandler)
+                return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).then {
+                    if let openSSLServerHandler = self.createOpenSSLServerHandler() {
+                        _ = channel.pipeline.add(handler: openSSLServerHandler, first: true)
                     }
+                    return channel.pipeline.add(handler: httpHandler)
                 }
             }
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
