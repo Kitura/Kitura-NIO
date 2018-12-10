@@ -475,7 +475,7 @@ public class ClientRequest {
         guard let data = authHeader.data(using: String.Encoding.utf8) else {
             return nil
         }
-        return "Basic \(data.base64EncodedString)"
+        return "Basic \(data.base64EncodedString())"
     }
 }
 
