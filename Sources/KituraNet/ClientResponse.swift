@@ -45,11 +45,11 @@ public class ClientResponse {
             guard let httpHeaders = httpHeaders else {
                 return HeadersContainer()
             }
-            return HeadersContainer.create(from: httpHeaders)
+            return HeadersContainer(with: httpHeaders)
         }
 
         set {
-           httpHeaders = newValue.httpHeaders()
+           httpHeaders = newValue.nioHeaders
         }
     }
     /// The HTTP Status code, as an Int, sent in the response by the remote server.

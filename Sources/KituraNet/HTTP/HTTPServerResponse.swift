@@ -183,7 +183,7 @@ public class HTTPServerResponse: ServerResponse {
 
     /// Send response to the client
     private func sendResponse(channel: Channel, handler: HTTPRequestHandler, status: HTTPResponseStatus, withBody: Bool = true) throws {
-        let response = HTTPResponseHead(version: httpVersion, status: status, headers: headers.httpHeaders())
+        let response = HTTPResponseHead(version: httpVersion, status: status, headers: headers.nioHeaders)
         channel.write(handler.wrapOutboundOut(.head(response)), promise: nil)
         if withBody && buffer.readableBytes > 0 {
             channel.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)

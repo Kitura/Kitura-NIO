@@ -115,7 +115,7 @@ public class HTTPServerRequest: ServerRequest {
     }
 
     init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead, enableSSL: Bool) {
-        self.headers = HeadersContainer.create(from: requestHead.headers)
+        self.headers = HeadersContainer(with: requestHead.headers)
         self.method = requestHead.method.string()
         self.httpVersionMajor = requestHead.version.major
         self.httpVersionMinor = requestHead.version.minor
