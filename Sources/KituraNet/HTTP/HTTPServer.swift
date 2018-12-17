@@ -21,6 +21,7 @@ import NIOOpenSSL
 import SSLService
 import LoggerAPI
 import NIOWebSocket
+import CLinuxHelpers
 
 /// An HTTP server that listens for connections on a socket.
 public class HTTPServer : Server {
@@ -66,11 +67,18 @@ public class HTTPServer : Server {
     private let maxPendingConnections = 100
 
     /// The event loop group on which the HTTP handler runs
-    let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+    private let eventLoopGroup: MultiThreadedEventLoopGroup
 
     private var ctx: ChannelHandlerContext?
 
-    public init() { }
+    public init() {
+#if os(Linux)
+        let numberOfCores = Int(linux_sched_getaffinity())
+        self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
+#else
+        self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+#endif
+    }
 
     /// SSL cert configs for handling client requests
     public var sslConfig: SSLService.Configuration? {
