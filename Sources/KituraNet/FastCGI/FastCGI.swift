@@ -16,17 +16,17 @@
 
 /// The "root" class for the FastCGI server implementation.
 public class FastCGI {
- 
+
     //
     // Global Constants used through FastCGI protocol implementation
     //
     struct Constants {
-        
+
         // general
         //
         static let FASTCGI_PROTOCOL_VERSION : UInt8 = 1
         static let FASTCGI_DEFAULT_REQUEST_ID : UInt16 = 0
-        
+
         // FastCGI record types
         //
         static let FCGI_NO_TYPE : UInt8 = 0
@@ -35,23 +35,23 @@ public class FastCGI {
         static let FCGI_PARAMS : UInt8 = 4
         static let FCGI_STDIN : UInt8 = 5
         static let FCGI_STDOUT : UInt8 = 6
-        
+
         // sub types
         //
         static let FCGI_SUBTYPE_NO_TYPE : UInt8 = 99
         static let FCGI_REQUEST_COMPLETE : UInt8 = 0
         static let FCGI_CANT_MPX_CONN : UInt8 = 1
         static let FCGI_UNKNOWN_ROLE : UInt8 = 3
-        
+
         // roles
         //
         static let FCGI_NO_ROLE : UInt16 = 99
         static let FCGI_RESPONDER : UInt16 = 1
-        
+
         // flags
         //
         static let FCGI_KEEP_CONN : UInt8 = 1
-        
+
         // request headers of note
         // we translate these into internal variables
         //
@@ -60,12 +60,12 @@ public class FastCGI {
         static let HEADER_HTTP_HOST : String = "HTTP_HOST";
         static let HEADER_REQUEST_URI : String = "REQUEST_URI";
     }
-    
+
     //
     // Exceptions
     //
     enum RecordErrors : Swift.Error {
-        
+
         case invalidType
         case invalidSubType
         case invalidRequestId
@@ -87,6 +87,4 @@ public class FastCGI {
     public static func createServer() -> FastCGIServer {
         return FastCGIServer()
     }
-
-    
 }

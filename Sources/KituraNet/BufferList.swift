@@ -79,8 +79,8 @@ public class BufferList {
     ///Fill a `NSMutableData` with data from the buffer.
     public func fill(data: NSMutableData) -> Int {
         let length = byteBuffer.readableBytes
-        let result = byteBuffer.readWithUnsafeReadableBytes() { body in 
-            data.append(body.baseAddress!, length: length) 
+        let result = byteBuffer.readWithUnsafeReadableBytes() { body in
+            data.append(body.baseAddress!, length: length)
             return length
         }
         return result
@@ -94,5 +94,5 @@ public class BufferList {
     ///Sets the buffer back to the beginning position. The next `BufferList.fill()` will take data from the beginning of the buffer.
     public func rewind() {
         byteBuffer.moveReaderIndex(to: 0)
-    }    
+    }
 }

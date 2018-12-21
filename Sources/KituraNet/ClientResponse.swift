@@ -25,18 +25,18 @@ public class ClientResponse {
     public init() { }
 
     public internal(set) var httpStatusCode: HTTPStatusCode = .unknown
-    
+
     /// HTTP Method of the incoming message.
     @available(*, deprecated, message:
     "This method never worked on Client Responses and was inherited incorrectly from a super class")
-    public var method: String { return "" } 
-    
+    public var method: String { return "" }
+
     /// Major version of HTTP of the response
     public var httpVersionMajor: UInt16?
-    
+
     /// Minor version of HTTP of the response
-    public var httpVersionMinor: UInt16? 
-    
+    public var httpVersionMinor: UInt16?
+
     internal var _headers: HTTPHeaders?
 
     /// Set of HTTP headers of the response.
@@ -67,7 +67,6 @@ public class ClientResponse {
 
     /// BufferList instance for storing the response
     var buffer: BufferList?
-
 
     /// Read a chunk of the body of the response.
     ///

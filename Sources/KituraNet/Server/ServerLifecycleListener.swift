@@ -105,4 +105,3 @@ class ServerLifecycleListener {
         self.clientConnectionFailCallbacks.append(callback)
     }
 }
-

@@ -20,15 +20,15 @@ import LoggerAPI
 
 /// A helper class to bridge betweem SSLService.Configuration (used by Kitura) and TLSConfiguration required by NIOOpenSSL
 internal class SSLConfiguration {
-   
+
     private var certificateFilePath: String?
-    
+
     private var keyFilePath: String?
 
     private var certificateChainFilePath: String?
 
     private var password: String?
-    
+
     // TODO: Consider other TLSConfiguration options (cipherSuites, trustRoots, applicationProtocols, etc..)
 
     /// Initialize using SSLService.Configuration

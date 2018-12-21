@@ -20,7 +20,7 @@ import Foundation
 /// across different networking protocols in an agnostic way to the
 /// Kitura project Router.
 public protocol ServerRequest: class {
-    
+
     /// The set of headers received with the incoming request
     var headers : HeadersContainer { get }
 
@@ -47,16 +47,16 @@ public protocol ServerRequest: class {
 
     /// The IP address of the client
     var remoteAddress: String { get }
-    
+
     /// Major version of HTTP of the request
     var httpVersionMajor: UInt16? { get }
 
     /// Minor version of HTTP of the request
     var httpVersionMinor: UInt16? { get }
-    
+
     /// The HTTP Method specified in the request
     var method: String { get }
-    
+
     /// Read data from the body of the request
     ///
     /// - Parameter data: A Data struct to hold the data read in.
@@ -64,14 +64,13 @@ public protocol ServerRequest: class {
     /// - Throws: Socket.error if an error occurred while reading from the socket
     /// - Returns: The number of bytes read
     func read(into data: inout Data) throws -> Int
-    
+
     /// Read a string from the body of the request.
     ///
     /// - Throws: Socket.error if an error occurred while reading from the socket
     /// - Returns: An Optional string
     func readString() throws -> String?
-    
-    
+
     /// Read all of the data in the body of the request
     ///
     /// - Parameter data: A Data struct to hold the data read in.

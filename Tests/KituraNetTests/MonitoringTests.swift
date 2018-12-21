@@ -22,21 +22,21 @@ import XCTest
 @testable import KituraNet
 
 class MonitoringTests: KituraNetTest {
-    
+
     static var allTests : [(String, (MonitoringTests) -> () throws -> Void)] {
         return [
             ("testStartedFinishedHTTP", testStartedFinishedHTTP)
         ]
     }
-    
+
     override func setUp() {
         doSetUp()
     }
-    
+
     override func tearDown() {
         doTearDown()
     }
-    
+
     func testStartedFinishedHTTP() {
         let startedExpectation = self.expectation(description: "started")
         let finishedExpectation = self.expectation(description: "finished")
@@ -58,14 +58,14 @@ class MonitoringTests: KituraNetTest {
                 })
             }
         }
-        
+
         server.failed { error in
             XCTFail("Server failed to start: \(error)")
         }
-        
+
         do {
             try server.listen(on: self.port)
-        
+
             self.waitForExpectations(timeout: 10) { error in
                 server.stop()
                 XCTAssertNil(error);
@@ -77,22 +77,22 @@ class MonitoringTests: KituraNetTest {
             Monitor.delegate = nil
         }
     }
-    
+
     private class TestMonitor: ServerMonitor {
         private let startedExpectation: XCTestExpectation
         private let finishedExpectation: XCTestExpectation
         private var startedTime = Date()
-        
+
         init(startedExpectation: XCTestExpectation, finishedExpectation: XCTestExpectation) {
             self.startedExpectation = startedExpectation
             self.finishedExpectation = finishedExpectation
         }
-        
+
         public func started(request: ServerRequest, response: ServerResponse) {
             startedTime = Date()
             startedExpectation.fulfill()
         }
-        
+
         public func finished(request: ServerRequest?, response: ServerResponse) {
             let now = Date()
             if now >= startedTime {
@@ -103,9 +103,9 @@ class MonitoringTests: KituraNetTest {
             }
         }
     }
-    
+
     private class TestServerDelegate : ServerDelegate {
-        
+
         func handle(request: ServerRequest, response: ServerResponse) {
             let payloadData = contentTypesString.data(using: .utf8)!
             do {

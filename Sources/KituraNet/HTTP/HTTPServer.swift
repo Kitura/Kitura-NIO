@@ -25,7 +25,7 @@ import CLinuxHelpers
 
 /// An HTTP server that listens for connections on a socket.
 public class HTTPServer : Server {
-    
+
     public typealias ServerType = HTTPServer
 
     /// HTTP `ServerDelegate`.
@@ -207,14 +207,13 @@ public class HTTPServer : Server {
         Log.verbose("Options for port \(self.port!): maxPendingConnections: \(maxPendingConnections), allowPortReuse: \(self.allowPortReuse)")
 
         let queuedBlock = DispatchWorkItem(block: {
-            guard let serverChannel = self.serverChannel else { return } 
+            guard let serverChannel = self.serverChannel else { return }
             try! serverChannel.closeFuture.wait()
             self.state = .stopped
             self.lifecycleListener.performStopCallbacks()
         })
         ListenerGroup.enqueueAsynchronously(on: DispatchQueue.global(), block: queuedBlock)
     }
-
 
     /// Static method to create a new HTTPServer and have it listen for connections.
     ///
@@ -228,7 +227,6 @@ public class HTTPServer : Server {
         try server.listen(on: port)
         return server
     }
-
 
     /// Listens for connections on a socket
     ///
@@ -247,7 +245,6 @@ public class HTTPServer : Server {
         }
     }
 
-
     /// Static method to create a new HTTPServer and have it listen for connections.
     ///
     /// - Parameter port: port number for accepting new connections
@@ -262,7 +259,7 @@ public class HTTPServer : Server {
         server.listen(port: port, errorHandler: errorHandler)
         return server
     }
-    
+
     deinit {
         do {
             try eventLoopGroup.syncShutdownGracefully()
@@ -311,7 +308,7 @@ public class HTTPServer : Server {
     /// - Returns: a `HTTPServer` instance
     @discardableResult
     public func failed(callback: @escaping (Swift.Error) -> Void) -> Self {
-        self.lifecycleListener.addFailCallback(callback) 
+        self.lifecycleListener.addFailCallback(callback)
         return self
     }
 
@@ -348,7 +345,7 @@ class HTTPDummyServerDelegate: ServerDelegate {
         catch {
             Log.error("Failed to send the response. Error = \(error)")
         }
-    } 
+    }
 }
 
 // A specialized Websocket upgrader for Kitura.

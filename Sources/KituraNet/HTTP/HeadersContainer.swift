@@ -25,7 +25,7 @@ public class HeadersContainer {
 
     /// The header storage
     internal var headers: [String: (key: String, value: [String])] = [:]
-    
+
     /// Create an instance of `HeadersContainer`
     public init() {}
 
@@ -39,7 +39,7 @@ public class HeadersContainer {
         get {
             return get(key)
         }
-        
+
         set(newValue) {
             if let newValue = newValue {
                 set(key, value: newValue)
@@ -55,19 +55,19 @@ public class HeadersContainer {
     /// - Parameter key: The HTTP header key
     /// - Parameter value: An array of strings to add as values of the HTTP header
     public func append(_ key: String, value: [String]) {
-        
+
         let lowerCaseKey = key.lowercased()
         let entry = headers[lowerCaseKey]
-        
+
         switch(lowerCaseKey) {
-            
+
         case "set-cookie":
             if let _ = entry {
                 headers[lowerCaseKey]?.value += value
             } else {
                 set(key, lowerCaseKey: lowerCaseKey, value: value)
             }
-            
+
         case "content-type", "content-length", "user-agent", "referer", "host",
              "authorization", "proxy-authorization", "if-modified-since",
              "if-unmodified-since", "from", "location", "max-forwards",
@@ -77,7 +77,7 @@ public class HeadersContainer {
                 break
             }
             fallthrough
-            
+
         default:
             guard let oldValue = entry?.value.first else {
                 set(key, lowerCaseKey: lowerCaseKey, value: value)
@@ -104,15 +104,15 @@ public class HeadersContainer {
     public func removeAll() {
         headers.removeAll(keepingCapacity: true)
     }
-    
+
     private func set(_ key: String, value: [String]) {
         set(key, lowerCaseKey: key.lowercased(), value: value)
     }
-    
+
     private func set(_ key: String, lowerCaseKey: String, value: [String]) {
         headers[lowerCaseKey] = (key: key, value: value)
     }
-    
+
     private func remove(_ key: String) {
         headers.removeValue(forKey: key.lowercased())
     }
@@ -185,4 +185,3 @@ extension HeadersContainer {
         return httpHeaders
     }
 }
-

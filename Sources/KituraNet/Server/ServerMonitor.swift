@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /// A protocol for implementing a delegate to receive monitoring events from KituraNet.
 public protocol ServerMonitor {
     /// An event fired when a HTTP request has finished being parsed and is about
@@ -23,7 +22,7 @@ public protocol ServerMonitor {
     /// - Parameter request: The `ServerRequest` class instance for the request starting.
     /// - Parameter response: The `ServerResponse` class instance for the request starting.
     func started(request: ServerRequest, response: ServerResponse)
-    
+
     /// An event fired when the processing of a HTTP request has finished.
     ///
     /// - Parameter request: The `ServerRequest` class instance for the request that finished.

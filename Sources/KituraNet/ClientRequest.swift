@@ -123,7 +123,6 @@ public class ClientRequest {
         case useHTTP2
     }
 
-
     init(url: String, callback: @escaping Callback) {
         self.url = url
         let url = URL(string: url)!
@@ -239,7 +238,6 @@ public class ClientRequest {
     ///                            that was received from the remote server.
     public typealias Callback = (ClientResponse?) -> Void
 
-
     /// Parse an URL String into options
     ///
     /// - Parameter urlString: URL of a String type
@@ -251,7 +249,6 @@ public class ClientRequest {
         }
         return []
     }
-
 
     /// Parse an URL class into options
     ///
@@ -287,7 +284,6 @@ public class ClientRequest {
         return options
     }
 
-
     /// Add a string to the body of the request to be sent
     ///
     /// - Parameter from: The String to be added
@@ -296,7 +292,6 @@ public class ClientRequest {
             write(from: data)
         }
     }
-
 
     /// Add the bytes in a Data struct to the body of the request to be sent
     ///
@@ -309,7 +304,6 @@ public class ClientRequest {
         headers["Content-Length"] = "\(bodyData!.count)" //very eagerly adding
     }
 
-
     /// Add a string to the body of the request to be sent and send the request
     /// to the remote server
     ///
@@ -320,7 +314,6 @@ public class ClientRequest {
         write(from: data)
         end(close: close)
     }
-
 
     /// Add the bytes in a Data struct to the body of the request to be sent
     /// and send the request to the remote server
@@ -339,7 +332,6 @@ public class ClientRequest {
     /// The client bootstrap used to connect to the remote server
     var bootstrap: ClientBootstrap?
 
-
     /// Send the request to the remote server
     ///
     /// - Parameter close: If true, add the "Connection: close" header to the set
@@ -352,7 +344,7 @@ public class ClientRequest {
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         if (URL(string: url)?.scheme)! == "https" {
            isHTTPS = true
-           self.sslConfig = TLSConfiguration.forClient(certificateVerification: .none)   
+           self.sslConfig = TLSConfiguration.forClient(certificateVerification: .none)
         }
 
         if isHTTPS {
