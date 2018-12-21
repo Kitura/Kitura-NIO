@@ -102,14 +102,14 @@ class KituraNetTest: XCTestCase {
             let requestQueue = DispatchQueue(label: "Request queue")
             for (index, asyncTask) in asyncTasks.enumerated() {
                 let expectation = self.expectation(line: line, index: index)
-                requestQueue.async() {
+                requestQueue.async {
                     asyncTask(expectation)
                 }
             }
 
             // wait for timeout or for all created expectations to be fulfilled
             waitExpectation(timeout: 10) { error in
-                XCTAssertNil(error);
+                XCTAssertNil(error)
             }
         } catch {
             XCTFail("Error: \(error)")
@@ -150,8 +150,8 @@ class KituraNetTest: XCTestCase {
                         headers: [String: String]? = nil, requestModifier: ((ClientRequest) -> Void)? = nil) {
 
         var allHeaders = [String: String]()
-        if  let headers = headers  {
-            for  (headerName, headerValue) in headers  {
+        if  let headers = headers {
+            for  (headerName, headerValue) in headers {
                 allHeaders[headerName] = headerValue
             }
         }

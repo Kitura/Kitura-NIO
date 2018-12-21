@@ -23,11 +23,11 @@ import Foundation
 #endif
 
 extension Range where Bound: BinaryInteger {
-    func iterate(by delta: Bound, action: (Range<Bound>) throws -> ()) throws {
+    func iterate(by delta: Bound, action: (Range<Bound>) throws -> Void) throws {
 
         var base = self.lowerBound
 
-        while (base < self.upperBound) {
+        while base < self.upperBound {
             let subRange = (base ..< (base + delta)).clamped(to: self)
             try action(subRange)
 
@@ -38,7 +38,7 @@ extension Range where Bound: BinaryInteger {
 
 /// The FastCGIServerRequest class implements the `ServerResponse` protocol
 /// for incoming HTTP requests that come in over a FastCGI connection.
-public class FastCGIServerResponse : ServerResponse {
+public class FastCGIServerResponse: ServerResponse {
 
     /// Size of buffers (64 * 1024 is the max size for a FastCGI outbound record)
     /// Which also gives a bit more internal buffer room.
@@ -57,7 +57,7 @@ public class FastCGIServerResponse : ServerResponse {
     private var status = HTTPStatusCode.OK.rawValue
 
     /// Corresponding server request
-    private weak var serverRequest : FastCGIServerRequest?
+    private weak var serverRequest: FastCGIServerRequest?
 
     /// The status code to send in the HTTP response.
     public var statusCode: HTTPStatusCode? {

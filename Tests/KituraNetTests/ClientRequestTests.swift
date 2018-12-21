@@ -140,7 +140,7 @@ class ClientRequestTests: KituraNetTest {
 }
 
 extension ClientRequestTests {
-    static var allTests : [(String, (ClientRequestTests) -> () throws -> Void)] {
+    static var allTests: [(String, (ClientRequestTests) -> () throws -> Void)] {
         return [
             ("testClientRequestWhenInitializedWithValidURL", testClientRequestWhenInitializedWithValidURL),
             ("testClientRequestWhenInitializedWithSimpleSchema",
@@ -154,7 +154,7 @@ extension ClientRequestTests {
             ("testClientRequestSet", testClientRequestSet),
             ("testClientRequestParse", testClientRequestParse),
             ("testClientRequestBasicAuthentcation", testClientRequestBasicAuthentcation),
-            ("testClientRequestSyncBehavior", testClientRequestSyncBehavior),
+            ("testClientRequestSyncBehavior", testClientRequestSyncBehavior)
         ]
     }
 }

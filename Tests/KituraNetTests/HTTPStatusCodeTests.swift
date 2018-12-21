@@ -66,12 +66,12 @@ class HTTPStatusCodeTests: KituraNetTest {
 }
 
 extension HTTPStatusCodeTests {
-    static var allTests : [(String, (HTTPStatusCodeTests) -> () throws -> Void)] {
+    static var allTests: [(String, (HTTPStatusCodeTests) -> () throws -> Void)] {
         return [
             ("testStatusCodeCreation", testStatusCodeCreation),
             ("testInvalidStatusCode", testInvalidStatusCode),
             ("testClassOfStatusCode", testClassOfStatusCode),
-            ("testClassOfEveryValidCode", testClassOfEveryValidCode),
+            ("testClassOfEveryValidCode", testClassOfEveryValidCode)
         ]
     }
 }

@@ -25,7 +25,7 @@ public protocol ServerResponse: class {
     var statusCode: HTTPStatusCode? { get set }
 
     /// The headers to send back as part of the HTTP response.
-    var headers : HeadersContainer { get }
+    var headers: HeadersContainer { get }
 
     /// Add a string to the body of the HTTP response.
     ///

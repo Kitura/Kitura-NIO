@@ -30,7 +30,7 @@ public enum KeepAliveState {
     }
 
     /// Decrements the number of requests remaining
-    mutating func decrement() -> Void {
+    mutating func decrement() {
         switch self {
         case .unlimited: break
         case .limited(let limit):

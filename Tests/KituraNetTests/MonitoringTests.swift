@@ -23,7 +23,7 @@ import XCTest
 
 class MonitoringTests: KituraNetTest {
 
-    static var allTests : [(String, (MonitoringTests) -> () throws -> Void)] {
+    static var allTests: [(String, (MonitoringTests) -> () throws -> Void)] {
         return [
             ("testStartedFinishedHTTP", testStartedFinishedHTTP)
         ]
@@ -68,7 +68,7 @@ class MonitoringTests: KituraNetTest {
 
             self.waitForExpectations(timeout: 10) { error in
                 server.stop()
-                XCTAssertNil(error);
+                XCTAssertNil(error)
                 Monitor.delegate = nil
             }
         } catch let error {
@@ -97,14 +97,13 @@ class MonitoringTests: KituraNetTest {
             let now = Date()
             if now >= startedTime {
                 finishedExpectation.fulfill()
-            }
-            else {
+            } else {
                 XCTFail("Monitoring finished called before Monitoring started")
             }
         }
     }
 
-    private class TestServerDelegate : ServerDelegate {
+    private class TestServerDelegate: ServerDelegate {
 
         func handle(request: ServerRequest, response: ServerResponse) {
             let payloadData = contentTypesString.data(using: .utf8)!
@@ -113,8 +112,7 @@ class MonitoringTests: KituraNetTest {
                 response.headers["Content-Length"] = ["\(payloadData.count)"]
                 try response.write(from: payloadData)
                 try response.end()
-            }
-            catch {
+            } catch {
                 XCTFail("Error writing response.")
             }
         }

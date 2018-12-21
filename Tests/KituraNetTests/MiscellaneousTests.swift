@@ -22,7 +22,7 @@ import XCTest
 
 class MiscellaneousTests: KituraNetTest {
 
-    static var allTests : [(String, (MiscellaneousTests) -> () throws -> Void)] {
+    static var allTests: [(String, (MiscellaneousTests) -> () throws -> Void)] {
         return [
             ("testEscape", testEscape),
             ("testHeadersContainers", testHeadersContainers)
@@ -46,7 +46,7 @@ class MiscellaneousTests: KituraNetTest {
         var foundContentType = false
 
         for (key, value) in headers {
-            switch(key.lowercased()) {
+            switch key.lowercased() {
             case "content-type":
                 XCTAssertEqual(value.count, 1, "Content-Type didn't have only one value. It had \(value.count) values")
                 XCTAssertEqual(value[0], "text/plain", "Expecting a value of text/plain. Found \(value[0])")

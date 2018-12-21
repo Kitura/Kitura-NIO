@@ -46,7 +46,7 @@ public class HTTPServerResponse: ServerResponse {
     }
 
     /// The HTTP headers to be sent to the client as part of the response.
-    public var headers : HeadersContainer = HeadersContainer()
+    public var headers: HeadersContainer = HeadersContainer()
 
     /// The HTTP version to be sent in the response.
     private var httpVersion: HTTPVersion

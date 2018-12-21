@@ -24,29 +24,29 @@ import Foundation
 public class HTTPServerRequest: ServerRequest {
 
     /// Set of HTTP headers of the request.
-    public var headers : HeadersContainer
+    public var headers: HeadersContainer
 
     @available(*, deprecated, message: "This contains just the path and query parameters starting with '/'. use 'urlURL' instead")
-    public var urlString : String {
+    public var urlString: String {
         return _urlString
     }
 
     /// The URL from the request in UTF-8 form
     /// This contains just the path and query parameters starting with '/'
     /// Use 'urlURL' for the full URL
-    public var url : Data {
+    public var url: Data {
         //The url needs to retain the percent encodings. URL.path doesn't, so we do this.
         return _urlString.data(using: .utf8) ?? Data()
     }
 
     @available(*, deprecated, message: "URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead")
-    public var urlComponents : URLComponents {
+    public var urlComponents: URLComponents {
         return URLComponents(url: urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
     }
 
     private var _url: URL?
 
-    public var urlURL : URL {
+    public var urlURL: URL {
         if let _url = _url {
             return _url
         }
@@ -98,7 +98,7 @@ public class HTTPServerRequest: ServerRequest {
 
     private var enableSSL: Bool = false
 
-    private var _urlString : String
+    private var _urlString: String
 
     private static func host(socketAddress: SocketAddress?) -> String {
         guard let socketAddress = socketAddress else {
@@ -109,7 +109,7 @@ public class HTTPServerRequest: ServerRequest {
             return addr.host
         case .v6(let addr):
             return addr.host
-        case .unixDomainSocket(_):
+        case .unixDomainSocket:
             return "n/a"
         }
     }

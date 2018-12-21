@@ -22,7 +22,7 @@ import XCTest
 
 class LargePayloadTests: KituraNetTest {
 
-    static var allTests : [(String, (LargePayloadTests) -> () throws -> Void)] {
+    static var allTests: [(String, (LargePayloadTests) -> () throws -> Void)] {
         return [
             ("testLargePosts", testLargePosts),
             ("testLargeGets", testLargeGets)
@@ -52,12 +52,10 @@ class LargePayloadTests: KituraNetTest {
                     let postValue = String(data: data, encoding: .utf8)
                     if  let postValue = postValue {
                         XCTAssertEqual(postValue, expectedResult)
-                    }
-                    else {
+                    } else {
                         XCTFail("postValue's value wasn't an UTF8 string")
                     }
-                }
-                catch {
+                } catch {
                     XCTFail("Failed reading the body of the response")
                 }
                 expectation.fulfill()
@@ -78,13 +76,12 @@ class LargePayloadTests: KituraNetTest {
         })
     }
 
-    private class TestServerDelegate : ServerDelegate {
+    private class TestServerDelegate: ServerDelegate {
 
         func handle(request: ServerRequest, response: ServerResponse) {
             if  request.method.uppercased() == "GET" {
                 handleGet(request: request, response: response)
-            }
-            else {
+            } else {
                 handlePost(request: request, response: response)
             }
         }
@@ -100,8 +97,7 @@ class LargePayloadTests: KituraNetTest {
                 response.headers["Content-Length"] = ["\(payloadData.count)"]
                 try response.write(from: payloadData)
                 try response.end()
-            }
-            catch {
+            } catch {
                 print("Error writing response.")
             }
         }
@@ -115,8 +111,7 @@ class LargePayloadTests: KituraNetTest {
                 response.headers["Content-Length"] = ["\(result.count)"]
 
                 try response.end(text: result)
-            }
-            catch {
+            } catch {
                 print("Error reading body or writing response")
             }
         }
