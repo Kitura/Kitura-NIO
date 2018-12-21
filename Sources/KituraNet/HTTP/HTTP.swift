@@ -18,10 +18,10 @@ import Foundation
 
 /// A set of helpers for HTTP: status codes mapping, server and client request creation.
 public class HTTP {
-    
+
     /// Mapping of integer HTTP status codes to the String description.
     public static let statusCodes = [
-        
+
         100: "Continue", 101: "Switching Protocols", 102: "Processing",
         200: "OK", 201: "Created", 202: "Accepted", 203: "Non Authoritative Information",
         204: "No Content", 205: "Reset Content", 206: "Partial Content", 207: "Multi-Status",
@@ -39,7 +39,7 @@ public class HTTP {
         504: "Gateway Timeout", 505: "HTTP Version Not Supported", 507: "Insufficient Storage",
         511: "Network Authentication Required"
     ]
-    
+
     public static func createServer() -> HTTPServer {
         return HTTPServer()
     }
@@ -68,12 +68,11 @@ public class HTTP {
     }
 }
 
-
 // MARK HTTPStatusCode
 
 /// HTTP status codes and numbers.
 public enum HTTPStatusCode: Int {
-    
+
     case accepted = 202, badGateway = 502, badRequest = 400, conflict = 409, `continue` = 100, created = 201
     case expectationFailed = 417, failedDependency  = 424, forbidden = 403, gatewayTimeout = 504, gone = 410
     case httpVersionNotSupported = 505, insufficientSpaceOnResource = 419, insufficientStorage = 507
@@ -87,7 +86,7 @@ public enum HTTPStatusCode: Int {
     case resetContent = 205, seeOther = 303, serviceUnavailable = 503, switchingProtocols = 101
     case temporaryRedirect = 307, tooManyRequests = 429, unauthorized = 401, unprocessableEntity = 422
     case unsupportedMediaType = 415, useProxy = 305, misdirectedRequest = 421, unknown = -1
-    
+
 }
 
 extension HTTPStatusCode {
@@ -124,6 +123,4 @@ extension HTTPStatusCode {
     public var `class`: Class {
         return Class(code: self.rawValue)
     }
-
 }
-

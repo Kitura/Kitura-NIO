@@ -19,7 +19,7 @@ import Dispatch
 /// A class that provides a set of helper functions that enables a caller to wait
 /// for a group of listener blocks to finish executing.
 public class ListenerGroup {
-    
+
     /// Group for waiting on listeners
     private static let group = DispatchGroup()
 
@@ -27,7 +27,7 @@ public class ListenerGroup {
     public static func waitForListeners() {
         _ = group.wait(timeout: DispatchTime.distantFuture)
     }
-    
+
     /// Enqueue a block of code on a given queue, assigning
     /// it to the listener group in the process (so we can wait
     /// on it later).
@@ -38,5 +38,4 @@ public class ListenerGroup {
     public static func enqueueAsynchronously(on queue: DispatchQueue, block: DispatchWorkItem) {
         queue.async(group: ListenerGroup.group, execute: block)
     }
-    
 }

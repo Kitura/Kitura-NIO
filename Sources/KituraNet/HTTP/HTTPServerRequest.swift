@@ -70,20 +70,19 @@ public class HTTPServerRequest: ServerRequest {
 
         url.append(_urlString)
 
-   
         if let urlURL = URL(string: url) {
             self._url = urlURL
         } else {
             Log.error("URL init failed from: \(url)")
             self._url = URL(string: "http://not_available/")!
         }
-        
+
         return self._url!
     }
 
     /// Server IP address pulled from socket.
     public var remoteAddress: String
-    
+
     /// Minor version of HTTP of the request
     public var httpVersionMajor: UInt16?
 
@@ -126,7 +125,7 @@ public class HTTPServerRequest: ServerRequest {
         self.localAddress = HTTPServerRequest.host(socketAddress: localAddress)
         self.localAddressPort = localAddress?.port.map { Int($0) } ?? 0
         self.enableSSL = enableSSL
-    } 
+    }
 
     var buffer: BufferList?
 

@@ -49,7 +49,7 @@ class LifecycleListenerTests: KituraNetTest {
             started = true
             startExpectation.fulfill()
         }
-        
+
         server.clientConnectionFailed() { error in
             XCTFail("A client connection had an error [\(error)]")
         }
@@ -76,7 +76,7 @@ class LifecycleListenerTests: KituraNetTest {
             XCTFail("Error: \(error)")
         }
     }
-    
+
     /*func testFastCGILifecycle() {
         
         //Create server
@@ -116,7 +116,7 @@ class LifecycleListenerTests: KituraNetTest {
             XCTFail("Error: \(error)")
         }
     }*/
-    
+
     func testLifecycleWithState() {
         var started = false
         let startExpectation = self.expectation(description: "start")
@@ -148,7 +148,7 @@ class LifecycleListenerTests: KituraNetTest {
     func testServerFailLifecycle() {
 
         let failedCallbackExpectation = self.expectation(description: "failedCallback")
-        
+
         let server = HTTP.createServer()
         server.failed(callback: { error in
             failedCallbackExpectation.fulfill()
@@ -160,7 +160,7 @@ class LifecycleListenerTests: KituraNetTest {
             // Do NOT fail the test if an error is thrown.
             // In this test case an error should be thrown.
         }
-        
+
         self.waitForExpectations(timeout: 5) { error in
             XCTAssertNil(error)
         }

@@ -61,7 +61,7 @@ class RegressionTests: KituraNetTest {
             defer {
                 server.stop()
             }
- 
+
             var badClient = try BadClient()
             var goodClient = try GoodClient()
 
@@ -69,7 +69,7 @@ class RegressionTests: KituraNetTest {
             try badClient.connect(serverPort, expectation: self.expectation(description: "Connecting a bad client"))
             XCTAssertEqual(badClient.connectedPort, serverPort, "BadClient not connected to expected server port")
             //XCTAssertFalse(badClient.socket.isSecure, "Expected BadClient socket to be insecure")
-            
+
             /// Connect a 'good' (SSL enabled) client to the server
             try goodClient.connect(serverPort, expectation: self.expectation(description: "Connecting a bad client"))
             XCTAssertEqual(goodClient.connectedPort, serverPort, "GoodClient not connected to expected server port")
@@ -77,12 +77,12 @@ class RegressionTests: KituraNetTest {
         } catch {
              XCTFail("Error: \(error)")
         }
-        
+
         waitForExpectations(timeout: 10)
     }
 
     /// Tests that attempting to start a second HTTPServer on the same port fails.
-    func testServersCollidingOnPort() { 
+    func testServersCollidingOnPort() {
         do {
             let server: HTTPServer
             let serverPort: Int
@@ -90,7 +90,7 @@ class RegressionTests: KituraNetTest {
             defer {
                 server.stop()
             }
-            
+
             do {
                 let collidingServer: HTTPServer = try startServer(nil, port: serverPort, useSSL: false)
                 defer {
@@ -100,12 +100,11 @@ class RegressionTests: KituraNetTest {
             } catch {
                 XCTAssert(error is IOError, "Expected an IOError, received: \(error)")
             }
-            
+
         } catch {
             XCTFail("Error: \(error)")
         }
     }
-
 
     /// Tests that attempting to start a second HTTPServer on the same port with
     /// SO_REUSEPORT enabled is successful.
@@ -115,13 +114,13 @@ class RegressionTests: KituraNetTest {
             defer {
                 server.stop()
             }
-            
+
             guard let serverPort = server.port else {
                 XCTFail("Server port was not initialized")
                 return
             }
             XCTAssertTrue(serverPort != 0, "Ephemeral server port not set")
-            
+
             do {
                 let sharingServer: HTTPServer = try startServer(nil, port: serverPort, useSSL: false, allowPortReuse: true)
                 defer {
@@ -130,12 +129,11 @@ class RegressionTests: KituraNetTest {
             } catch {
                 XCTFail("Second server could not share listener port, received: \(error)")
             }
-            
+
         } catch {
             XCTFail("Error: \(error)")
         }
     }
-
 
     ///Test that sending a bad request results in a `400/Bad Request` response
     ///from the server with a `Connection: Close` header
@@ -163,9 +161,8 @@ class RegressionTests: KituraNetTest {
         } catch {
             XCTFail("Couldn't start server")
         }
+    }
 
-    }    
-    
     /// Tests that sending a good request followed by garbage on a Keep-Alive
     /// connection results in a `200/OK` response, followed by a `400/Bad Request`
     /// response with `Connection: Close` header.
@@ -195,24 +192,23 @@ class RegressionTests: KituraNetTest {
         }
     }
 
-
     /// A simple client which connects to a port but sends no data
     struct BadClient {
         let clientBootstrap: ClientBootstrap
 
         var channel: Channel?
-         
+
         var connectedPort: Int {
             return Int(channel?.remoteAddress?.port ?? 0)
         }
-            
+
         init() throws {
             clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
                 .channelInitializer { channel in
                     channel.pipeline.addHTTPClientHandlers()
-                } 
+                }
         }
-        
+
         mutating func connect(_ port: Int, expectation: XCTestExpectation) throws {
             do {
                 channel = try clientBootstrap.connect(host: "localhost", port: port).wait()
@@ -225,18 +221,17 @@ class RegressionTests: KituraNetTest {
         }
     }
 
-
     /// A simple client based on OpenSSL, which connects to a port and performs
     /// an SSL handshake
     struct GoodClient {
         let clientBootstrap: ClientBootstrap
-    
+
         var channel: Channel?
- 
+
         var connectedPort: Int {
             return Int(channel?.remoteAddress?.port ?? 0)
         }
-        
+
         init() throws {
             var openSSLClientHandler: OpenSSLHandler? {
                 let sslConfig = TLSConfiguration.forClient(certificateVerification: .none)
@@ -279,7 +274,7 @@ class RegressionTests: KituraNetTest {
                expectation.fulfill()
             }
         }
-        
+
         mutating func makeBadRequest(_ port: Int) throws {
             do {
                 channel = try clientBootstrap.connect(host: "localhost", port: port).wait()
@@ -303,14 +298,12 @@ class RegressionTests: KituraNetTest {
             _ = channel?.write(NIOAny(HTTPClientRequestPart.head(request)))
             _ = channel?.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
             sleep(1) //workaround for an apparent swift-nio issue
-            let request0 = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET,  uri: "#/") 
+            let request0 = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET,  uri: "#/")
             _ = channel?.write(NIOAny(HTTPClientRequestPart.head(request0)))
             _ = channel?.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
-        }    
-
+        }
     }
 }
-
 
 class HTTPClient: ChannelInboundHandler {
     typealias InboundIn = HTTPClientResponsePart

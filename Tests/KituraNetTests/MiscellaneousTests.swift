@@ -21,41 +21,41 @@ import XCTest
 @testable import KituraNet
 
 class MiscellaneousTests: KituraNetTest {
-    
+
     static var allTests : [(String, (MiscellaneousTests) -> () throws -> Void)] {
         return [
             ("testEscape", testEscape),
             ("testHeadersContainers", testHeadersContainers)
         ]
     }
-    
+
     func testEscape() {
         let testString = "#%?"
         let desiredResult = "%23%25%3F"
-        
+
         XCTAssertEqual(HTTP.escape(url: testString), desiredResult, "Escape of \"\(testString)\" wasn't \"\(desiredResult)\", it was \"\(HTTP.escape(url: testString))\"")
     }
-    
+
     func testHeadersContainers() {
         let headers = HeadersContainer()
         headers.append("Set-Cookie", value: "plover=xyzzy")
         headers.append("Set-Cookie", value: "kitura=great")
         headers.append("Content-Type", value: "text/plain")
-        
+
         var foundSetCookie = false
         var foundContentType = false
-        
+
         for (key, value) in headers {
             switch(key.lowercased()) {
             case "content-type":
                 XCTAssertEqual(value.count, 1, "Content-Type didn't have only one value. It had \(value.count) values")
                 XCTAssertEqual(value[0], "text/plain", "Expecting a value of text/plain. Found \(value[0])")
                 foundContentType = true
-                
+
             case "set-cookie":
                 XCTAssertEqual(value.count, 2, "Set-Cookie didn't have two values. It had \(value.count) values")
                 foundSetCookie = true
-                
+
             default:
                 XCTFail("Found a header other than Content-Type or Set-Cookie (\(key))")
             }

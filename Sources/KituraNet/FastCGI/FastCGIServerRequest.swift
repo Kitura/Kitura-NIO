@@ -99,7 +99,7 @@ public class FastCGIServerRequest : ServerRequest {
         case unsupportedRole
         case internalError
     }
-    
+
     public init () {
     }
 

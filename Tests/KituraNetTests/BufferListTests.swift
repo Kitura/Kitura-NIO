@@ -49,7 +49,7 @@ class BufferListTests: XCTestCase {
         XCTAssertEqual(fillArray.reduce(0) { Int($0) + Int($1) }, 512)
         var fillArray0 = [UInt8](repeating: 0, count: 1024)
         let result0 = bufferList.fill(array: &fillArray0)
-        XCTAssertEqual(result0, 512)        
+        XCTAssertEqual(result0, 512)
         bufferList.reset()
     }
 
@@ -72,13 +72,12 @@ class BufferListTests: XCTestCase {
         bufferList.reset()
     }
 
-
     func testFillUnsafeMutablePointer() {
         let data = Data(repeating: 1, count: 512)
         bufferList.append(data: data)
         let array = [UInt8](repeating: 0, count: 64)
         let pointer = UnsafeMutablePointer(mutating: array)
-        let result = bufferList.fill(buffer: pointer, length: 64) 
+        let result = bufferList.fill(buffer: pointer, length: 64)
         XCTAssertEqual(result, 64)
         XCTAssertEqual(Array(UnsafeBufferPointer(start: pointer, count: 64)).reduce(0) { Int($0) + Int($1) }, 64)
         bufferList.reset()
@@ -92,24 +91,24 @@ class BufferListTests: XCTestCase {
         XCTAssertEqual(result0, 48)
         bufferList.rewind()
         var array1 = [UInt8](repeating: 0, count: 48)
-        let result1 = bufferList.fill(array: &array1) 
+        let result1 = bufferList.fill(array: &array1)
         XCTAssertEqual(result1, 48)
         bufferList.reset()
     }
 
     func testDataAndCount() {
         let data = Data(repeating: 1, count: 64)
-        bufferList.append(data: data) 
+        bufferList.append(data: data)
         XCTAssertEqual(bufferList.data.count, 64)
         XCTAssertEqual(bufferList.count, 4096)
         bufferList.reset()
     }
-        
+
     static var allTests = [
         ("testAppendUnsafePointerLength", testAppendUnsafePointerLength),
         ("testAppendData", testAppendData),
         ("testFillArray", testFillArray),
-        ("testFillData", testFillData), 
+        ("testFillData", testFillData),
         ("testFillMutableData", testFillMutableData),
         ("testFillUnsafeMutablePointer", testFillUnsafeMutablePointer),
         ("testRewind", testRewind),

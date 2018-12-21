@@ -27,36 +27,36 @@ class HTTPResponseTests: KituraNetTest {
             ("testMultipleWritesToResponse", testMultipleWritesToResponse),
         ]
     }
-    
+
     func testContentTypeHeaders() {
         let headers = HeadersContainer()
-        
+
         headers.append("Content-Type", value: "text/html")
         var values = headers["Content-Type"]
         XCTAssertNotNil(values, "Couldn't retrieve just set Content-Type header")
         XCTAssertEqual(values?.count, 1, "Content-Type header should only have one value")
         XCTAssertEqual(values?[0], "text/html")
-        
+
         headers.append("Content-Type", value: "text/plain; charset=utf-8")
         XCTAssertEqual(headers["Content-Type"]?[0], "text/html")
-        
+
         headers["Content-Type"] = nil
         XCTAssertNil(headers["Content-Type"])
-        
+
         headers.append("Content-Type", value: "text/plain, image/png")
         XCTAssertEqual(headers["Content-Type"]?[0], "text/plain, image/png")
-        
+
         headers.append("Content-Type", value: "text/html, image/jpeg")
         XCTAssertEqual(headers["Content-Type"]?[0], "text/plain, image/png")
-        
+
         headers.append("Content-Type", value: "charset=UTF-8")
         XCTAssertEqual(headers["Content-Type"]?[0], "text/plain, image/png")
-        
+
         headers["Content-Type"] = nil
-        
+
         headers.append("Content-Type", value: "text/html")
         XCTAssertEqual(headers["Content-Type"]?[0], "text/html")
-        
+
         headers.append("Content-Type", value: "image/png, text/plain")
         XCTAssertEqual(headers["Content-Type"]?[0], "text/html")
     }

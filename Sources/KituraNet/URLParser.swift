@@ -27,29 +27,29 @@ public class URLParser : CustomStringConvertible {
 
     /// Hostname.
     public var host: String?
-    
+
     /// Path portion of the URL.
     public var path: String?
-    
+
     /// The entire query portion of the URL.
     public var query: String?
-    
+
     /// An optional fragment identifier providing direction to a secondary resource.
     public var fragment: String?
-    
+
     /// The userid and password if specified in the URL.
     public var userinfo: String?
-    
+
     /// The port specified, if any, in the URL.
     public var port: Int?
-    
+
     /// The query parameters broken out.
     public var queryParameters: [String:String] = [:]
-    
+
     /// Nicely formatted description of the parsed result.
     public var description: String {
         var desc = ""
-        
+
         if let schema = schema {
             desc += "schema: \(schema) "
         }
@@ -72,10 +72,9 @@ public class URLParser : CustomStringConvertible {
         if let userinfo = userinfo {
             desc += "userinfo: \(userinfo) "
         }
-        
+
         return desc
     }
-
 
     /// Initialize a new `URLParser` instance.
     ///     - Parameter url: The URL to be parsed.
@@ -92,7 +91,7 @@ public class URLParser : CustomStringConvertible {
         }
         self.port = urlComponents?.port
         if let queryItems = urlComponents?.queryItems{
-           queryItems.forEach { 
+           queryItems.forEach {
                self.queryParameters[$0.name] = $0.value
            }
         }

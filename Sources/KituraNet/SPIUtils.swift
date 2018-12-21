@@ -26,25 +26,25 @@ import Foundation
 
 /// A set of utility functions.
 public class SPIUtils {
-    
+
     /// Abbreviations for month names
     private static let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                                  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    
+
     /// Abbreviations for days of the week
     private static let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    
+
     /// Format the given time for use in HTTP, default value is current time.
     ///
     /// - Parameter timestamp: the time ( default value is current timestamp )
     ///
     /// - Returns: string representation of timestamp
     public static func httpDate(from timestamp: time_t = time(nil)) -> String {
-        
+
         var theTime = timestamp
         var timeStruct: tm = tm()
         gmtime_r(&theTime, &timeStruct)
-        
+
         let wday = Int(timeStruct.tm_wday)
         let mday = Int(timeStruct.tm_mday)
         let mon = Int(timeStruct.tm_mon)
@@ -69,9 +69,9 @@ public class SPIUtils {
         s.append(twoDigit[sec])
         s.append(" GMT")
         return s
-        
+
     }
-    
+
     /// Format the given date for use in HTTP
     ///
     /// - Parameter date: the date
@@ -94,7 +94,6 @@ public class SPIUtils {
                                    "90", "91", "92", "93", "94", "95", "96", "97", "98", "99"]
 }
 
-
 extension Date {
     /// Format the date for use in HTTP
     ///
@@ -103,4 +102,3 @@ extension Date {
         return SPIUtils.httpDate(self)
     }
 }
-

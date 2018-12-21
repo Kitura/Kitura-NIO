@@ -24,7 +24,7 @@ import Dispatch
 internal class HTTPRequestHandler: ChannelInboundHandler {
 
     /// The HTTPServer instance on which this handler is installed
-    var server: HTTPServer 
+    var server: HTTPServer
 
     /// The serverRequest related to this handler instance
     var serverRequest: HTTPServerRequest?
@@ -54,12 +54,12 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
     private var _keepAliveState: KeepAliveState = .unlimited
 
     static let keepAliveTimeout: TimeInterval = 60
-  
+
     private(set) var clientRequestedKeepAlive = false
 
     private(set) var enableSSLVerification = false
 
-    public init(for server: HTTPServer) { 
+    public init(for server: HTTPServer) {
         self.server = server
         self.keepAliveState = server.keepAliveState
         if let _ = server.sslConfig {

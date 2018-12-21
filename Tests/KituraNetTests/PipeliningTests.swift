@@ -117,7 +117,6 @@ class PipeliningTests : KituraNetTest {
     }
 }
 
-
 private class Delegate: ServerDelegate {
     var count: Int {
         set {
@@ -147,7 +146,6 @@ private class Delegate: ServerDelegate {
         count += 1
     }
 }
-
 
 private class PipelinedRequestsHandler: ChannelInboundHandler {
     typealias InboundIn = HTTPClientResponsePart

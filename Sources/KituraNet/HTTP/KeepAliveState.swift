@@ -15,11 +15,11 @@
  */
 
 public enum KeepAliveState {
-    
+
     case disabled
     case unlimited
     case limited(maxRequests: UInt)
-    
+
     /// Returns true if there are requests remaining, or unlimited requests are allowed
     func keepAlive() -> Bool {
         switch self {
@@ -28,7 +28,7 @@ public enum KeepAliveState {
         case .limited(let limit): return limit > 0
         }
     }
-    
+
     /// Decrements the number of requests remaining
     mutating func decrement() -> Void {
         switch self {
@@ -40,7 +40,7 @@ public enum KeepAliveState {
             assertionFailure("Cannot decrement when Keep-Alive is disabled")
         }
     }
-    
+
     /// Returns the number of requests remaining if the KeepAlive state is `limited`.
     var requestsRemaining: UInt? {
         switch self {
@@ -49,4 +49,3 @@ public enum KeepAliveState {
         }
     }
 }
-

@@ -50,7 +50,7 @@ class KituraNetTest: XCTestCase {
                                             usingSelfSignedCerts: true, cipherSuite: nil)
         #endif
     }()
-    
+
     static let clientSSLConfig = SSLService.Configuration(withCipherSuite: nil, clientAllowsSelfSignedCertificates: true)
 
     //private static let initOnce: () = PrintLogger.use(colored: true)
@@ -63,7 +63,7 @@ class KituraNetTest: XCTestCase {
     }
 
     func startServer(_ delegate: ServerDelegate?, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault) throws -> HTTPServer {
-        
+
         let server = HTTP.createServer()
         server.delegate = delegate
         server.allowPortReuse = allowPortReuse
@@ -73,7 +73,7 @@ class KituraNetTest: XCTestCase {
         try server.listen(on: port)
         return server
     }
-    
+
     /// Convenience function for starting an HTTPServer on an ephemeral port,
     /// returning the a tuple containing the server and the port it is listening on.
     func startEphemeralServer(_ delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault) throws -> (server: HTTPServer, port: Int) {
@@ -86,7 +86,7 @@ class KituraNetTest: XCTestCase {
         }
         return (server, serverPort)
     }
-    
+
     func performServerTest(_ delegate: ServerDelegate?, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault,
                            line: Int = #line, asyncTasks: (XCTestExpectation) -> Void...) {
 
