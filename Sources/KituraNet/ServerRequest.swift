@@ -22,28 +22,28 @@ import Foundation
 public protocol ServerRequest: class {
 
     /// The set of headers received with the incoming request
-    var headers : HeadersContainer { get }
+    var headers: HeadersContainer { get }
 
     /// The URL from the request in string form
     /// This contains just the path and query parameters starting with '/'
     /// Use 'urlURL' for the full URL
     @available(*, deprecated, message:
         "This contains just the path and query parameters starting with '/'. use 'urlURL' instead")
-    var urlString : String { get }
+    var urlString: String { get }
 
     /// The URL from the request in UTF-8 form
     /// This contains just the path and query parameters starting with '/'
     /// Use 'urlURL' for the full URL
-    var url : Data { get }
+    var url: Data { get }
 
     /// The URL from the request as URLComponents
     /// URLComponents has a memory leak on linux as of swift 3.0.1. Use 'urlURL' instead
     @available(*, deprecated, message:
         "URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead")
-    var urlComponents : URLComponents { get }
+    var urlComponents: URLComponents { get }
 
     /// The URL from the request
-    var urlURL : URL { get }
+    var urlURL: URL { get }
 
     /// The IP address of the client
     var remoteAddress: String { get }

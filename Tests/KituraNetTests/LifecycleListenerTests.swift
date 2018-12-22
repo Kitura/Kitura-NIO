@@ -23,11 +23,11 @@ import XCTest
 
 class LifecycleListenerTests: KituraNetTest {
 
-    static var allTests : [(String, (LifecycleListenerTests) -> () throws -> Void)] {
+    static var allTests: [(String, (LifecycleListenerTests) -> () throws -> Void)] {
         return [
             ("testLifecycle", testLifecycle),
             ("testLifecycleWithState", testLifecycleWithState),
-            ("testServerFailLifecycle", testServerFailLifecycle),
+            ("testServerFailLifecycle", testServerFailLifecycle)
             //("testFastCGILifecycle", testFastCGILifecycle)
         ]
     }
@@ -50,7 +50,7 @@ class LifecycleListenerTests: KituraNetTest {
             startExpectation.fulfill()
         }
 
-        server.clientConnectionFailed() { error in
+        server.clientConnectionFailed { error in
             XCTFail("A client connection had an error [\(error)]")
         }
 
@@ -150,7 +150,7 @@ class LifecycleListenerTests: KituraNetTest {
         let failedCallbackExpectation = self.expectation(description: "failedCallback")
 
         let server = HTTP.createServer()
-        server.failed(callback: { error in
+        server.failed(callback: { _ in
             failedCallbackExpectation.fulfill()
         })
 

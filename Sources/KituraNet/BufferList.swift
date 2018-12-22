@@ -79,7 +79,7 @@ public class BufferList {
     ///Fill a `NSMutableData` with data from the buffer.
     public func fill(data: NSMutableData) -> Int {
         let length = byteBuffer.readableBytes
-        let result = byteBuffer.readWithUnsafeReadableBytes() { body in
+        let result = byteBuffer.readWithUnsafeReadableBytes { body in
             data.append(body.baseAddress!, length: length)
             return length
         }

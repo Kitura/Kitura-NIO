@@ -43,8 +43,7 @@ public class HeadersContainer {
         set(newValue) {
             if let newValue = newValue {
                 set(key, value: newValue)
-            }
-            else {
+            } else {
                 remove(key)
             }
         }
@@ -59,10 +58,10 @@ public class HeadersContainer {
         let lowerCaseKey = key.lowercased()
         let entry = headers[lowerCaseKey]
 
-        switch(lowerCaseKey) {
+        switch lowerCaseKey {
 
         case "set-cookie":
-            if let _ = entry {
+            if entry != nil {
                 headers[lowerCaseKey]?.value += value
             } else {
                 set(key, lowerCaseKey: lowerCaseKey, value: value)
@@ -72,7 +71,7 @@ public class HeadersContainer {
              "authorization", "proxy-authorization", "if-modified-since",
              "if-unmodified-since", "from", "location", "max-forwards",
              "retry-after", "etag", "last-modified", "server", "age", "expires":
-            if let _ = entry {
+            if entry != nil {
                 Log.warning("Duplicate header \(key) discarded")
                 break
             }
@@ -137,10 +136,10 @@ extension HeadersContainer: Collection {
     public typealias Index = DictionaryIndex<String, (key: String, value: [String])>
 
     /// The starting index of the `HeadersContainer` collection
-    public var startIndex:Index { return headers.startIndex }
+    public var startIndex: Index { return headers.startIndex }
 
     /// The ending index of the `HeadersContainer` collection
-    public var endIndex:Index { return headers.endIndex }
+    public var endIndex: Index { return headers.endIndex }
 
     /// Get a (key value) tuple from the `HeadersContainer` collection at the specified position.
     ///
@@ -149,9 +148,7 @@ extension HeadersContainer: Collection {
     ///
     /// - Returns: A (key, value) tuple.
     public subscript(position: Index) -> (key: String, value: [String]) {
-        get {
             return headers[position].value
-        }
     }
 
     /// Get the next Index in the `HeadersContainer` collection after the one specified.
@@ -159,8 +156,8 @@ extension HeadersContainer: Collection {
     /// - Parameter after: The Index whose successor is to be returned.
     ///
     /// - Returns: The Index in the `HeadersContainer` collection after the one specified.
-    public func index(after i: Index) -> Index {
-        return headers.index(after: i)
+    public func index(after index: Index) -> Index {
+        return headers.index(after: index)
     }
 }
 

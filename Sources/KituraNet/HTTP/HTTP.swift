@@ -58,7 +58,7 @@ public class HTTP {
         return req
     }
 
-    private static let allowedCharacterSet = NSCharacterSet(charactersIn:"\"#%/<>?@\\^`{|} ").inverted
+    private static let allowedCharacterSet = NSCharacterSet(charactersIn: "\"#%/<>?@\\^`{|} ").inverted
 
     public static func escape(url: String) -> String {
         if let escaped = url.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet) {
@@ -68,7 +68,7 @@ public class HTTP {
     }
 }
 
-// MARK HTTPStatusCode
+// MARK: HTTPStatusCode
 
 /// HTTP status codes and numbers.
 public enum HTTPStatusCode: Int {
@@ -109,12 +109,12 @@ extension HTTPStatusCode {
 
         init(code: Int) {
             switch code {
-                case 100..<200: self = .informational
-                case 200..<300: self = .successful
-                case 300..<400: self = .redirection
-                case 400..<500: self = .clientError
-                case 500..<600: self = .serverError
-                default: self = .invalidStatus
+            case 100..<200: self = .informational
+            case 200..<300: self = .successful
+            case 300..<400: self = .redirection
+            case 400..<500: self = .clientError
+            case 500..<600: self = .serverError
+            default: self = .invalidStatus
             }
         }
     }

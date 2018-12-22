@@ -62,7 +62,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
     public init(for server: HTTPServer) {
         self.server = server
         self.keepAliveState = server.keepAliveState
-        if let _ = server.sslConfig {
+        if server.sslConfig != nil {
             self.enableSSLVerification = true
         }
     }
@@ -92,7 +92,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
             } else {
                 serverRequest.buffer!.byteBuffer.write(buffer: &buffer)
             }
-        case .end(_):
+        case .end:
             serverResponse = HTTPServerResponse(channel: ctx.channel, handler: self)
             //Make sure we use the latest delegate registered with the server
             DispatchQueue.global().async {

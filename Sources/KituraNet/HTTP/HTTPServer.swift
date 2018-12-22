@@ -24,7 +24,7 @@ import NIOWebSocket
 import CLinuxHelpers
 
 /// An HTTP server that listens for connections on a socket.
-public class HTTPServer : Server {
+public class HTTPServer: Server {
 
     public typealias ServerType = HTTPServer
 
@@ -341,8 +341,7 @@ class HTTPDummyServerDelegate: ServerDelegate {
             response.headers["Content-Length"] = [String(theBody.utf8.count)]
             try response.write(from: theBody)
             try response.end()
-        }
-        catch {
+        } catch {
             Log.error("Failed to send the response. Error = \(error)")
         }
     }

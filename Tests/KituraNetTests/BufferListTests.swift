@@ -112,6 +112,6 @@ class BufferListTests: XCTestCase {
         ("testFillMutableData", testFillMutableData),
         ("testFillUnsafeMutablePointer", testFillUnsafeMutablePointer),
         ("testRewind", testRewind),
-        ("testDataAndCount", testDataAndCount),
+        ("testDataAndCount", testDataAndCount)
     ]
 }

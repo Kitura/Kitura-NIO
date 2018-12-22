@@ -20,11 +20,11 @@ import XCTest
 @testable import KituraNet
 
 class HTTPResponseTests: KituraNetTest {
-    static var allTests : [(String, (HTTPResponseTests) -> () throws -> Void)] {
+    static var allTests: [(String, (HTTPResponseTests) -> () throws -> Void)] {
         return [
             ("testContentTypeHeaders", testContentTypeHeaders),
             ("testHeadersContainerHTTPHeaders", testHeadersContainerHTTPHeaders),
-            ("testMultipleWritesToResponse", testMultipleWritesToResponse),
+            ("testMultipleWritesToResponse", testMultipleWritesToResponse)
         ]
     }
 

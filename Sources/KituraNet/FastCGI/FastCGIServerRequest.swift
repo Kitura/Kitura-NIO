@@ -20,7 +20,7 @@ import LoggerAPI
 
 /// The FastCGIServerRequest class implements the `ServerRequest` protocol
 /// for incoming HTTP requests that come in over a FastCGI connection.
-public class FastCGIServerRequest : ServerRequest {
+public class FastCGIServerRequest: ServerRequest {
 
     /// The IP address of the client
     public private(set) var remoteAddress: String = ""
@@ -41,7 +41,7 @@ public class FastCGIServerRequest : ServerRequest {
     public private(set) var method: String = ""
 
     /// URI Component received from FastCGI
-    private var requestUri : String? = nil
+    private var requestUri: String?
 
     public private(set) var urlURL = URL(string: "http://not_available/")!
 
@@ -50,12 +50,12 @@ public class FastCGIServerRequest : ServerRequest {
     /// Use 'urlURL' for the full URL
     @available(*, deprecated, message:
     "This contains just the path and query parameters starting with '/'. use 'urlURL' instead")
-    public var urlString : String { return requestUri ?? "" }
+    public var urlString: String { return requestUri ?? "" }
 
     /// The URL from the request in UTF-8 form
     /// This contains just the path and query parameters starting with '/'
     /// Use 'urlURL' for the full URL
-    public var url : Data { return requestUri?.data(using: .utf8) ?? Data() }
+    public var url: Data { return requestUri?.data(using: .utf8) ?? Data() }
 
     /// The URL from the request as URLComponents
     /// URLComponents has a memory leak on linux as of swift 3.0.1. Use 'urlURL' instead
@@ -72,15 +72,15 @@ public class FastCGIServerRequest : ServerRequest {
     private var status = Status.initial
 
     /// The request ID established by the FastCGI client.
-    public private(set) var requestId : UInt16 = 0
+    public private(set) var requestId: UInt16 = 0
 
     /// An array of request ID's that are not our primary one.
     /// When the main request is done, the FastCGIServer can reject the
     /// extra requests as being unusable.
-    public private(set) var extraRequestIds : [UInt16] = []
+    public private(set) var extraRequestIds: [UInt16] = []
 
     /// Some defaults
-    private static let defaultMethod : String = "GET"
+    private static let defaultMethod: String = "GET"
 
     /// List of status states
     private enum Status {

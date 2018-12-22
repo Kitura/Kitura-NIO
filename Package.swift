@@ -24,14 +24,14 @@ let package = Package(
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "KituraNet",
-            targets: ["KituraNet"]),
+            targets: ["KituraNet"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/apple/swift-nio.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "1.0.1"),
         .package(url: "https://github.com/IBM-Swift/BlueSSLService.git", from: "1.0.0"),
-        .package(url: "https://github.com/IBM-Swift/LoggerAPI.git", from: "1.7.3"),
+        .package(url: "https://github.com/IBM-Swift/LoggerAPI.git", from: "1.7.3")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -44,6 +44,6 @@ let package = Package(
             dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOOpenSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "CLinuxHelpers"]),
         .testTarget(
             name: "KituraNetTests",
-            dependencies: ["KituraNet"]),
+            dependencies: ["KituraNet"])
     ]
 )

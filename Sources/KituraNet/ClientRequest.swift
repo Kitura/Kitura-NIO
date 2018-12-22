@@ -157,7 +157,7 @@ public class ClientRequest {
     ///
     /// - Parameter option: an `Options` instance describing the change to be made to the request
     public func set(_ option: Options) {
-        switch(option) {
+        switch option {
         case .schema, .hostname, .port, .path, .username, .password:
             Log.error("Must use ClientRequest.init() to set URL components")
         case .method(let method):
@@ -188,33 +188,33 @@ public class ClientRequest {
         var path = ""
         var port = ""
 
-        for option in options  {
-            switch(option) {
+        for option in options {
+            switch option {
 
-                case .method, .headers, .maxRedirects, .disableSSLVerification, .useHTTP2:
-                    // call set() for Options that do not construct the URL
-                    set(option)
-                case .schema(var schema):
-                    if !schema.contains("://") && !schema.isEmpty {
-                      schema += "://"
-                    }
-                    theSchema = schema
-                case .hostname(let host):
-                    hostName = host
-                    self.hostName = host
-                case .port(let thePort):
-                    port = ":\(thePort)"
-                    self.port = Int(thePort)
-                case .path(var thePath):
-                    if thePath.first != "/" {
-                      thePath = "/" + thePath
-                    }
-                    path = thePath
-                    self.path = path
-                case .username(let userName):
-                    self.userName = userName
-                case .password(let password):
-                    self.password = password
+            case .method, .headers, .maxRedirects, .disableSSLVerification, .useHTTP2:
+                // call set() for Options that do not construct the URL
+                set(option)
+            case .schema(var schema):
+                if !schema.contains("://") && !schema.isEmpty {
+                    schema += "://"
+                }
+                theSchema = schema
+            case .hostname(let host):
+                hostName = host
+                self.hostName = host
+            case .port(let thePort):
+                port = ":\(thePort)"
+                self.port = Int(thePort)
+            case .path(var thePath):
+                if thePath.first != "/" {
+                    thePath = "/" + thePath
+                }
+                path = thePath
+                self.path = path
+            case .username(let userName):
+                self.userName = userName
+            case .password(let password):
+                self.password = password
             }
         }
 
@@ -223,7 +223,7 @@ public class ClientRequest {
         let pwd = self.password ?? ""
         var authenticationClause = ""
         // If either the userName or password are non-empty, add the authenticationClause
-        if (!user.isEmpty || !pwd.isEmpty) {
+        if !user.isEmpty || !pwd.isEmpty {
           authenticationClause = "\(user):\(pwd)@"
         }
 
@@ -392,7 +392,7 @@ public class ClientRequest {
             return
         }
 
-        var request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: HTTPMethod.method(from: self.method), uri: path)
+        var request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: HTTPMethod.method(from: self.method), uri: path)
         request.headers = HTTPHeaders.from(dictionary: self.headers)
 
         // Make the HTTP request, the response callbacks will be received on the HTTPClientHandler.
@@ -578,7 +578,7 @@ class HTTPClientHandler: ChannelInboundHandler {
          let response = self.unwrapInboundIn(data)
          switch response {
          case .head(let header):
-             clientResponse._headers = header.headers
+             clientResponse.httpHeaders = header.headers
              clientResponse.httpVersionMajor = header.version.major
              clientResponse.httpVersionMinor = header.version.minor
              clientResponse.statusCode = HTTPStatusCode(rawValue: Int(header.status.code))!
@@ -588,7 +588,7 @@ class HTTPClientHandler: ChannelInboundHandler {
              } else {
                  clientResponse.buffer!.byteBuffer.write(buffer: &buffer)
              }
-         case .end(_):
+         case .end:
             // Handle redirection
             if clientResponse.statusCode == .movedTemporarily || clientResponse.statusCode == .movedPermanently {
                 self.clientRequest.redirectCount += 1

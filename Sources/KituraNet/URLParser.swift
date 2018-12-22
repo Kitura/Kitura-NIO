@@ -20,7 +20,7 @@ import Foundation
 ///	**scheme:[//[user:password@]host[:port]][/]path[?query][#fragment]**
 /// We use the URLComponents class from Foundation here.
 
-public class URLParser : CustomStringConvertible {
+public class URLParser: CustomStringConvertible {
 
     /// Schema.
     public var schema: String?
@@ -90,7 +90,7 @@ public class URLParser : CustomStringConvertible {
             self.userinfo = "\(username):\(password)"
         }
         self.port = urlComponents?.port
-        if let queryItems = urlComponents?.queryItems{
+        if let queryItems = urlComponents?.queryItems {
            queryItems.forEach {
                self.queryParameters[$0.name] = $0.value
            }

@@ -26,7 +26,7 @@ public struct SSLConfig {
     // MARK: Lifecycle
 
     #if os(Linux)
-    //MARK: For Linux
+    // MARK: For Linux
     /// Initialize an `SSLService.Configuration` instance using a CA certificate file.
     ///
     /// - Parameter caCertificateFilePath: Path to the PEM formatted CA certificate file.
@@ -37,7 +37,7 @@ public struct SSLConfig {
     ///    - Returns:    New `SSLConfig` instance.
     public init(withCACertificateFilePath caCertificateFilePath: String?, usingCertificateFile certificateFilePath: String?, withKeyFile keyFilePath: String? = nil, usingSelfSignedCerts selfSigned: Bool = true, cipherSuite: String? = nil) {
 
-    config = SSLService.Configuration(withCACertificateFilePath: caCertificateFilePath, usingCertificateFile: certificateFilePath, withKeyFile:keyFilePath, usingSelfSignedCerts: selfSigned, cipherSuite: cipherSuite)
+    config = SSLService.Configuration(withCACertificateFilePath: caCertificateFilePath, usingCertificateFile: certificateFilePath, withKeyFile: keyFilePath, usingSelfSignedCerts: selfSigned, cipherSuite: cipherSuite)
     }
 
     /// Initialize an `SSLService.Configuration` instance using a CA certificate directory.
@@ -52,10 +52,10 @@ public struct SSLConfig {
     ///    - Returns: New `SSLConfig` instance.
     public init(withCACertificateDirectory caCertificateDirPath: String?, usingCertificateFile certificateFilePath: String?, withKeyFile keyFilePath: String? = nil, usingSelfSignedCerts selfSigned: Bool = true, cipherSuite: String? = nil) {
 
-    config = SSLService.Configuration(withCACertificateDirectory:caCertificateDirPath, usingCertificateFile: certificateFilePath, withKeyFile: keyFilePath, usingSelfSignedCerts: selfSigned, cipherSuite: cipherSuite)
+    config = SSLService.Configuration(withCACertificateDirectory: caCertificateDirPath, usingCertificateFile: certificateFilePath, withKeyFile: keyFilePath, usingSelfSignedCerts: selfSigned, cipherSuite: cipherSuite)
     }
     #endif // os(Linux)
-    //MARK: For MacOS
+    // MARK: For MacOS
     /// Initialize an `SSLService.Configuration` instance using a certificate chain file.
     ///
     /// *Note:* If using a certificate chain file, the certificates must be in PEM format and must be sorted starting with the subject's certificate (actual client or server certificate), followed by intermediate CA certificates if applicable, and ending at the highest level (root) CA.

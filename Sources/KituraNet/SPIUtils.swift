@@ -52,23 +52,23 @@ public class SPIUtils {
         let hour = Int(timeStruct.tm_hour)
         let min = Int(timeStruct.tm_min)
         let sec = Int(timeStruct.tm_sec)
-        var s = days[wday]
-        s.reserveCapacity(30)
-        s.append(", ")
-        s.append(twoDigit[mday])
-        s.append(" ")
-        s.append(months[mon])
-        s.append(" ")
-        s.append(twoDigit[year/100])
-        s.append(twoDigit[year%100])
-        s.append(" ")
-        s.append(twoDigit[hour])
-        s.append(":")
-        s.append(twoDigit[min])
-        s.append(":")
-        s.append(twoDigit[sec])
-        s.append(" GMT")
-        return s
+        var time = days[wday]
+        time.reserveCapacity(30)
+        time.append(", ")
+        time.append(twoDigit[mday])
+        time.append(" ")
+        time.append(months[mon])
+        time.append(" ")
+        time.append(twoDigit[year/100])
+        time.append(twoDigit[year%100])
+        time.append(" ")
+        time.append(twoDigit[hour])
+        time.append(":")
+        time.append(twoDigit[min])
+        time.append(":")
+        time.append(twoDigit[sec])
+        time.append(" GMT")
+        return time
 
     }
 

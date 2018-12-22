@@ -30,12 +30,12 @@ func randomNumber(limit: Int) -> Int {
     #endif
 }
 
-class PipeliningTests : KituraNetTest {
+class PipeliningTests: KituraNetTest {
 
-    static var allTests : [(String, (PipeliningTests) -> () throws -> Void)] {
+    static var allTests: [(String, (PipeliningTests) -> () throws -> Void)] {
         return [
             ("testPipelining", testPipelining),
-            ("testPipeliningSpanningPackets", testPipeliningSpanningPackets),
+            ("testPipeliningSpanningPackets", testPipeliningSpanningPackets)
         ]
     }
 
@@ -63,7 +63,7 @@ class PipeliningTests : KituraNetTest {
             }
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
             .connect(host: "localhost", port: server.port!).wait()
-            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .GET,  uri: "/")
+            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .GET,  uri: "/")
             for _ in 0...4 {
                 clientChannel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
                 _ = clientChannel.write(NIOAny(HTTPClientRequestPart.end(nil)))
@@ -101,7 +101,7 @@ class PipeliningTests : KituraNetTest {
                 }
                 .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
                 .connect(host: "localhost", port: server.port!).wait()
-            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: .POST,  uri: "/")
+            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .POST,  uri: "/")
             for _ in 0...5 {
                 clientChannel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
                 let buffer = BufferList()
@@ -163,7 +163,7 @@ private class PipelinedRequestsHandler: ChannelInboundHandler {
     public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
         let request = self.unwrapInboundIn(data)
         switch request {
-        case .head(_):
+        case .head:
             break
         case .body(let buffer):
             let len = buffer.readableBytes
@@ -171,7 +171,7 @@ private class PipelinedRequestsHandler: ChannelInboundHandler {
             if responses == expectedResponses {
                 expectation.fulfill()
             }
-        case .end(_):
+        case .end:
            break
         }
    }
