@@ -18,7 +18,7 @@ import NIOOpenSSL
 import SSLService
 import LoggerAPI
 
-/// A helper class to bridge betweem SSLService.Configuration (used by Kitura) and TLSConfiguration required by NIOOpenSSL
+/// A helper class to bridge between SSLService.Configuration (used by Kitura) and TLSConfiguration required by NIOOpenSSL
 internal class SSLConfiguration {
 
     private var certificateFilePath: String?

@@ -281,7 +281,7 @@ class RegressionTests: KituraNetTest {
             } catch {
                 Log.error("Failed to connect to port \(port)")
             }
-            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .GET,  uri: "#/")
+            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .GET, uri: "#/")
             _ = channel?.write(NIOAny(HTTPClientRequestPart.head(request)))
             _ = channel?.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
         }
@@ -292,13 +292,13 @@ class RegressionTests: KituraNetTest {
             } catch {
                 Log.error("Failed to connect to port \(port)")
             }
-            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .GET,  uri: "/")
+            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .GET, uri: "/")
             var httpHeaders = HTTPHeaders()
             httpHeaders.add(name: "Connection", value: "Keep-Alive")
             _ = channel?.write(NIOAny(HTTPClientRequestPart.head(request)))
             _ = channel?.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
             sleep(1) //workaround for an apparent swift-nio issue
-            let request0 = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .GET,  uri: "#/")
+            let request0 = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .GET, uri: "#/")
             _ = channel?.write(NIOAny(HTTPClientRequestPart.head(request0)))
             _ = channel?.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil)))
         }

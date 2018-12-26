@@ -44,7 +44,7 @@ public class URLParser: CustomStringConvertible {
     public var port: Int?
 
     /// The query parameters broken out.
-    public var queryParameters: [String:String] = [:]
+    public var queryParameters: [String: String] = [:]
 
     /// Nicely formatted description of the parsed result.
     public var description: String {

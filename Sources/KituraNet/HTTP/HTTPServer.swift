@@ -372,7 +372,7 @@ final class KituraWebSocketUpgrader: HTTPProtocolUpgrader {
     }
 
     public convenience init(automaticErrorHandling: Bool = true, shouldUpgrade: @escaping (HTTPRequestHead) -> HTTPHeaders?,
-                upgradePipelineHandler: @escaping (Channel, HTTPRequestHead) -> EventLoopFuture<Void>) {
+                            upgradePipelineHandler: @escaping (Channel, HTTPRequestHead) -> EventLoopFuture<Void>) {
         self.init(maxFrameSize: 1 << 14, automaticErrorHandling: automaticErrorHandling,
                   shouldUpgrade: shouldUpgrade, upgradePipelineHandler: upgradePipelineHandler)
     }
