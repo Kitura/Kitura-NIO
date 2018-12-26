@@ -208,7 +208,11 @@ public class HTTPServer: Server {
 
         let queuedBlock = DispatchWorkItem(block: {
             guard let serverChannel = self.serverChannel else { return }
-            try! serverChannel.closeFuture.wait()
+            do {
+                try serverChannel.closeFuture.wait()
+            } catch let error {
+                Log.error("Error while closing channel: \(error)")
+            }
             self.state = .stopped
             self.lifecycleListener.performStopCallbacks()
         })
