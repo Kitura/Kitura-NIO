@@ -63,7 +63,7 @@ class PipeliningTests: KituraNetTest {
             }
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
             .connect(host: "localhost", port: server.port!).wait()
-            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .GET,  uri: "/")
+            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .GET, uri: "/")
             for _ in 0...4 {
                 clientChannel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
                 _ = clientChannel.write(NIOAny(HTTPClientRequestPart.end(nil)))
@@ -101,7 +101,7 @@ class PipeliningTests: KituraNetTest {
                 }
                 .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
                 .connect(host: "localhost", port: server.port!).wait()
-            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .POST,  uri: "/")
+            let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .POST, uri: "/")
             for _ in 0...5 {
                 clientChannel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
                 let buffer = BufferList()

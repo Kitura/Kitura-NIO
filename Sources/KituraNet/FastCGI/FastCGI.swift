@@ -55,10 +55,10 @@ public class FastCGI {
         // request headers of note
         // we translate these into internal variables
         //
-        static let HEADER_REQUEST_METHOD: String = "REQUEST_METHOD";
-        static let HEADER_REQUEST_SCHEME: String = "REQUEST_SCHEME";
-        static let HEADER_HTTP_HOST: String = "HTTP_HOST";
-        static let HEADER_REQUEST_URI: String = "REQUEST_URI";
+        static let HEADER_REQUEST_METHOD: String = "REQUEST_METHOD"
+        static let HEADER_REQUEST_SCHEME: String = "REQUEST_SCHEME"
+        static let HEADER_HTTP_HOST: String = "HTTP_HOST"
+        static let HEADER_REQUEST_URI: String = "REQUEST_URI"
     }
 
     //
