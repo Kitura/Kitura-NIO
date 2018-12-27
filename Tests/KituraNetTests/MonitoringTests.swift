@@ -52,6 +52,7 @@ class MonitoringTests: KituraNetTest {
 
         server.started {
             DispatchQueue.global().async {
+                self.port = server.port!
                 self.performRequest("get", path: "/plover", callback: { response in
                     XCTAssertNotNil(response, "Received a nil response")
                     XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
@@ -64,8 +65,7 @@ class MonitoringTests: KituraNetTest {
         }
 
         do {
-            try server.listen(on: self.port)
-
+            try server.listen(on: 0)
             self.waitForExpectations(timeout: 10) { error in
                 server.stop()
                 XCTAssertNil(error)

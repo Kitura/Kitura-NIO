@@ -28,6 +28,17 @@ struct KituraNetTestError: Swift.Error {
 
 class KituraNetTest: XCTestCase {
 
+    override class func setUp() {
+        func shell(_ args: String...) {
+            let task = Process()
+            task.launchPath = "/usr/bin/env"
+            task.arguments = args
+            task.launch()
+            task.waitUntilExit()
+        }
+        shell("./Tests/KituraNetTests/setup.sh")
+    }
+
     static let useSSLDefault = true
     static let portDefault = 8080
     static let portReuseDefault = false
@@ -92,9 +103,10 @@ class KituraNetTest: XCTestCase {
 
         do {
             self.useSSL = useSSL
+
+            let (server, port) = try startEphemeralServer(delegate, useSSL: useSSL, allowPortReuse: allowPortReuse)
             self.port = port
 
-            let server: HTTPServer = try startServer(delegate, port: port, useSSL: useSSL, allowPortReuse: allowPortReuse)
             defer {
                 server.stop()
             }
