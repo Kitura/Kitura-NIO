@@ -55,7 +55,11 @@ class LifecycleListenerTests: KituraNetTest {
         }
 
         do {
+#if USE_EPHEMERAL_PORTS
             try server.listen(on: 0)
+#else
+            try server.listen(on: self.port)
+#endif
 
             self.waitForExpectations(timeout: 5) { error in
                 XCTAssertNil(error)
@@ -127,7 +131,11 @@ class LifecycleListenerTests: KituraNetTest {
         }
 
         do {
+#if USE_EPHEMERAL_PORTS
             try server.listen(on: 0)
+#else
+            try server.listen(on: self.port)
+#endif
 
             self.waitForExpectations(timeout: 5) { error in
                 XCTAssertNil(error)
