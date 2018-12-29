@@ -29,7 +29,7 @@ We expect most of our users to require higher level concepts such as routing, te
 
 Kitura-NIO utilises [SwiftNIO](https://github.com/apple/swift-nio) and [NIOOpenSSL](https://github.com/apple/swift-nio-ssl).
 
-Kitura-NIO works with Swift 4.1. It is also being tested with the development binaries for Swift 4.2.
+Kitura-NIO works with Swift 4.2. It is also being tested with the development binaries for Swift 5.
 
 ## Features
 
@@ -71,11 +71,17 @@ We'd be more than happy to receive bug reports, enhancement requests and pull re
 
 `$ swift test`
 
-In some Linux environments, this [issue](https://github.com/IBM-Swift/Kitura-NIO/issues/1) may be experienced.
+By default, all the tests that fire up servers, bind them to port 8080. If you wish to use the `--parallel` option to run the tests in parallel, we need to make sure that port collisions don't happen. For that, we recommend the usage of ephemeral ports in the tests, via the USE_EPHEMERAL_PORTS flag.
+
+`$ swift test -Xswiftc -DUSE_EPHEMERAL_PORTS --parallel`
+
+Please note that, due to a KituraNet API limitation, you'd need superuser privileges (at least on macOS) to use this option.
+
+In some Linux environments, a low open file limit could cause test failures. See [this](https://github.com/IBM-Swift/Kitura-NIO/issues/1).
 
 ## Community
 
-These are early days for Kitura-NIO. We'd really love to hear feedback from you.
+We'd really love to hear feedback from you.
 
 Join the [Kitura on Swift Forums](https://forums.swift.org/c/related-projects/kitura) or our [Slack](http://swift-at-ibm-slack.mybluemix.net/) to meet the team!
 
