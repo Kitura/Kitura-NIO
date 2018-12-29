@@ -103,23 +103,25 @@ class ClientE2ETests: KituraNetTest {
     }
 
     func testSimpleHTTPClient() {
-        let expectation = self.expectation(description: "HTTP client response completed")
-        let url = "http://httpbin.org"
+        let delegate = TestSimpleClientDelegate()
+        performServerTest(delegate, asyncTasks: { expectation in
+            self.performRequest("get", path: "/" , callback: { response in
+                XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .OK was \(String(describing: response?.statusCode))")
+                if let contentType = response?.headers["Content-type"] {
+                    XCTAssertEqual(contentType, ["text/plain"], "Content-Type wasn't text/plain")
+                }
 
-        _ = HTTP.get(url) { response in
-            XCTAssertNotNil(response, "ERROR!!! ClientRequest response object was nil")
-            XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "HTTP Status code was \(String(describing: response?.statusCode))")
-            let contentType = response?.headers["Content-Type"]
-            XCTAssertNotNil(contentType, "No ContentType header in response")
-            if let contentType = contentType {
-                XCTAssertEqual(contentType, ["text/html; charset=utf-8"], "Content-Type header wasn't `text/html`")
-            }
-            expectation.fulfill()
-        }
-
-        waitExpectation(timeout: 10) { error in
-            XCTAssertNil(error)
-        }
+                do {
+                    let result = try response?.readString()
+                    XCTAssertNotNil(result, "The body of the response was empty")
+                    XCTAssertEqual(result?.count, 13, "Result should have been 13 bytes, was \(String(describing: result?.count))")
+                    XCTAssertEqual(result, "Hello, World!")
+                } catch {
+                    XCTFail("Failed reading the body of the response")
+                }
+                expectation.fulfill()
+            })
+        })
     }
 
     func testPostRequests() {
@@ -332,6 +334,21 @@ class ClientE2ETests: KituraNetTest {
                 try response.end()
             } catch {
                 print("Error reading body or writing response")
+            }
+        }
+    }
+
+    class TestSimpleClientDelegate: ServerDelegate {
+
+        func handle(request: ServerRequest, response: ServerResponse) {
+            do {
+                let result: String = "Hello, World!"
+                response.statusCode = .OK
+                response.headers["Content-Type"] = ["text/plain"]
+                response.headers["Content-Length"] = ["\(result.count)"]
+                try response.end(text: result)
+            } catch {
+                XCTFail("Error while writing response")
             }
         }
     }
