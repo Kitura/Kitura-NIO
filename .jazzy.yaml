@@ -1,0 +1,14 @@
+module: KituraNet
+author: IBM
+github_url: https://github.com/IBM-Swift/Kitura-NIO/
+
+theme: fullwidth
+clean: true
+exclude: [Packages]
+
+readme: README.md
+
+skip_undocumented: false
+hide_documentation_coverage: false
+
+xcodebuild_arguments: [-project, KituraNet.xcodeproj, -target, KituraNet, LIBRARY_SEARCH_PATHS=.build/debug]
