@@ -26,8 +26,24 @@ public class HeadersContainer {
     /// The header storage
     internal var headers: [String: (key: String, value: [String])] = [:]
 
+    /// An alternate backing store of type `NIOHTTP1.HTTPHeader` used to avoid translations between HeadersContainer and HTTPHeaders
+    var nioHeaders: HTTPHeaders = HTTPHeaders()
+    
     /// Create an instance of `HeadersContainer`
     public init() {}
+
+    /// A special initializer for HTTPServerRequest, to make the latter better performant
+    init(with nioHeaders: HTTPHeaders) {
+        self.nioHeaders = nioHeaders
+    }
+
+    private enum _Mode {
+        case nio  // Headers are simply backed up by `NIOHTTP1.HTTPHeaders`
+        case dual // Headers are backed up by a dictionary as well, we switch to this mode while using HeadersContainer as Collection
+    }
+
+    // The default mode is nio
+    private var mode: _Mode = .nio
 
     /// Access the value of a HTTP header using subscript syntax.
     ///
@@ -42,9 +58,16 @@ public class HeadersContainer {
 
         set(newValue) {
             if let newValue = newValue {
-                set(key, value: newValue)
-            } else {
-                remove(key)
+                nioHeaders.replace(name: key, values: newValue)
+                if mode == .dual {
+                    set(key, value: newValue)
+                }
+            }
+            else {
+                nioHeaders.remove(name: key)
+                if mode == .dual {
+                    remove(key)
+                }
             }
         }
     }
@@ -54,36 +77,49 @@ public class HeadersContainer {
     /// - Parameter key: The HTTP header key
     /// - Parameter value: An array of strings to add as values of the HTTP header
     public func append(_ key: String, value: [String]) {
-
         let lowerCaseKey = key.lowercased()
-        let entry = headers[lowerCaseKey]
-
-        switch lowerCaseKey {
+        var entry = nioHeaders[key]
+        
+        switch(lowerCaseKey) {
 
         case "set-cookie":
-            if entry != nil {
-                headers[lowerCaseKey]?.value += value
+            if entry.count > 0 {
+                entry += value
+                nioHeaders.replace(name: key, values: entry)
+                if mode == .dual {
+                    headers[lowerCaseKey]?.value += value
+                }
             } else {
-                set(key, lowerCaseKey: lowerCaseKey, value: value)
+                nioHeaders.add(name: key, values: value)
+                if mode == .dual {
+                    set(key, lowerCaseKey: lowerCaseKey, value: value)
+                }
             }
 
         case "content-type", "content-length", "user-agent", "referer", "host",
              "authorization", "proxy-authorization", "if-modified-since",
              "if-unmodified-since", "from", "location", "max-forwards",
              "retry-after", "etag", "last-modified", "server", "age", "expires":
-            if entry != nil {
+            if entry.count > 0 {
                 Log.warning("Duplicate header \(key) discarded")
                 break
             }
             fallthrough
 
         default:
-            guard let oldValue = entry?.value.first else {
-                set(key, lowerCaseKey: lowerCaseKey, value: value)
-                return
+            if nioHeaders[key].count == 0 {
+                nioHeaders.add(name: key, values: value)
+                if mode == .dual {
+                    set(key, lowerCaseKey: lowerCaseKey, value: value)
+                }
+            } else {
+                let oldValue = nioHeaders[key].first!
+                let newValue = oldValue + ", " + value.joined(separator: ", ")
+                nioHeaders.replaceOrAdd(name: key, value: newValue)
+                if mode == .dual {
+                   headers[lowerCaseKey]?.value[0] = newValue
+                }
             }
-            let newValue = oldValue + ", " + value.joined(separator: ", ")
-            headers[lowerCaseKey]?.value[0] = newValue
         }
     }
 
@@ -96,12 +132,17 @@ public class HeadersContainer {
     }
 
     private func get(_ key: String) -> [String]? {
-        return headers[key.lowercased()]?.value
+        let values = nioHeaders[key]
+        // `HTTPHeaders.subscript` returns a [] if no header is found, but `HeadersContainer` is expected to return a nil
+        return values.count > 0 ? values : nil
     }
 
     /// Remove all of the headers
     public func removeAll() {
-        headers.removeAll(keepingCapacity: true)
+        nioHeaders = HTTPHeaders()
+        if mode == .dual {
+            headers.removeAll(keepingCapacity: true)
+        }
     }
 
     private func set(_ key: String, value: [String]) {
@@ -115,6 +156,14 @@ public class HeadersContainer {
     private func remove(_ key: String) {
         headers.removeValue(forKey: key.lowercased())
     }
+
+    func checkAndSwitchToDualMode() {
+        guard mode == .nio else { return }
+        mode = .dual
+        for header in nioHeaders {
+            headers[header.name.lowercased()] = (header.name, nioHeaders[header.name])
+        }
+    }
 }
 
 extension HTTPHeaders {
@@ -124,22 +173,30 @@ extension HTTPHeaders {
         }
     }
 
-    mutating func replaceOrAdd(name: String, values: [String]) {
-        values.forEach {
-            replaceOrAdd(name: name, value: $0)
+    mutating func replace(name: String, values: [String]) {
+        self.replaceOrAdd(name: name, value: values[0])
+        for value in values.suffix(from: 1) {
+           self.add(name: name, value: value)
         }
     }
 }
 /// Conformance to the `Collection` protocol
+/// As soon as either of these properties or methods are invoked, we need to switch to the `dual` mode of operation
 extension HeadersContainer: Collection {
 
     public typealias Index = DictionaryIndex<String, (key: String, value: [String])>
 
     /// The starting index of the `HeadersContainer` collection
-    public var startIndex: Index { return headers.startIndex }
+    public var startIndex:Index {
+        checkAndSwitchToDualMode()
+        return headers.startIndex
+    }
 
     /// The ending index of the `HeadersContainer` collection
-    public var endIndex: Index { return headers.endIndex }
+    public var endIndex:Index {
+        checkAndSwitchToDualMode()
+        return headers.endIndex
+    }
 
     /// Get a (key value) tuple from the `HeadersContainer` collection at the specified position.
     ///
@@ -148,7 +205,10 @@ extension HeadersContainer: Collection {
     ///
     /// - Returns: A (key, value) tuple.
     public subscript(position: Index) -> (key: String, value: [String]) {
+        get {
+            checkAndSwitchToDualMode()
             return headers[position].value
+        }
     }
 
     /// Get the next Index in the `HeadersContainer` collection after the one specified.
@@ -156,29 +216,8 @@ extension HeadersContainer: Collection {
     /// - Parameter after: The Index whose successor is to be returned.
     ///
     /// - Returns: The Index in the `HeadersContainer` collection after the one specified.
-    public func index(after index: Index) -> Index {
-        return headers.index(after: index)
-    }
-}
-
-/// Kitura uses HeadersContainer and NIOHTTP1 expects HTTPHeader - bridging methods
-extension HeadersContainer {
-    /// HTTPHeaders to HeadersContainer
-    static func create(from httpHeaders: HTTPHeaders) -> HeadersContainer {
-        let headerContainer = HeadersContainer()
-        for header in httpHeaders {
-            headerContainer.append(header.name, value: header.value)
-        }
-        return headerContainer
-    }
-
-    func httpHeaders() -> HTTPHeaders {
-        var httpHeaders = HTTPHeaders()
-        for (_, keyValues) in headers {
-            for value in keyValues.1 {
-                httpHeaders.add(name: keyValues.0, value: value)
-            }
-        }
-        return httpHeaders
+    public func index(after i: Index) -> Index {
+        checkAndSwitchToDualMode()
+        return headers.index(after: i)
     }
 }
