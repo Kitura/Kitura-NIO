@@ -1,0 +1,6 @@
+test:
+  image: ibmcom/swift-ubuntu:4.2
+  volumes:
+    - ./:/Kitura-NIO
+  command: bash -c "cd /Kitura-NIO && swift package  --build-path .build-ubuntu clean && swift build  --build-path .build-ubuntu && swift test  --build-path .build-ubuntu"
+
