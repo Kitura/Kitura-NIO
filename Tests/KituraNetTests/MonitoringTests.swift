@@ -65,11 +65,7 @@ class MonitoringTests: KituraNetTest {
         }
 
         do {
-#if USE_EPHEMERAL_PORTS
             try server.listen(on: 0)
-#else
-            try server.listen(on: self.port)
-#endif
             self.waitForExpectations(timeout: 10) { error in
                 server.stop()
                 XCTAssertNil(error)

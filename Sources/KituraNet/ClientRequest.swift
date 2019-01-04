@@ -21,6 +21,12 @@ import NIOOpenSSL
 import LoggerAPI
 import Dispatch
 
+fileprivate extension Int16 {
+    func toUInt16() -> UInt16 {
+        return UInt16(bitPattern: self)
+    }
+}
+
 /// This class provides a set of low level APIs for issuing HTTP requests to another server.
 public class ClientRequest {
 
@@ -203,8 +209,9 @@ public class ClientRequest {
                 hostName = host
                 self.hostName = host
             case .port(let thePort):
-                port = ":\(thePort)"
-                self.port = Int(thePort)
+                let portNumber = thePort.toUInt16()
+                port = ":\(portNumber)"
+                self.port = Int(portNumber)
             case .path(var thePath):
                 if thePath.first != "/" {
                     thePath = "/" + thePath
@@ -273,7 +280,7 @@ public class ClientRequest {
         }
         options.append(.path(fullPath))
         if let port = url.port {
-            options.append(.port(Int16(port)))
+            options.append(.port(Int16(bitPattern: UInt16(port))))
         }
         if let username = url.user {
             options.append(.username(username))

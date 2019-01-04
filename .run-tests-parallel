@@ -1,1 +1,1 @@
-swift test -Xswiftc -DUSE_EPHEMERAL_PORTS --parallel
+swift test --parallel
