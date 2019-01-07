@@ -28,19 +28,6 @@ struct KituraNetTestError: Swift.Error {
 
 class KituraNetTest: XCTestCase {
 
-    override class func setUp() {
-#if USE_EPHEMERAL_PORTS
-        func shell(_ args: String...) {
-            let task = Process()
-            task.launchPath = "/usr/bin/env"
-            task.arguments = args
-            task.launch()
-            task.waitUntilExit()
-        }
-        shell("./Tests/KituraNetTests/setup.sh")
-#endif
-    }
-
     static let useSSLDefault = true
     static let portDefault = 8080
     static let portReuseDefault = false
@@ -105,13 +92,8 @@ class KituraNetTest: XCTestCase {
 
         do {
             self.useSSL = useSSL
-#if USE_EPHEMERAL_PORTS
             let (server, ephemeralPort) = try startEphemeralServer(delegate, useSSL: useSSL, allowPortReuse: allowPortReuse)
             self.port = ephemeralPort
-#else
-            let server: HTTPServer = try startServer(delegate, port: port, useSSL: useSSL, allowPortReuse: allowPortReuse)
-            self.port = port
-#endif
             defer {
                 server.stop()
             }
@@ -176,7 +158,7 @@ class KituraNetTest: XCTestCase {
 
         let schema = self.useSSL ? "https" : "http"
         var options: [ClientRequest.Options] =
-            [.method(method), .schema(schema), .hostname(hostname), .port(Int16(self.port)), .path(path), .headers(allHeaders)]
+            [.method(method), .schema(schema), .hostname(hostname), .port(UInt16(self.port).toInt16()), .path(path), .headers(allHeaders)]
         if self.useSSL {
             options.append(.disableSSLVerification)
         }
@@ -194,5 +176,11 @@ class KituraNetTest: XCTestCase {
 
     func waitExpectation(timeout: TimeInterval, handler: XCWaitCompletionHandler?) {
         self.waitForExpectations(timeout: timeout, handler: handler)
+    }
+}
+
+private extension UInt16 {
+    func toInt16() -> Int16 {
+        return Int16(bitPattern: self)
     }
 }
