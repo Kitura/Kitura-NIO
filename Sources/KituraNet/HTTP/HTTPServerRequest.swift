@@ -58,10 +58,10 @@ public class HTTPServerRequest: ServerRequest {
         var localAddressPort = UInt16(0)
 
         do {
-            try ctx.eventLoop.submit {
+            try ctx.eventLoop.runAndWait {
                 localAddress = HTTPServerRequest.host(socketAddress: self.ctx.localAddress)
                 localAddressPort = self.ctx.localAddress?.port ?? 0
-            }.wait()
+            }
         } catch {
             Log.error("Unable to get the local address")
         }
@@ -92,8 +92,21 @@ public class HTTPServerRequest: ServerRequest {
         return self._url!
     }
 
+    private var _remoteAddress: String?
+
     /// Server IP address pulled from socket.
-    public var remoteAddress: String
+    public var remoteAddress: String {
+        if _remoteAddress == nil {
+            do {
+                try ctx.eventLoop.runAndWait {
+                    self._remoteAddress = HTTPServerRequest.host(socketAddress: self.ctx.localAddress)
+                }
+            } catch {
+                Log.error("Unable to get the remote address")
+            }
+        }
+        return _remoteAddress!
+    }
 
     /// Minor version of HTTP of the request
     public var httpVersionMajor: UInt16?
@@ -131,7 +144,6 @@ public class HTTPServerRequest: ServerRequest {
         self.httpVersionMajor = requestHead.version.major
         self.httpVersionMinor = requestHead.version.minor
         self._urlString = requestHead.uri
-        self.remoteAddress = HTTPServerRequest.host(socketAddress: ctx.remoteAddress)
         self.enableSSL = enableSSL
     }
 

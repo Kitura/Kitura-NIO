@@ -77,7 +77,7 @@ public class HTTPServerResponse: ServerResponse {
             return
         }
 
-        execute(on: channel.eventLoop) {
+        channel.eventLoop.run {
             self.buffer.write(string: string)
         }
     }
@@ -92,19 +92,8 @@ public class HTTPServerResponse: ServerResponse {
             return
         }
 
-        execute(on: channel.eventLoop) {
+        channel.eventLoop.run {
             self.buffer.write(bytes: data)
-        }
-    }
-
-    /// Executes task on event loop
-    private func execute(on eventLoop: EventLoop, _ task: @escaping () -> Void) {
-        if eventLoop.inEventLoop {
-            task()
-        } else {
-            eventLoop.execute {
-                task()
-            }
         }
     }
 
@@ -141,7 +130,7 @@ public class HTTPServerResponse: ServerResponse {
             }
         }
 
-        execute(on: channel.eventLoop) {
+        channel.eventLoop.run {
             do {
                 try self.sendResponse(channel: channel, handler: handler, status: status)
             } catch let error {
@@ -171,7 +160,7 @@ public class HTTPServerResponse: ServerResponse {
         //We don't keep the connection alive on an HTTP error
         headers["Connection"] = ["Close"]
 
-        execute(on: channel.eventLoop) {
+        channel.eventLoop.run {
             do {
                 try self.sendResponse(channel: channel, handler: handler, status: status, withBody: withBody)
             } catch let error {
@@ -210,5 +199,25 @@ public class HTTPServerResponse: ServerResponse {
         buffer.clear()
         headers.removeAll()
         headers["Date"] = [SPIUtils.httpDate()]
+    }
+}
+
+extension EventLoop {
+    /// Make sure `task` runs on the current event loop
+    @discardableResult
+    func run(_ task: @escaping () -> Void) -> EventLoopFuture<Void>? {
+        if self.inEventLoop {
+            task()
+            return nil
+        } else {
+            return self.submit {
+                task()
+            }
+        }
+    }
+
+    func runAndWait(_ task: @escaping () -> Void) throws {
+        guard let eventLoopFuture = run(task) else { return }
+        try eventLoopFuture.wait()
     }
 }
