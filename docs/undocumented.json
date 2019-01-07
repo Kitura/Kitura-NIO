@@ -1,0 +1,565 @@
+{
+  "warnings": [
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ClientResponse.swift",
+      "line": 25,
+      "symbol": "ClientResponse.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ClientResponse.swift",
+      "line": 27,
+      "symbol": "ClientResponse.httpStatusCode",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ConnectionUpgrader.swift",
+      "line": 21,
+      "symbol": "ConnectionUpgrader",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ConnectionUpgrader.swift",
+      "line": 31,
+      "symbol": "ConnectionUpgrader.register(handlerFactory:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ConnectionUpgrader.swift",
+      "line": 44,
+      "symbol": "ProtocolHandlerFactory",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ConnectionUpgrader.swift",
+      "line": 46,
+      "symbol": "ProtocolHandlerFactory.name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ConnectionUpgrader.swift",
+      "line": 49,
+      "symbol": "ProtocolHandlerFactory.handler(for:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ConnectionUpgrader.swift",
+      "line": 52,
+      "symbol": "ProtocolHandlerFactory.isServiceRegistered(at:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServer.swift",
+      "line": 50,
+      "symbol": "FastCGIServer.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "line": 95,
+      "symbol": "FastCGIServerRequest.FastCGIParserErrorType.success",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "line": 96,
+      "symbol": "FastCGIServerRequest.FastCGIParserErrorType.protocolError",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "line": 97,
+      "symbol": "FastCGIServerRequest.FastCGIParserErrorType.invalidType",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "line": 98,
+      "symbol": "FastCGIServerRequest.FastCGIParserErrorType.clientDisconnect",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "line": 99,
+      "symbol": "FastCGIServerRequest.FastCGIParserErrorType.unsupportedRole",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "line": 100,
+      "symbol": "FastCGIServerRequest.FastCGIParserErrorType.internalError",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "line": 103,
+      "symbol": "FastCGIServerRequest.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 43,
+      "symbol": "HTTP.createServer()",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 47,
+      "symbol": "HTTP.request(_:callback:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 51,
+      "symbol": "HTTP.request(_:callback:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 55,
+      "symbol": "HTTP.get(_:callback:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 63,
+      "symbol": "HTTP.escape(url:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 76,
+      "symbol": "HTTPStatusCode.accepted",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 76,
+      "symbol": "HTTPStatusCode.badGateway",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 76,
+      "symbol": "HTTPStatusCode.badRequest",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 76,
+      "symbol": "HTTPStatusCode.conflict",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 76,
+      "symbol": "HTTPStatusCode.continue",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 76,
+      "symbol": "HTTPStatusCode.created",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 77,
+      "symbol": "HTTPStatusCode.expectationFailed",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 77,
+      "symbol": "HTTPStatusCode.failedDependency",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 77,
+      "symbol": "HTTPStatusCode.forbidden",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 77,
+      "symbol": "HTTPStatusCode.gatewayTimeout",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 77,
+      "symbol": "HTTPStatusCode.gone",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 78,
+      "symbol": "HTTPStatusCode.httpVersionNotSupported",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 78,
+      "symbol": "HTTPStatusCode.insufficientSpaceOnResource",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 78,
+      "symbol": "HTTPStatusCode.insufficientStorage",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 79,
+      "symbol": "HTTPStatusCode.internalServerError",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 79,
+      "symbol": "HTTPStatusCode.lengthRequired",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 79,
+      "symbol": "HTTPStatusCode.methodFailure",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 79,
+      "symbol": "HTTPStatusCode.methodNotAllowed",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 80,
+      "symbol": "HTTPStatusCode.movedPermanently",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 80,
+      "symbol": "HTTPStatusCode.movedTemporarily",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 80,
+      "symbol": "HTTPStatusCode.multiStatus",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 80,
+      "symbol": "HTTPStatusCode.multipleChoices",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 81,
+      "symbol": "HTTPStatusCode.networkAuthenticationRequired",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 81,
+      "symbol": "HTTPStatusCode.noContent",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 81,
+      "symbol": "HTTPStatusCode.nonAuthoritativeInformation",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 82,
+      "symbol": "HTTPStatusCode.OK",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 82,
+      "symbol": "HTTPStatusCode.notAcceptable",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 82,
+      "symbol": "HTTPStatusCode.notFound",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 82,
+      "symbol": "HTTPStatusCode.notImplemented",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 82,
+      "symbol": "HTTPStatusCode.notModified",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 83,
+      "symbol": "HTTPStatusCode.partialContent",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 83,
+      "symbol": "HTTPStatusCode.paymentRequired",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 83,
+      "symbol": "HTTPStatusCode.preconditionFailed",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 83,
+      "symbol": "HTTPStatusCode.preconditionRequired",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 84,
+      "symbol": "HTTPStatusCode.processing",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 84,
+      "symbol": "HTTPStatusCode.proxyAuthenticationRequired",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 84,
+      "symbol": "HTTPStatusCode.requestHeaderFieldsTooLarge",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 85,
+      "symbol": "HTTPStatusCode.requestTimeout",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 85,
+      "symbol": "HTTPStatusCode.requestTooLong",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 85,
+      "symbol": "HTTPStatusCode.requestURITooLong",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 85,
+      "symbol": "HTTPStatusCode.requestedRangeNotSatisfiable",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 86,
+      "symbol": "HTTPStatusCode.resetContent",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 86,
+      "symbol": "HTTPStatusCode.seeOther",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 86,
+      "symbol": "HTTPStatusCode.serviceUnavailable",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 86,
+      "symbol": "HTTPStatusCode.switchingProtocols",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 87,
+      "symbol": "HTTPStatusCode.temporaryRedirect",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 87,
+      "symbol": "HTTPStatusCode.tooManyRequests",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 87,
+      "symbol": "HTTPStatusCode.unauthorized",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 87,
+      "symbol": "HTTPStatusCode.unprocessableEntity",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 88,
+      "symbol": "HTTPStatusCode.misdirectedRequest",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 88,
+      "symbol": "HTTPStatusCode.unknown",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 88,
+      "symbol": "HTTPStatusCode.unsupportedMediaType",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTP.swift",
+      "line": 88,
+      "symbol": "HTTPStatusCode.useProxy",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTPServer.swift",
+      "line": 58,
+      "symbol": "HTTPServer.keepAliveState",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/HTTPServer.swift",
+      "line": 74,
+      "symbol": "HTTPServer.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
+      "line": 17,
+      "symbol": "KeepAliveState",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
+      "line": 19,
+      "symbol": "KeepAliveState.disabled",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
+      "line": 20,
+      "symbol": "KeepAliveState.unlimited",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
+      "line": 21,
+      "symbol": "KeepAliveState.limited",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/Users/travis/build/IBM-Swift/Kitura-NIO"
+}
