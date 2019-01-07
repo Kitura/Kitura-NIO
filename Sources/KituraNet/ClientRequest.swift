@@ -21,6 +21,14 @@ import NIOOpenSSL
 import LoggerAPI
 import Dispatch
 
+// The public API for ClientRequest erroneously defines the port as an Int16, which is
+// insufficient to hold all possible port values. To avoid a breaking change, we allow
+// UInt16 bit patterns to be passed in, under the guises of an Int16, which we will
+// then convert back to UInt16.
+//
+// User code must perform the equivalent conversion in order to pass in a value that
+// is greater than Int16.max.
+//
 fileprivate extension Int16 {
     func toUInt16() -> UInt16 {
         return UInt16(bitPattern: self)
@@ -103,7 +111,15 @@ public class ClientRequest {
         /// Specifies the host name to be used in the URL of request
         case hostname(String)
 
-        /// Specifies the port to be used in the URL of request
+        /// Specifies the port to be used in the URL of request.
+        ///
+        /// Note that an Int16 is incapable of representing all possible port values, however
+        /// it forms part of the Kitura-net 2.0 API. In order to pass a port number greater
+        /// than 32,767 (Int16.max), use the following code:
+        /// ```
+        /// let portNumber: UInt16 = 65535
+        /// let portOption: ClientRequest.Options = .port(Int16(bitPattern: portNumber))
+        /// ```
         case port(Int16)
 
         /// Specifies the path to be used in the URL of request
