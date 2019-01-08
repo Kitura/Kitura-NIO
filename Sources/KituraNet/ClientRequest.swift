@@ -35,6 +35,12 @@ fileprivate extension Int16 {
     }
 }
 
+fileprivate extension UInt16 {
+    func toInt16() -> Int16 {
+        return Int16(bitPattern: self)
+    }
+}
+
 /// This class provides a set of low level APIs for issuing HTTP requests to another server.
 public class ClientRequest {
 
@@ -611,9 +617,10 @@ class HTTPClientHandler: ChannelInboundHandler {
                     }
                     if url.starts(with: "/") {
                         let scheme = URL(string: clientRequest.url)?.scheme
+                        let port = clientRequest.port.map { UInt16($0) }.map { $0.toInt16() }!
                         let request = ClientRequest(options: [.schema(scheme!),
                                                               .hostname(clientRequest.hostName!),
-                                                              .port(Int16(clientRequest.port!)),
+                                                              .port(port),
                                                               .path(url)],
                                                     callback: clientRequest.callback)
                         request.maxRedirects = self.clientRequest.maxRedirects - 1
