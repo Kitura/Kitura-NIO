@@ -54,18 +54,30 @@ public class HTTPServerRequest: ServerRequest {
 
         self.enableSSL ? url.append("https://") : url.append("http://")
 
+        var localAddress = ""
+        var localAddressPort = UInt16(0)
+
+        do {
+            try ctx.eventLoop.runAndWait {
+                localAddress = HTTPServerRequest.host(socketAddress: self.ctx.localAddress)
+                localAddressPort = self.ctx.localAddress?.port ?? 0
+            }
+        } catch {
+            Log.error("Unable to get the local address")
+        }
+
         if let hostname = headers["Host"]?.first {
             url.append(hostname)
             if !hostname.contains(":") {
                 url.append(":")
-                url.append(String(describing: self.localAddressPort))
+                url.append(String(describing: localAddressPort))
             }
         } else {
             Log.error("Host header not received")
-            let hostname = self.localAddress
+            let hostname = localAddress
             url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
             url.append(":")
-            url.append(String(describing: self.localAddressPort))
+            url.append(String(describing: localAddressPort))
         }
 
         url.append(_urlString)
@@ -80,8 +92,21 @@ public class HTTPServerRequest: ServerRequest {
         return self._url!
     }
 
+    private var _remoteAddress: String?
+
     /// Server IP address pulled from socket.
-    public var remoteAddress: String
+    public var remoteAddress: String {
+        if _remoteAddress == nil {
+            do {
+                try ctx.eventLoop.runAndWait {
+                    self._remoteAddress = HTTPServerRequest.host(socketAddress: self.ctx.localAddress)
+                }
+            } catch {
+                Log.error("Unable to get the remote address")
+            }
+        }
+        return _remoteAddress!
+    }
 
     /// Minor version of HTTP of the request
     public var httpVersionMajor: UInt16?
@@ -92,9 +117,7 @@ public class HTTPServerRequest: ServerRequest {
     /// HTTP Method of the request.
     public var method: String
 
-    private let localAddress: String
-
-    private let localAddressPort: Int
+    private let ctx: ChannelHandlerContext
 
     private var enableSSL: Bool = false
 
@@ -115,15 +138,12 @@ public class HTTPServerRequest: ServerRequest {
     }
 
     init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead, enableSSL: Bool) {
+        self.ctx = ctx
         self.headers = HeadersContainer(with: requestHead.headers)
         self.method = requestHead.method.string()
         self.httpVersionMajor = requestHead.version.major
         self.httpVersionMinor = requestHead.version.minor
         self._urlString = requestHead.uri
-        let localAddress = ctx.localAddress
-        self.remoteAddress = HTTPServerRequest.host(socketAddress: ctx.remoteAddress)
-        self.localAddress = HTTPServerRequest.host(socketAddress: localAddress)
-        self.localAddressPort = localAddress?.port.map { Int($0) } ?? 0
         self.enableSSL = enableSSL
     }
 
