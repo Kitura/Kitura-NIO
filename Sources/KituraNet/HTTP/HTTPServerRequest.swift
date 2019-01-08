@@ -99,7 +99,7 @@ public class HTTPServerRequest: ServerRequest {
         if _remoteAddress == nil {
             do {
                 try ctx.eventLoop.runAndWait {
-                    self._remoteAddress = HTTPServerRequest.host(socketAddress: self.ctx.localAddress)
+                    self._remoteAddress = HTTPServerRequest.host(socketAddress: self.ctx.remoteAddress)
                 }
             } catch {
                 Log.error("Unable to get the remote address")
