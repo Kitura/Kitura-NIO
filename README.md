@@ -23,11 +23,9 @@
 
 # Kitura-NIO
 
-Kitura-NIO is a SwiftNIO based networking library for Kitura. Other than an additive change to the HTTPServer API around IPv6 support, Kitura-NIO adopts the same API as KituraNet, making the transition to using the NIO port almost seamless. While Kitura-NIO shares some code with Kitura-Net, the core comprising of HTTPServer, ClientRequest/ClientResponse and TLS support have been implemented using SwiftNIO.
+Kitura-NIO is a [SwiftNIO](https://github.com/apple/swift-nio) based networking library for Kitura. Kitura-NIO adopts the same API as [KituraNet](https://github.com/IBM-Swift/Kitura-net), making the transition from KituraNet to Kitura-NIO seamless. While Kitura-NIO shares some code with Kitura-Net, the core comprising of HTTPServer, ClientRequest/ClientResponse and TLS support have been implemented using SwiftNIO. Kitura-NIO uses [NIOOpenSSL](https://github.com/apple/swift-nio-ssl) for TLS support.
 
 We expect most of our users to require higher level concepts such as routing, templates and middleware, these are not provided in Kitura-NIO, if you want to use those facilities you should be coding at the Kitura level, for this please see the [Kitura](https://github.com/IBM-Swift/Kitura) project. Kitura-NIO, like  [Kitura-net](https://github.com/IBM-Swift/Kitura-net), underpins Kitura which offers a higher abstraction level to users.
-
-Kitura-NIO utilises [SwiftNIO](https://github.com/apple/swift-nio) and [NIOOpenSSL](https://github.com/apple/swift-nio-ssl).
 
 Kitura-NIO works with Swift 4.2. It is also being tested with the development binaries for Swift 5.
 
@@ -71,11 +69,8 @@ We'd be more than happy to receive bug reports, enhancement requests and pull re
 
 `$ swift test`
 
-By default, all the tests that fire up servers, bind them to port 8080. If you wish to use the `--parallel` option to run the tests in parallel, we need to make sure that port collisions don't happen. For that, we recommend the usage of ephemeral ports in the tests, via the USE_EPHEMERAL_PORTS flag.
-
-`$ swift test -Xswiftc -DUSE_EPHEMERAL_PORTS --parallel`
-
-Please note that, due to a KituraNet API limitation, you'd need superuser privileges (at least on macOS) to use this option.
+You may also want to run the tests in parallel:
+`$ swift test --parallel`
 
 In some Linux environments, a low open file limit could cause test failures. See [this](https://github.com/IBM-Swift/Kitura-NIO/issues/1).
 
