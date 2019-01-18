@@ -20,7 +20,7 @@ import XCTest
 import Foundation
 import NIO
 import NIOHTTP1
-import NIOOpenSSL
+import NIOSSL
 import LoggerAPI
 
 class RegressionTests: KituraNetTest {
@@ -219,7 +219,7 @@ class RegressionTests: KituraNetTest {
         }
     }
 
-    /// A simple client based on OpenSSL, which connects to a port and performs
+    /// A simple client based on NIOSSL, which connects to a port and performs
     /// an SSL handshake
     struct GoodClient {
         let clientBootstrap: ClientBootstrap
@@ -231,13 +231,13 @@ class RegressionTests: KituraNetTest {
         }
 
         init() throws {
-            var openSSLClientHandler: OpenSSLHandler? {
+            var nioSSLClientHandler: NIOSSLHandler? {
                 let sslConfig = TLSConfiguration.forClient(certificateVerification: .none)
                 do {
-                    let sslContext = try SSLContext(configuration: sslConfig)
-                    return try OpenSSLClientHandler(context: sslContext)
+                    let sslContext = try NIOSSLContext(configuration: sslConfig)
+                    return try NIOSSLClientHandler(context: sslContext, serverHostname: nil)
                 } catch let error {
-                    Log.error("Failed to create OpenSSLClientHandler. Error: \(error)")
+                    Log.error("Failed to create NIOSSLClientHandler. Error: \(error)")
                     return nil
                 }
             }
@@ -245,8 +245,8 @@ class RegressionTests: KituraNetTest {
             clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
                 .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
                 .channelInitializer { channel in
-                    if let openSSLClientHandler = openSSLClientHandler {
-                        _ = channel.pipeline.add(handler: openSSLClientHandler)
+                    if let nioSSLClientHandler = nioSSLClientHandler {
+                        _ = channel.pipeline.addHandler(nioSSLClientHandler)
                     }
                     return channel.pipeline.addHTTPClientHandlers()
                 }
@@ -256,8 +256,8 @@ class RegressionTests: KituraNetTest {
             clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
                 .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
                 .channelInitializer { channel in
-                    channel.pipeline.addHTTPClientHandlers().then {
-                        channel.pipeline.add(handler: httpClient)
+                    channel.pipeline.addHTTPClientHandlers().flatMap {
+                        channel.pipeline.addHandler(httpClient)
                     }
                 }
         }
@@ -315,7 +315,7 @@ class HTTPClient: ChannelInboundHandler {
 
     private var responses: [String] = []
 
-    public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
+    public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let request = self.unwrapInboundIn(data)
         switch request {
         case .head(let header):

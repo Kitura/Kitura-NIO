@@ -42,7 +42,7 @@ public struct SSLConfig {
 
     /// Initialize an `SSLService.Configuration` instance using a CA certificate directory.
     ///
-    ///    *Note:* `caCertificateDirPath` - all certificates in the specified directory **must** be hashed using the OpenSSL Certificate Tool.
+    ///    *Note:* `caCertificateDirPath` - all certificates in the specified directory **must** be hashed using the NIOSSL Certificate Tool.
     ///
     /// - Parameter caCertificateDirPath: Path to a directory containing CA certificates. *(see note above)*
     /// - Parameter certificateFilePath: Path to the PEM formatted certificate file. If nil, `certificateFilePath` will be used.

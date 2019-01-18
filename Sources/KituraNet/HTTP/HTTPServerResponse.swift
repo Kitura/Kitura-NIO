@@ -96,8 +96,8 @@ public class HTTPServerResponse: ServerResponse {
         self.channel = channel
         self.handler = handler
         self.buffer = channel.allocator.buffer(capacity: HTTPServerResponse.bufferSize)
-        let httpVersionMajor = handler.serverRequest?.httpVersionMajor ?? 1
-        let httpVersionMinor = handler.serverRequest?.httpVersionMinor ?? 1
+        let httpVersionMajor = Int(handler.serverRequest?.httpVersionMajor ?? 1)
+        let httpVersionMinor = Int(handler.serverRequest?.httpVersionMinor ?? 1)
         self.httpVersion = HTTPVersion(major: httpVersionMajor, minor: httpVersionMinor)
         headers["Date"] = [SPIUtils.httpDate()]
     }
@@ -121,7 +121,7 @@ public class HTTPServerResponse: ServerResponse {
         }
 
         channel.eventLoop.run {
-            self.buffer.write(string: string)
+            self.buffer.writeString(string)
         }
     }
 
@@ -144,7 +144,7 @@ public class HTTPServerResponse: ServerResponse {
         }
 
         channel.eventLoop.run {
-            self.buffer.write(bytes: data)
+            self.buffer.writeBytes(data)
         }
     }
 
@@ -228,7 +228,7 @@ public class HTTPServerResponse: ServerResponse {
         headers["Connection"] = ["Close"]
 
         // We want to close this channel after the error response is sent
-        let responseSentPromise = channel.eventLoop.newPromise(of: Void.self)
+        let responseSentPromise = channel.eventLoop.makePromise(of: Void.self)
         channel.eventLoop.run {
             do {
                 try self.sendResponse(channel: channel, handler: handler, status: status, withBody: withBody, promise: responseSentPromise)
@@ -236,7 +236,7 @@ public class HTTPServerResponse: ServerResponse {
                 Log.error("Error sending response: \(error)")
                 //TODO: We must be rethrowing/throwing from here, for which we'd need to add a new Error type to the API
             }
-            responseSentPromise.futureResult.whenComplete {
+            responseSentPromise.futureResult.whenComplete { _ in
                 channel.close(promise: nil)
             }
         }

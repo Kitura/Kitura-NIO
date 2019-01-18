@@ -115,7 +115,7 @@ public class BufferList {
 
     */
     public func append(bytes: UnsafePointer<UInt8>, length: Int) {
-        byteBuffer.write(bytes: UnsafeBufferPointer(start: bytes, count: length))
+        byteBuffer.writeBytes(UnsafeBufferPointer(start: bytes, count: length))
     }
 
     /**
@@ -130,7 +130,7 @@ public class BufferList {
 
     */
     public func append(data: Data) {
-        byteBuffer.write(bytes: data)
+        byteBuffer.writeBytes(data)
     }
 
     /**

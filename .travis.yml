@@ -35,23 +35,15 @@ matrix:
       dist: xenial
       sudo: required
       services: docker
-      env: DOCKER_IMAGE=ubuntu:18.04 DOCKER_PRIVILEGED=true
-    - os: osx
-      osx_image: xcode9.2
-      sudo: required
-      env: SWIFT_SNAPSHOT=4.0.3 BREW_INSTALL_PACKAGES="libressl" CUSTOM_TEST_SCRIPT=.kitura-test.sh
-    - os: osx
-      osx_image: xcode9.4
-      sudo: required
-      env: SWIFT_SNAPSHOT=4.1.2 JAZZY_ELIGIBLE=true CODECOV_ELIGIBLE=true BREW_INSTALL_PACKAGES="libressl"
+      env: DOCKER_IMAGE=ubuntu:18.04 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT DOCKER_PRIVILEGED=true
     - os: osx
       osx_image: xcode10.1
       sudo: required
-      env: SWIFT_TEST_ARGS="--parallel" BREW_INSTALL_PACKAGES="libressl"
+      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT JAZZY_ELIGIBLE=true SWIFT_TEST_ARGS="--parallel"
     - os: osx
       osx_image: xcode10.1
       sudo: required
-      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT BREW_INSTALL_PACKAGES="libressl" CUSTOM_TEST_SCRIPT=.kitura-test.sh
+      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT
 
 before_install:
   - git clone https://github.com/IBM-Swift/Package-Builder.git

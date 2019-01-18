@@ -21,7 +21,7 @@ import LoggerAPI
 import Foundation
 import Dispatch
 
-internal class HTTPRequestHandler: ChannelInboundHandler {
+internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandler {
 
     /// The HTTPServer instance on which this handler is installed
     var server: HTTPServer
@@ -70,7 +70,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
     public typealias InboundIn = HTTPServerRequestPart
     public typealias OutboundOut = HTTPServerResponsePart
 
-    public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
+    public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let request = self.unwrapInboundIn(data)
         // If an error response was already sent, we'd want to spare running through this for now.
         // If an upgrade to WebSocket fails, both `errorCaught` and `channelRead` are triggered.
@@ -79,7 +79,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
 
         switch request {
         case .head(let header):
-            serverRequest = HTTPServerRequest(ctx: ctx, requestHead: header, enableSSL: enableSSLVerification)
+            serverRequest = HTTPServerRequest(ctx: context, requestHead: header, enableSSL: enableSSLVerification)
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
             guard let serverRequest = serverRequest else {
@@ -89,10 +89,10 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
             if serverRequest.buffer == nil {
                 serverRequest.buffer = BufferList(with: buffer)
             } else {
-                serverRequest.buffer!.byteBuffer.write(buffer: &buffer)
+                serverRequest.buffer!.byteBuffer.writeBuffer(&buffer)
             }
         case .end:
-            serverResponse = HTTPServerResponse(channel: ctx.channel, handler: self)
+            serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
             //Make sure we use the latest delegate registered with the server
             DispatchQueue.global().async {
                 guard let serverRequest = self.serverRequest, let serverResponse = self.serverResponse else { return }
@@ -104,17 +104,17 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
     }
 
     //IdleStateEvents are received on this method
-    public func userInboundEventTriggered(ctx: ChannelHandlerContext, event: Any) {
+    public func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
         if event is IdleStateHandler.IdleStateEvent {
-            _ = ctx.close()
+            _ = context.close()
         }
     }
 
-    public func channelReadComplete(ctx: ChannelHandlerContext) {
-        ctx.flush()
+    public func channelReadComplete(context: ChannelHandlerContext) {
+        context.flush()
     }
 
-    public func errorCaught(ctx: ChannelHandlerContext, error: Error) {
+    public func errorCaught(context: ChannelHandlerContext, error: Error) {
         guard !errorResponseSent else { return }
         var message: String?
         switch error {
@@ -128,18 +128,20 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
             break
         case KituraWebSocketUpgradeError.invalidVersionHeader(_):
             message = "Only WebSocket protocol version 13 is supported"
-        case NIOWebSocketUpgradeError.unsupportedWebSocketTarget:
-            let target = server.latestWebSocketURI ?? "/<unknown>"
-            message = "No service has been registered for the path \(target)"
         default:
-            // Don't handle any other errors, including `HTTPParserError`s.
-            // We could log an error message here.
-            ctx.close(promise: nil)
+            // Handle only NIOWebSocketUpgradeError here, nothing else
+            if let upgradeError = error as? NIOWebSocketUpgradeError, upgradeError == .unsupportedWebSocketTarget {
+                let target = server.latestWebSocketURI ?? "/<unknown>"
+                message = "No service has been registered for the path \(target)"
+                return
+            }
+            // TODO: Do we log an error message here?
+            context.close(promise: nil)
             return
         }
 
         do {
-            serverResponse = HTTPServerResponse(channel: ctx.channel, handler: self)
+            serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
             errorResponseSent = true
             try serverResponse?.end(with: .badRequest, message: message)
         } catch {

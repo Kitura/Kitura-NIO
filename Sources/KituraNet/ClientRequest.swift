@@ -17,7 +17,7 @@
 import NIO
 import NIOHTTP1
 import Foundation
-import NIOOpenSSL
+import NIOSSL
 import LoggerAPI
 import Dispatch
 
@@ -159,7 +159,7 @@ public class ClientRequest {
     /// The current redirection count
     internal var redirectCount: Int = 0
 
-    private var sslContext: NIOOpenSSL.SSLContext?
+    private var sslContext: NIOSSLContext?
 
     /// Should HTTP/2 protocol be used
     private var useHTTP2 = false
@@ -608,7 +608,7 @@ public class ClientRequest {
     private func initializeClientBootstrapWithSSL(eventLoopGroup: EventLoopGroup) {
         if let sslConfig = self.sslConfig {
             do {
-                sslContext = try SSLContext(configuration: sslConfig)
+                sslContext = try NIOSSLContext(configuration: sslConfig)
             } catch let error {
                 Log.error("Failed to create SSLContext. Error: \(error)")
             }
@@ -617,9 +617,9 @@ public class ClientRequest {
         bootstrap = ClientBootstrap(group: eventLoopGroup)
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .channelInitializer { channel in
-                channel.pipeline.add(handler: try! OpenSSLClientHandler(context: self.sslContext!)).then {
-                    channel.pipeline.addHTTPClientHandlers().then {
-                        channel.pipeline.add(handler: HTTPClientHandler(request: self))
+                channel.pipeline.addHandler(try! NIOSSLClientHandler(context: self.sslContext!, serverHostname: nil)).flatMap {
+                    channel.pipeline.addHTTPClientHandlers().flatMap {
+                        channel.pipeline.addHandler(HTTPClientHandler(request: self))
                     }
                 }
             }
@@ -629,8 +629,8 @@ public class ClientRequest {
         bootstrap = ClientBootstrap(group: eventLoopGroup)
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .channelInitializer { channel in
-                channel.pipeline.addHTTPClientHandlers().then {
-                    channel.pipeline.add(handler: HTTPClientHandler(request: self))
+                channel.pipeline.addHTTPClientHandlers().flatMap {
+                    channel.pipeline.addHandler(HTTPClientHandler(request: self))
                 }
             }
     }
@@ -745,19 +745,19 @@ class HTTPClientHandler: ChannelInboundHandler {
      typealias InboundIn = HTTPClientResponsePart
 
      /// Read the header, body and trailer. Redirection is handled in the trailer case.
-     func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
+     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
          let response = self.unwrapInboundIn(data)
          switch response {
          case .head(let header):
              clientResponse.httpHeaders = header.headers
-             clientResponse.httpVersionMajor = header.version.major
-             clientResponse.httpVersionMinor = header.version.minor
+             clientResponse.httpVersionMajor = UInt16(header.version.major)
+             clientResponse.httpVersionMinor = UInt16(header.version.minor)
              clientResponse.statusCode = HTTPStatusCode(rawValue: Int(header.status.code))!
          case .body(var buffer):
              if clientResponse.buffer == nil {
                  clientResponse.buffer = BufferList(with: buffer)
              } else {
-                 clientResponse.buffer!.byteBuffer.write(buffer: &buffer)
+                 clientResponse.buffer!.byteBuffer.writeBuffer(&buffer)
              }
          case .end:
             // Handle redirection

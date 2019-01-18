@@ -17,7 +17,7 @@
 import NIO
 import NIOHTTP1
 import Dispatch
-import NIOOpenSSL
+import NIOSSL
 import SSLService
 import LoggerAPI
 import NIOWebSocket
@@ -158,19 +158,19 @@ public class HTTPServer: Server {
         }
     }
 
-    /// NIOOpenSSL.TLSConfiguration used with the ServerBootstrap
+    /// NIOSSL.TLSConfiguration used with the ServerBootstrap
     private var tlsConfig: TLSConfiguration?
 
     /// The SSLContext built using the TLSConfiguration
-    private var sslContext: NIOOpenSSL.SSLContext?
+    private var sslContext: NIOSSLContext?
 
     /// URI for which the latest WebSocket upgrade was requested by a client
     var latestWebSocketURI: String?
 
     /// Determines if the request should be upgraded and adds additional upgrade headers to the request
-    private func shouldUpgradeToWebSocket(webSocketHandlerFactory: ProtocolHandlerFactory, head: HTTPRequestHead) -> HTTPHeaders? {
+    private func shouldUpgradeToWebSocket(channel: Channel, webSocketHandlerFactory: ProtocolHandlerFactory, head: HTTPRequestHead) -> EventLoopFuture<HTTPHeaders?> {
         self.latestWebSocketURI = head.uri
-        guard webSocketHandlerFactory.isServiceRegistered(at: head.uri) else { return nil }
+        guard webSocketHandlerFactory.isServiceRegistered(at: head.uri) else { return channel.eventLoop.makeSucceededFuture(nil) }
         var headers = HTTPHeaders()
         if let wsProtocol = head.headers["Sec-WebSocket-Protocol"].first {
             headers.add(name: "Sec-WebSocket-Protocol", value: wsProtocol)
@@ -181,7 +181,7 @@ public class HTTPServer: Server {
         if let _extension = head.headers["Sec-WebSocket-Extensions"].first {
             headers.add(name: "Sec-WebSocket-Extensions", value: webSocketHandlerFactory.negotiate(header: _extension))
         }
-        return headers
+        return channel.eventLoop.makeSucceededFuture(headers)
     }
 
     /// Creates upgrade request and adds WebSocket handler to pipeline
@@ -190,23 +190,23 @@ public class HTTPServer: Server {
         ///TODO: Handle secure upgrade request ("wss://")
         let serverRequest = HTTPServerRequest(ctx: ctx, requestHead: request, enableSSL: false)
         let websocketConnectionHandler = webSocketHandlerFactory.handler(for: serverRequest)
-        let future = ctx.channel.pipeline.add(handler: websocketConnectionHandler)
+        let future = ctx.channel.pipeline.addHandler(websocketConnectionHandler)
         if let _extensions = request.headers["Sec-WebSocket-Extensions"].first {
             for handler in webSocketHandlerFactory.extensionHandlers(header: _extensions) {
-                _ = future.then {
-                    ctx.channel.pipeline.add(handler: handler, before: websocketConnectionHandler)
+                _ = future.flatMap {
+                    ctx.channel.pipeline.addHandler(handler, position: .before(websocketConnectionHandler))
                 }
             }
         }
         return future
     }
 
-    private typealias ShouldUpgradeFunction = (HTTPRequestHead) -> HTTPHeaders?
+    private typealias ShouldUpgradeFunction = (Channel, HTTPRequestHead) -> EventLoopFuture<HTTPHeaders?>
     private typealias UpgradePipelineHandlerFunction = (Channel, HTTPRequestHead) -> EventLoopFuture<Void>
 
     private func generateShouldUpgrade(_ webSocketHandlerFactory: ProtocolHandlerFactory) -> ShouldUpgradeFunction {
-        return { (head: HTTPRequestHead) in
-            return self.shouldUpgradeToWebSocket(webSocketHandlerFactory: webSocketHandlerFactory, head: head)
+        return { (channel: Channel, head: HTTPRequestHead) in
+            return self.shouldUpgradeToWebSocket(channel: channel, webSocketHandlerFactory: webSocketHandlerFactory, head: head)
         }
     }
 
@@ -216,12 +216,12 @@ public class HTTPServer: Server {
         }
     }
 
-    private func createOpenSSLServerHandler() -> OpenSSLServerHandler? {
+    private func createNIOSSLServerHandler() -> NIOSSLServerHandler? {
         if let sslContext = self.sslContext {
             do {
-                return try OpenSSLServerHandler(context: sslContext)
+                return try NIOSSLServerHandler(context: sslContext)
             } catch let error {
-                Log.error("Failed to create OpenSSLServerHandler. Error: \(error)")
+                Log.error("Failed to create NIOSSLServerHandler. Error: \(error)")
             }
         }
         return nil
@@ -269,13 +269,13 @@ public class HTTPServer: Server {
 
         if let tlsConfig = tlsConfig {
             do {
-                self.sslContext = try SSLContext(configuration: tlsConfig)
+                self.sslContext = try NIOSSLContext(configuration: tlsConfig)
             } catch let error {
                 Log.error("Failed to create SSLContext. Error: \(error)")
             }
         }
 
-        var upgraders: [HTTPProtocolUpgrader] = []
+        var upgraders: [HTTPServerProtocolUpgrader] = []
         if let webSocketHandlerFactory = ConnectionUpgrader.getProtocolHandlerFactory(for: "websocket") {
             ///TODO: Should `maxFrameSize` be configurable?
             let upgrader = KituraWebSocketUpgrader(maxFrameSize: 1 << 24,
@@ -286,20 +286,20 @@ public class HTTPServer: Server {
         }
 
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
-            .serverChannelOption(ChannelOptions.backlog, value: BacklogOption.OptionType(self.maxPendingConnections))
+            .serverChannelOption(ChannelOptions.backlog, value: BacklogOption.Value(self.maxPendingConnections))
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
                 let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { ctx in
                     self.ctx = ctx
-                    _ = channel.pipeline.remove(handler: httpHandler)
+                    _ = channel.pipeline.removeHandler(httpHandler)
                 })
-                return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).then {
-                    if let openSSLServerHandler = self.createOpenSSLServerHandler() {
-                        _ = channel.pipeline.add(handler: openSSLServerHandler, first: true)
+                return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).flatMap {
+                    if let nioSSLServerHandler = self.createNIOSSLServerHandler() {
+                        _ = channel.pipeline.addHandler(nioSSLServerHandler, position: .first)
                     }
-                    return channel.pipeline.add(handler: httpHandler)
+                    return channel.pipeline.addHandler(httpHandler)
                 }
             }
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
@@ -568,16 +568,17 @@ class HTTPDummyServerDelegate: ServerDelegate {
 // This work-around will have to be removed once the limitation is removed from swift-nio, possibly in version 2.0
 
 // TODO: Re-evaluate the need for this class when swift-nio 2.0 is released.
-final class KituraWebSocketUpgrader: HTTPProtocolUpgrader {
+final class KituraWebSocketUpgrader: HTTPServerProtocolUpgrader {
     private let _wrappedUpgrader: WebSocketUpgrader
 
-    public init(maxFrameSize: Int, automaticErrorHandling: Bool = true, shouldUpgrade: @escaping (HTTPRequestHead) -> HTTPHeaders?,
+    public init(maxFrameSize: Int, automaticErrorHandling: Bool = true,
+                shouldUpgrade: @escaping (Channel, HTTPRequestHead) -> EventLoopFuture<HTTPHeaders?>,
                 upgradePipelineHandler: @escaping (Channel, HTTPRequestHead) -> EventLoopFuture<Void>) {
         _wrappedUpgrader = WebSocketUpgrader(maxFrameSize: maxFrameSize, automaticErrorHandling: automaticErrorHandling, shouldUpgrade: shouldUpgrade,
                                              upgradePipelineHandler: upgradePipelineHandler)
     }
 
-    public convenience init(automaticErrorHandling: Bool = true, shouldUpgrade: @escaping (HTTPRequestHead) -> HTTPHeaders?,
+    public convenience init(automaticErrorHandling: Bool = true, shouldUpgrade: @escaping (Channel, HTTPRequestHead) -> EventLoopFuture<HTTPHeaders?>,
                             upgradePipelineHandler: @escaping (Channel, HTTPRequestHead) -> EventLoopFuture<Void>) {
         self.init(maxFrameSize: 1 << 14, automaticErrorHandling: automaticErrorHandling,
                   shouldUpgrade: shouldUpgrade, upgradePipelineHandler: upgradePipelineHandler)
@@ -591,35 +592,38 @@ final class KituraWebSocketUpgrader: HTTPProtocolUpgrader {
         return _wrappedUpgrader.requiredUpgradeHeaders
     }
 
-    public func buildUpgradeResponse(upgradeRequest: HTTPRequestHead, initialResponseHeaders: HTTPHeaders) throws -> HTTPHeaders {
-        do {
-            return try _wrappedUpgrader.buildUpgradeResponse(upgradeRequest: upgradeRequest, initialResponseHeaders: initialResponseHeaders)
-        } catch {
-            if case NIOWebSocketUpgradeError.invalidUpgradeHeader = error {
-                let keyHeader = upgradeRequest.headers[canonicalForm: "Sec-WebSocket-Key"]
-                let versionHeader = upgradeRequest.headers[canonicalForm: "Sec-WebSocket-Version"]
-
-                if keyHeader.count == 0 {
-                    throw KituraWebSocketUpgradeError.noWebSocketKeyHeader
-                } else if keyHeader.count > 1 {
-                    throw KituraWebSocketUpgradeError.invalidKeyHeaderCount(keyHeader.count)
-                } else if versionHeader.count == 0 {
-                    throw KituraWebSocketUpgradeError.noWebSocketVersionHeader
-                } else if versionHeader.count > 1 {
-                    throw KituraWebSocketUpgradeError.invalidVersionHeaderCount(versionHeader.count)
-                } else if versionHeader.first! != "13" {
-                    throw KituraWebSocketUpgradeError.invalidVersionHeader(versionHeader.first!)
-                } else {
-                    throw error
-                }
-            } else {
-                throw error
+    public func buildUpgradeResponse(channel: Channel, upgradeRequest: HTTPRequestHead, initialResponseHeaders: HTTPHeaders) -> EventLoopFuture<HTTPHeaders> {
+        let future = _wrappedUpgrader.buildUpgradeResponse(channel: channel, upgradeRequest: upgradeRequest, initialResponseHeaders: initialResponseHeaders)
+        return future.flatMapError { error in
+            guard let upgradeError = error as? NIOWebSocketUpgradeError, upgradeError == NIOWebSocketUpgradeError.invalidUpgradeHeader else {
+                return channel.eventLoop.makeFailedFuture(error)
             }
+
+            let keyHeader = upgradeRequest.headers[canonicalForm: "Sec-WebSocket-Key"]
+            let versionHeader = upgradeRequest.headers[canonicalForm: "Sec-WebSocket-Version"]
+
+            var error: KituraWebSocketUpgradeError 
+            if keyHeader.count == 0 {
+                error = KituraWebSocketUpgradeError.noWebSocketKeyHeader
+            } else if keyHeader.count > 1 {
+                error = KituraWebSocketUpgradeError.invalidKeyHeaderCount(keyHeader.count)
+            } else if versionHeader.count == 0 {
+                error = KituraWebSocketUpgradeError.noWebSocketVersionHeader
+            } else if versionHeader.count > 1 {
+                error = KituraWebSocketUpgradeError.invalidVersionHeaderCount(versionHeader.count)
+            } else if versionHeader.first! != "13" {
+                error = KituraWebSocketUpgradeError.invalidVersionHeader(String(versionHeader.first!))
+            } else {
+                error = KituraWebSocketUpgradeError.unknownUpgradeError 
+            }
+            return channel.eventLoop.makeFailedFuture(error)
+        }.flatMap { value in 
+            return channel.eventLoop.makeSucceededFuture(value)
         }
     }
 
-    public func upgrade(ctx: ChannelHandlerContext, upgradeRequest: HTTPRequestHead) -> EventLoopFuture<Void> {
-        return _wrappedUpgrader.upgrade(ctx: ctx, upgradeRequest: upgradeRequest)
+    public func upgrade(context: ChannelHandlerContext, upgradeRequest: HTTPRequestHead) -> EventLoopFuture<Void> {
+        return _wrappedUpgrader.upgrade(context: context, upgradeRequest: upgradeRequest)
     }
 }
 
@@ -640,4 +644,7 @@ enum KituraWebSocketUpgradeError: Error {
 
     // The Sec-WebSocket-Version is not 13
     case invalidVersionHeader(String)
+
+    // Unknown upgrade error
+    case unknownUpgradeError
 }
