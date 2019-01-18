@@ -41,55 +41,61 @@ public class HTTPServerRequest: ServerRequest {
 
     @available(*, deprecated, message: "URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead")
     public var urlComponents: URLComponents {
-        return URLComponents(url: urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
+        if let _urlComponents = _urlComponents {
+            return _urlComponents
+        }
+        _urlComponents = URLComponents(url: urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
+        return _urlComponents!
     }
 
     private var _url: URL?
+
+    private var _urlComponents: URLComponents?
 
     public var urlURL: URL {
         if let _url = _url {
             return _url
         }
-        var url = ""
 
-        self.enableSSL ? url.append("https://") : url.append("http://")
-
-        var localAddress = ""
-        var localAddressPort = UInt16(0)
-
-        do {
-            try ctx.eventLoop.runAndWait {
-                localAddress = HTTPServerRequest.host(socketAddress: self.ctx.localAddress)
-                localAddressPort = self.ctx.localAddress?.port ?? 0
-            }
-        } catch {
-            Log.error("Unable to get the local address")
-        }
-
-        if let hostname = headers["Host"]?.first {
-            url.append(hostname)
-            if !hostname.contains(":") {
-                url.append(":")
-                url.append(String(describing: localAddressPort))
-            }
+        if let _urlComponents = _urlComponents {
+            self._url = _urlComponents.url
+            return self._url!
         } else {
-            Log.error("Host header not received")
-            let hostname = localAddress
-            url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
-            url.append(":")
-            url.append(String(describing: localAddressPort))
+            _urlComponents = URLComponents()
+            _urlComponents?.scheme = self.enableSSL ? "https" : "http"
+
+            var localAddress = ""
+            var localAddressPort = UInt16(0)
+
+            do {
+                try ctx.eventLoop.runAndWait {
+                    localAddress = HTTPServerRequest.host(socketAddress: self.ctx.localAddress)
+                    localAddressPort = self.ctx.localAddress?.port ?? 0
+                }
+            } catch {
+                Log.error("Unable to get the local address")
+            }
+
+            if let hostname = headers["Host"]?.first {
+                _urlComponents?.host = hostname
+            } else {
+                Log.error("Host header not received")
+                let hostname = localAddress
+                _urlComponents?.host = hostname == "127.0.0.1" ? "localhost" : hostname
+            }
+
+            _urlComponents?.port = Int(localAddressPort)
+            _urlComponents?.path = _urlString
+
+            if let urlURL = _urlComponents?.url {
+                self._url = urlURL
+            } else {
+                Log.error("URL init failed from: \(url)")
+                self._url = URL(string: "http://not_available/")!
+            }
+
+            return self._url!
         }
-
-        url.append(_urlString)
-
-        if let urlURL = URL(string: url) {
-            self._url = urlURL
-        } else {
-            Log.error("URL init failed from: \(url)")
-            self._url = URL(string: "http://not_available/")!
-        }
-
-        return self._url!
     }
 
     private var _remoteAddress: String?
