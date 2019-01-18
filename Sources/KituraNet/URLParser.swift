@@ -22,29 +22,92 @@ import Foundation
 
 public class URLParser: CustomStringConvertible {
 
+    private var urlComponents: URLComponents?
+
     /// Schema.
-    public var schema: String?
+    public var schema: String? {
+        get {
+            return self.urlComponents?.scheme
+        }
+        set (newValue) {
+            self.urlComponents?.scheme = newValue
+        }
+    }
 
     /// Hostname.
-    public var host: String?
+    public var host: String? {
+        get {
+            return self.urlComponents?.host
+        }
+        set (newValue) {
+            self.urlComponents?.host = newValue
+        }
+    }
 
     /// Path portion of the URL.
-    public var path: String?
+    public var path: String? {
+        get {
+            return self.urlComponents?.path
+        }
+        set (newValue) {
+            if let newValue = newValue {
+                self.urlComponents?.path = newValue
+            }
+        }
+    }
 
     /// The entire query portion of the URL.
-    public var query: String?
+    public var query: String? {
+        get {
+            return self.urlComponents?.query
+        }
+        set (newValue) {
+            self.urlComponents?.query = newValue
+        }
+    }
 
     /// An optional fragment identifier providing direction to a secondary resource.
-    public var fragment: String?
+    public var fragment: String? {
+        get {
+            return self.urlComponents?.fragment
+        }
+        set (newValue) {
+            self.urlComponents?.fragment = newValue
+        }
+    }
 
     /// The userid and password if specified in the URL.
-    public var userinfo: String?
+    public var userinfo: String? {
+        if let username = urlComponents?.user, let password = urlComponents?.password {
+            return "\(username):\(password)"
+        }
+        return nil
+    }
 
     /// The port specified, if any, in the URL.
-    public var port: Int?
+    public var port: Int? {
+        get {
+            return self.urlComponents?.port
+        }
+        set (newValue) {
+            self.urlComponents?.port = newValue
+        }
+    }
+
+    private var _query: [String: String] = [:]
 
     /// The query parameters broken out.
-    public var queryParameters: [String: String] = [:]
+    public var queryParameters: [String: String] {
+        if !_query.isEmpty {
+            return _query
+        }
+        if let queryItems = urlComponents?.queryItems {
+            queryItems.forEach {
+                _query[$0.name] = $0.value
+            }
+        }
+        return _query
+    }
 
     /// Nicely formatted description of the parsed result.
     public var description: String {
@@ -80,20 +143,9 @@ public class URLParser: CustomStringConvertible {
     ///     - Parameter url: The URL to be parsed.
     ///     - Parameter isConnect: A boolean, indicating whether or not a connection has been established.
     public init (url: Data, isConnect: Bool) {
-        let urlComponents = URLComponents(string: String(data: url, encoding: .utf8)!)
-        self.schema = urlComponents?.scheme
-        self.host = urlComponents?.host
-        self.path = urlComponents?.percentEncodedPath
-        self.query = urlComponents?.query
-        self.fragment = urlComponents?.fragment
-        if let username = urlComponents?.user, let password = urlComponents?.password {
-            self.userinfo = "\(username):\(password)"
-        }
-        self.port = urlComponents?.port
-        if let queryItems = urlComponents?.queryItems {
-           queryItems.forEach {
-               self.queryParameters[$0.name] = $0.value
-           }
+        let urlString: String? = String(data: url, encoding: .utf8)
+        if let urlString = urlString {
+            self.urlComponents = URLComponents(string: urlString)
         }
     }
 }
