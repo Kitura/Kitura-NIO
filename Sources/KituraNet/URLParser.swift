@@ -47,7 +47,7 @@ public class URLParser: CustomStringConvertible {
     /// Path portion of the URL.
     public var path: String? {
         get {
-            return self.urlComponents?.path
+            return self.urlComponents?.percentEncodedPath
         }
         set (newValue) {
             if let newValue = newValue {
