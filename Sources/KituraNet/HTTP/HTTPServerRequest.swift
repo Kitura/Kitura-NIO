@@ -78,13 +78,13 @@ public class HTTPServerRequest: ServerRequest {
 
         _urlComponents?.port = Int(localAddressPort)
 
-        let uriComponents = _urlString.components(separatedBy: "?")
+        let uriComponents = _urlString.split(separator: "?")
         if uriComponents.count > 0 {
-            _urlComponents?.path = uriComponents[0]
+            _urlComponents?.path = String(uriComponents[0])
         }
 
         if uriComponents.count > 1 {
-            _urlComponents?.percentEncodedQuery = uriComponents[1]
+            _urlComponents?.percentEncodedQuery = String(uriComponents[1])
         }
 
         if let urlURL = _urlComponents?.url {
