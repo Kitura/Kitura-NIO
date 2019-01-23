@@ -59,4 +59,8 @@ before_install:
   - git clone https://github.com/IBM-Swift/Package-Builder.git
 
 script:
-  - ./Package-Builder/build-package.sh -projectDir $TRAVIS_BUILD_DIR
+  - source ./Package-Builder/build-package.sh -projectDir $TRAVIS_BUILD_DIR
+  - cd ../ && git clone https://github.com/IBM-Swift/Kitura && cd Kitura
+  - swift build
+  - swift package edit Kitura-NIO --path ../Kitura-NIO
+  - swift test
