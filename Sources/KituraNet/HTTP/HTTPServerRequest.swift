@@ -46,13 +46,15 @@ public class HTTPServerRequest: ServerRequest {
 
     private var _url: URL?
 
+    private var _urlComponents: URLComponents?
+
     public var urlURL: URL {
         if let _url = _url {
             return _url
         }
-        var url = ""
 
-        self.enableSSL ? url.append("https://") : url.append("http://")
+        _urlComponents = URLComponents()
+        _urlComponents?.scheme = self.enableSSL ? "https" : "http"
 
         var localAddress = ""
         var localAddressPort = UInt16(0)
@@ -67,22 +69,25 @@ public class HTTPServerRequest: ServerRequest {
         }
 
         if let hostname = headers["Host"]?.first {
-            url.append(hostname)
-            if !hostname.contains(":") {
-                url.append(":")
-                url.append(String(describing: localAddressPort))
-            }
+            _urlComponents?.host = hostname
         } else {
             Log.error("Host header not received")
             let hostname = localAddress
-            url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
-            url.append(":")
-            url.append(String(describing: localAddressPort))
+            _urlComponents?.host = hostname == "127.0.0.1" ? "localhost" : hostname
         }
 
-        url.append(_urlString)
+        _urlComponents?.port = Int(localAddressPort)
 
-        if let urlURL = URL(string: url) {
+        let uriComponents = _urlString.split(separator: "?")
+        if uriComponents.count > 0 {
+            _urlComponents?.path = String(uriComponents[0])
+        }
+
+        if uriComponents.count > 1 {
+            _urlComponents?.percentEncodedQuery = String(uriComponents[1])
+        }
+
+        if let urlURL = _urlComponents?.url {
             self._url = urlURL
         } else {
             Log.error("URL init failed from: \(url)")
