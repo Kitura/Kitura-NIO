@@ -36,7 +36,7 @@ public class HTTPServerRequest: ServerRequest {
     /// Use 'urlURL' for the full URL
     public var url: Data {
         //The url needs to retain the percent encodings. URL.path doesn't, so we do this.
-        return _urlString.data(using: .utf8) ?? Data()
+        return Data(_urlString.utf8)
     }
 
     @available(*, deprecated, message: "URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead")

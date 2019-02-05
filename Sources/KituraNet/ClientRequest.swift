@@ -317,9 +317,7 @@ public class ClientRequest {
     ///
     /// - Parameter from: The String to be added
     public func write(from string: String) {
-        if let data = string.data(using: .utf8) {
-            write(from: data)
-        }
+        write(from: Data(string.utf8))
     }
 
     /// Add the bytes in a Data struct to the body of the request to be sent
@@ -480,11 +478,9 @@ public class ClientRequest {
             }
     }
 
-    private func createHTTPBasicAuthHeader(username: String, password: String) -> String? {
+    private func createHTTPBasicAuthHeader(username: String, password: String) -> String {
         let authHeader = "\(username):\(password)"
-        guard let data = authHeader.data(using: String.Encoding.utf8) else {
-            return nil
-        }
+        let data = Data(authHeader.utf8)
         return "Basic \(data.base64EncodedString())"
     }
 }
