@@ -55,7 +55,7 @@ public class FastCGIServerRequest: ServerRequest {
     /// The URL from the request in UTF-8 form
     /// This contains just the path and query parameters starting with '/'
     /// Use 'urlURL' for the full URL
-    public var url: Data { return requestUri?.data(using: .utf8) ?? Data() }
+    public var url: Data { return Data((requestUri ?? "").utf8) }
 
     /// The URL from the request as URLComponents
     /// URLComponents has a memory leak on linux as of swift 3.0.1. Use 'urlURL' instead
