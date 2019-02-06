@@ -69,7 +69,7 @@ public class ClientRequest {
     public private(set) var closeConnection = false
 
     /// The callback to receive the response
-    public private(set) var callback: Callback
+    private(set) var callback: Callback
 
     /// The hostname of the remote server
     var hostName: String?
