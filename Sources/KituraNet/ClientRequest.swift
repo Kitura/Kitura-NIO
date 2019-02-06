@@ -41,31 +41,95 @@ fileprivate extension UInt16 {
     }
 }
 
-/// This class provides a set of low level APIs for issuing HTTP requests to another server.
+// MARK: ClientRequest
+/**
+This class provides a set of low level APIs for issuing HTTP requests to another server. A new instance of the request can be created, along with options if the user would like to specify certain parameters such as HTTP headers, HTTP methods, host names, and SSL credentials. `Data` and `String` objects cab be added to a `ClientRequest` too, and URLs can be parsed.
+
+### Usage Example: ###
+````swift
+//Function to create a new `ClientRequest` using a URL.
+ public static func request(_ url: String, callback: @escaping ClientRequest.Callback) -> ClientRequest {
+     return ClientRequest(url: url, callback: callback)
+ }
+
+ //Create a new `ClientRequest` using a URL.
+ let request = HTTP.request("http://localhost/8080") {response in
+     ...
+ }
+````
+*/
 public class ClientRequest {
 
-    /// The set of HTTP headers to be sent with the request.
+    /**
+     The set of HTTP headers to be sent with the request.
+
+     ### Usage Example: ###
+     ````swift
+     clientRequest.headers["Content-Type"] = ["text/plain"]
+     ````
+     */
     public var headers = [String: String]()
 
-    /// The URL for the request
+    /**
+     The URL for the request.
+
+     ### Usage Example: ###
+     ````swift
+     clientRequest.url = "https://localhost:8080"
+     ````
+     */
     public private(set) var url: String = ""
 
-    /// The HTTP method (i.e. GET, POST, PUT, DELETE) for the request
+    /**
+     The HTTP method (i.e. GET, POST, PUT, DELETE) for the request.
+
+     ### Usage Example: ###
+     ````swift
+     clientRequest.method = "post"
+     ````
+     */
     public private(set) var method: String = "get"
 
-    /// The username to be used if using Basic Auth authentication
+    /**
+     The username to be used if using Basic Auth authentication.
+
+     ### Usage Example: ###
+     ````swift
+     clientRequest.userName = "user1"
+     ````
+     */
     public private(set) var userName: String?
 
-    /// The password to be used if using Basic Auth authentication.
+    /**
+     The password to be used if using Basic Auth authentication.
+
+     ### Usage Example: ###
+     ````swift
+     clientRequest.password = "sUpeR_seCurE_paSsw0rd"
+     ````
+     */
     public private(set) var password: String?
 
-    /// The maximum number of redirects before failure.
-    ///
-    /// - Note: The `ClientRequest` class will automatically follow redirect responses. To
-    ///        avoid redirect loops, it will at maximum follow `maxRedirects` redirects.
+    /**
+     The maximum number of redirects before failure.
+
+     - Note: The `ClientRequest` class will automatically follow redirect responses. To avoid redirect loops, it will at maximum follow `maxRedirects` redirects.
+
+     ### Usage Example: ###
+     ````swift
+     clientRequest.maxRedirects = 10
+     ````
+     */
     public internal(set) var maxRedirects = 10
 
-    /// If true, the "Connection: close" header will be added to the request that is sent.
+    /**
+     If true, the "Connection: close" header will be added to the request that is sent.
+
+     ### Usage Example: ###
+     ````swift
+     ClientRequest.closeConnection = false
+     ````
+     */
     public private(set) var closeConnection = false
 
     /// The callback to receive the response
@@ -106,7 +170,15 @@ public class ClientRequest {
     /// A semaphore used to make ClientRequest.end() synchronous
     let waitSemaphore = DispatchSemaphore(value: 0)
 
-    /// Client request option enum
+    /**
+    Client request options enum. This allows the client to specify certain parameteres such as HTTP headers, HTTP methods, host names, and SSL credentials.
+
+    ### Usage Example: ###
+    ````swift
+    //If present in the options provided, the client will try to use HTTP/2 protocol for the connection.
+    Options.useHTTP2
+    ````
+    */
     public enum Options {
         /// Specifies the HTTP method (i.e. PUT, POST...) to be sent in the request
         case method(String)
@@ -151,6 +223,10 @@ public class ClientRequest {
         case useHTTP2
     }
 
+    /// Initializes a `ClientRequest` instance
+    ///
+    /// - Parameter url: url for the request
+    /// - Parameter callback: The closure of type `Callback` to be used for the callback.
     init(url: String, callback: @escaping Callback) {
         self.url = url
         let url = URL(string: url)!
@@ -181,9 +257,19 @@ public class ClientRequest {
         self.callback = callback
     }
 
-    /// Set a single option in the request.  URL parameters must be set in init()
-    ///
-    /// - Parameter option: an `Options` instance describing the change to be made to the request
+    /**
+     Set a single option in the request. URL parameters must be set in init().
+
+     ### Usage Example: ###
+     ````swift
+     var options: [ClientRequest.Options] = []
+     options.append(.port(Int16(port)))
+     clientRequest.set(options)
+     ````
+
+     - Parameter option: An `Options` instance describing the change to be made to the request.
+
+     */
     public func set(_ option: Options) {
         switch option {
         case .schema, .hostname, .port, .path, .username, .password:
@@ -261,17 +347,31 @@ public class ClientRequest {
 
     }
 
-    /// Response callback closure type
-    ///
-    /// - Parameter ClientResponse: The `ClientResponse` object that describes the response
-    ///                            that was received from the remote server.
+    /**
+     Response callback closure type.
+
+     ### Usage Example: ###
+     ````swift
+     var ClientRequest.headers["Content-Type"] = ["text/plain"]
+     ````
+
+     - Parameter ClientResponse: The `ClientResponse` object that describes the response that was received from the remote server.
+
+    */
     public typealias Callback = (ClientResponse?) -> Void
 
-    /// Parse an URL String into options
-    ///
-    /// - Parameter urlString: URL of a String type
-    ///
-    /// - Returns: A `ClientRequest.Options` array
+    /**
+     Parse an URL (String) into an array of ClientRequest.Options.
+
+     ### Usage Example: ###
+     ````swift
+     let url: String = "http://www.website.com"
+     let parsedOptions = clientRequest.parse(url)
+     ````
+
+     - Parameter urlString: A String object referencing a URL.
+     - Returns: An array of `ClientRequest.Options`
+    */
     public class func parse(_ urlString: String) -> [ClientRequest.Options] {
         if let url = URL(string: urlString) {
             return parse(url)
@@ -279,11 +379,18 @@ public class ClientRequest {
         return []
     }
 
-    /// Parse an URL class into options
-    ///
-    /// - Parameter url: Foundation URL class
-    ///
-    /// - Returns: A `ClientRequest.Options` array
+    /**
+     Parse an URL Foudation object into an array of ClientRequest.Options.
+
+     ### Usage Example: ###
+     ````swift
+     let url: URL = URL(string: "http://www.website.com")!
+     let parsedOptions = clientRequest.parse(url)
+     ````
+
+     - Parameter url: Foundation URL object.
+     - Returns: An array of `ClientRequest.Options`
+    */
     public class func parse(_ url: URL) -> [ClientRequest.Options] {
 
         var options: [ClientRequest.Options] = []
@@ -313,16 +420,35 @@ public class ClientRequest {
         return options
     }
 
-    /// Add a string to the body of the request to be sent
-    ///
-    /// - Parameter from: The String to be added
+    /**
+     Add a String to the body of the request to be sent.
+
+     ### Usage Example: ###
+     ````swift
+     let stringToSend: String = "send something"
+     clientRequest.write(from: stringToSend)
+     ````
+
+     - Parameter from: The String to be added to the request.
+     */
     public func write(from string: String) {
         write(from: Data(string.utf8))
     }
 
-    /// Add the bytes in a Data struct to the body of the request to be sent
-    ///
-    /// - Parameter from: The Data Struct containing the bytes to be added
+    /**
+     Add the bytes in a Data struct to the body of the request to be sent.
+
+     ### Usage Example: ###
+     ````swift
+     let string = "some some more stuff"
+     if let data: Data = string.data(using: .utf8) {
+        clientRequest.write(from: data)
+     }
+
+     ````
+
+     - Parameter from: The Data Struct containing the bytes to be added to the request.
+     */
     public func write(from data: Data) {
         if bodyData == nil {
             bodyData = Data()
@@ -331,23 +457,37 @@ public class ClientRequest {
         headers["Content-Length"] = "\(bodyData!.count)" //very eagerly adding
     }
 
-    /// Add a string to the body of the request to be sent and send the request
-    /// to the remote server
-    ///
-    /// - Parameter from: The String to be added
-    /// - Parameter close: If true, add the "Connection: close" header to the set
-    ///                   of headers sent with the request
+    /**
+     Add a String to the body of the request to be sent and then send the request to the remote server.
+
+     ### Usage Example: ###
+     ````swift
+     let data: String = "send something"
+     clientRequest.end(from: data, close: true)
+     ````
+
+     - Parameter data: The String to be added to the request.
+     - Parameter close: If true, add the "Connection: close" header to the set of headers sent with the request.
+     */
     public func end(_ data: String, close: Bool = false) {
         write(from: data)
         end(close: close)
     }
 
-    /// Add the bytes in a Data struct to the body of the request to be sent
-    /// and send the request to the remote server
-    ///
-    /// - Parameter from: The Data Struct containing the bytes to be added
-    /// - Parameter close: If true, add the "Connection: close" header to the set
-    ///                   of headers sent with the request
+    /**
+     Add the bytes in a Data struct to the body of the request to be sent and then send the request to the remote server.
+
+     ### Usage Example: ###
+     ````swift
+     let stringToSend = "send this"
+     let data: Data = stringToSend.data(using: .utf8) {
+        clientRequest.end(from: data, close: true)
+     }
+     ````
+
+     - Parameter data: The Data struct containing the bytes to be added to the request.
+     - Parameter close: If true, add the "Connection: close" header to the set of headers sent with the request.
+     */
     public func end(_ data: Data, close: Bool = false) {
         write(from: data)
         end(close: close)
@@ -359,10 +499,16 @@ public class ClientRequest {
     /// The client bootstrap used to connect to the remote server
     var bootstrap: ClientBootstrap?
 
-    /// Send the request to the remote server
-    ///
-    /// - Parameter close: If true, add the "Connection: close" header to the set
-    ///                   of headers sent with the request
+    /**
+     Send the request to the remote server.
+
+     ### Usage Example: ###
+     ````swift
+     clientRequest.end(true)
+     ````
+
+     - Parameter close: If true, add the "Connection: close" header to the set of headers sent with the request.
+     */
     public func end(close: Bool = false) {
         closeConnection = close
 
