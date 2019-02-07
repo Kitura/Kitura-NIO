@@ -69,7 +69,7 @@ public class ClientRequest {
     public private(set) var closeConnection = false
 
     /// The callback to receive the response
-    public private(set) var callback: Callback
+    private(set) var callback: Callback
 
     /// The hostname of the remote server
     var hostName: String?
@@ -585,10 +585,10 @@ class HTTPClientHandler: ChannelInboundHandler {
          self.clientRequest = request
      }
 
-     public typealias InboundIn = HTTPClientResponsePart
+     typealias InboundIn = HTTPClientResponsePart
 
      /// Read the header, body and trailer. Redirection is handled in the trailer case.
-     public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
+     func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
          let response = self.unwrapInboundIn(data)
          switch response {
          case .head(let header):
