@@ -33,7 +33,9 @@ class ClientE2ETests: KituraNetTest {
             ("testPutRequests", testPutRequests),
             ("testPatchRequests", testPatchRequests),
             ("testSimpleHTTPClient", testSimpleHTTPClient),
-            ("testUrlURL", testUrlURL)
+            ("testUrlURL", testUrlURL),
+            ("testQueryParameters", testQueryParameters),
+            ("testRedirect", testRedirect),
         ]
     }
 
@@ -265,6 +267,77 @@ class ClientE2ETests: KituraNetTest {
             delegate.port = self.port
             self.performRequest("post", path: ClientE2ETests.urlPath, callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
+                expectation.fulfill()
+            })
+        }
+    }
+
+    func testQueryParameters() {
+        class TestDelegate : ServerDelegate {
+            func toDictionary(_ queryItems: [URLQueryItem]?) -> [String : String] {
+                guard let queryItems = queryItems else { return [:] }
+                var queryParameters: [String : String] = [:]
+                for queryItem in queryItems {
+                    queryParameters[queryItem.name] = queryItem.value ?? ""
+                }
+                return queryParameters
+            }
+
+            func handle(request: ServerRequest, response: ServerResponse) {
+               do {
+                   let urlComponents = URLComponents(url: request.urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
+                   let queryParameters = toDictionary(urlComponents.queryItems)
+                   XCTAssertEqual(queryParameters.count, 3, "Expected 3 query parameters, received \(queryParameters.count)")
+                   XCTAssertEqual(queryParameters["key1"], "value1", "Value of key1 should have been value1, received \(queryParameters["key1"]!)")
+                   XCTAssertEqual(queryParameters["key2"], "value2", "Value of key2 should have been value2, received \(queryParameters["key2"]!)")
+                   XCTAssertEqual(queryParameters["key3"], "value3 value4", "Value of key3 should have been \"value3 value4\", received \(queryParameters["key3"]!)")
+                   response.statusCode = .OK
+                   try response.end()
+                } catch {
+                    XCTFail("Error while writing a response")
+                }
+            }
+        }
+        let testDelegate = TestDelegate()
+        performServerTest(testDelegate) { expectation in
+            self.performRequest("get", path: "/zxcv/p?key1=value1&key2=value2&key3=value3%20value4", callback: { response in
+                XCTAssertEqual(response?.statusCode, .OK)
+                expectation.fulfill()
+            })
+        }
+    }
+
+    func testRedirect() {
+        class TestRedirectionDelegate: ServerDelegate {
+            func handle(request: ServerRequest, response: ServerResponse) {
+                switch request.urlURL.path {
+                case "/redirecting":
+                    response.statusCode = .movedPermanently
+                    response.headers.append("Location", value: ["/redirected"])
+                    do {
+                        try response.end()
+                    } catch {
+                        XCTFail("Failed to send response")
+                    }
+                case "/redirected":
+                    response.statusCode = .OK
+                    do {
+                        try response.end(text: "from redirected route")
+                    } catch {
+                        XCTFail("Failed to send response")
+                    }
+                default:
+                    XCTFail("This request pertains to an unexpected path")
+                }
+            }
+        }
+
+        let redirectingDelegate = TestRedirectionDelegate()
+        performServerTest(redirectingDelegate) { expectation in
+            self.performRequest("get", path: "/redirecting", callback: { response in
+                XCTAssertEqual(response?.statusCode, .OK, "Expected response code OK(200), but received \"(response?.statusCode)")
+                let responseString = try! response?.readString() ?? ""
+                XCTAssertEqual(responseString, "from redirected route", "Redirection failed")
                 expectation.fulfill()
             })
         }
