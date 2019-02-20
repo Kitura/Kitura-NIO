@@ -238,7 +238,7 @@ public class ClientRequest {
                 if thePath.first != "/" {
                     thePath = "/" + thePath
                 }
-                path = thePath
+                path = thePath.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed) ?? thePath
                 self.path = path
             case .username(let userName):
                 self.userName = userName

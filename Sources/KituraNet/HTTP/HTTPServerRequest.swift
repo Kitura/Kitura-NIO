@@ -126,7 +126,18 @@ public class HTTPServerRequest: ServerRequest {
 
     private var enableSSL: Bool = false
 
-    private var _urlString: String
+    private var rawURLString: String
+
+    private var urlStringPercentEncodingRemoved: String?
+
+    private var _urlString: String {
+        guard let urlStringPercentEncodingRemoved = self.urlStringPercentEncodingRemoved else {
+            let _urlStringPercentEncodingRemoved = rawURLString.removingPercentEncoding ?? rawURLString
+            self.urlStringPercentEncodingRemoved = _urlStringPercentEncodingRemoved
+            return _urlStringPercentEncodingRemoved
+        }
+        return urlStringPercentEncodingRemoved
+    }
 
     private static func host(socketAddress: SocketAddress?) -> String {
         guard let socketAddress = socketAddress else {
@@ -148,7 +159,7 @@ public class HTTPServerRequest: ServerRequest {
         self.method = requestHead.method.string()
         self.httpVersionMajor = requestHead.version.major
         self.httpVersionMinor = requestHead.version.minor
-        self._urlString = requestHead.uri
+        self.rawURLString = requestHead.uri
         self.enableSSL = enableSSL
     }
 
