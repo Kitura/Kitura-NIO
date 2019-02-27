@@ -19,26 +19,79 @@ import NIOHTTP1
 import LoggerAPI
 import Foundation
 
-/// This class implements the `ServerRequest` protocol for incoming sockets that
-/// are communicating via the HTTP protocol.
-public class HTTPServerRequest: ServerRequest {
+// MARK: HTTPServerRequest
 
-    /// Set of HTTP headers of the request.
+/**
+This class implements the `ServerRequest` protocol for incoming sockets that are communicating via the HTTP protocol. Data and Strings can be read in.
+
+### Usage Example: ###
+````swift
+ func handlePost(request: ServerRequest, response: ServerResponse) {
+     var body = Data()
+     do {
+         let length = try request.readAllData(into: &body)
+         let result = "Read \(length) bytes"
+         response.headers["Content-Type"] = ["text/plain"]
+         response.headers["Content-Length"] = ["\(result.count)"]
+
+         try response.end(text: result)
+     }
+     catch {
+         print("Error reading body or writing response")
+     }
+ }
+````
+*/
+public class HTTPServerRequest: ServerRequest {
+    /**
+     Set of HTTP headers of the request.
+
+     ### Usage Example: ###
+     ````swift
+     let protocols = request.headers["Upgrade"]
+     ````
+    */
     public var headers: HeadersContainer
 
+    /**
+     The URL from the request in string form
+     This contains just the path and query parameters starting with '/'
+     Use 'urlURL' for the full URL
+
+     ### Usage Example: ###
+     ````swift
+     print(request.urlString)
+     ````
+    */
     @available(*, deprecated, message: "This contains just the path and query parameters starting with '/'. use 'urlURL' instead")
     public var urlString: String {
         return _urlString
     }
 
-    /// The URL from the request in UTF-8 form
-    /// This contains just the path and query parameters starting with '/'
-    /// Use 'urlURL' for the full URL
+    /**
+     The URL from the request in UTF-8 form
+     This contains just the path and query parameters starting with '/'
+     Use 'urlURL' for the full URL
+
+     ### Usage Example: ###
+     ````swift
+     print(request.url)
+     ````
+    */
     public var url: Data {
         //The url needs to retain the percent encodings. URL.path doesn't, so we do this.
         return Data(_urlString.utf8)
     }
 
+    /**
+     The URL from the request as URLComponents
+     URLComponents has a memory leak on linux as of swift 3.0.1. Use 'urlURL' instead
+
+     ### Usage Example: ###
+     ````swift
+     print(request.urlComponents)
+     ````
+    */
     @available(*, deprecated, message: "URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead")
     public var urlComponents: URLComponents {
         return URLComponents(url: urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
@@ -48,6 +101,14 @@ public class HTTPServerRequest: ServerRequest {
 
     private var _urlComponents: URLComponents?
 
+    /**
+     Create and validate the full URL.
+
+     ### Usage Example: ###
+     ````swift
+     print(request.urlURL)
+     ````
+    */
     public var urlURL: URL {
         if let _url = _url {
             return _url
@@ -99,7 +160,14 @@ public class HTTPServerRequest: ServerRequest {
 
     private var _remoteAddress: String?
 
-    /// Server IP address pulled from socket.
+    /**
+     Server IP address pulled from socket.
+
+     ### Usage Example: ###
+     ````swift
+     request.remoteAddress
+     ````
+    */
     public var remoteAddress: String {
         if _remoteAddress == nil {
             do {
@@ -113,13 +181,34 @@ public class HTTPServerRequest: ServerRequest {
         return _remoteAddress!
     }
 
-    /// Minor version of HTTP of the request
+    /**
+     Major version of HTTP of the request
+
+     ### Usage Example: ###
+     ````swift
+     print(String(describing: request.httpVersionMajor))
+     ````
+    */
     public var httpVersionMajor: UInt16?
 
-    /// Major version of HTTP of the request
+    /**
+     Minor version of HTTP of the request
+
+     ### Usage Example: ###
+     ````swift
+     print(String(describing: request.httpVersionMinor))
+     ````
+    */
     public var httpVersionMinor: UInt16?
 
-    /// HTTP Method of the request.
+    /**
+     HTTP Method of the request.
+
+     ### Usage Example: ###
+     ````swift
+     request.method.lowercased()
+     ````
+    */
     public var method: String
 
     private let ctx: ChannelHandlerContext
@@ -168,21 +257,34 @@ public class HTTPServerRequest: ServerRequest {
     /// Default buffer size used for creating a BufferList
     let bufferSize = 2048
 
-    /// Read a chunk of the body of the request.
-    ///
-    /// - Parameter into: An NSMutableData to hold the data in the request.
-    /// - Throws: if an error occurs while reading the body.
-    /// - Returns: the number of bytes read.
+    /**
+     Read a chunk of the body of the request.
+
+     - Parameter into: An NSMutableData to hold the data in the request.
+     - Throws: if an error occurs while reading the body.
+     - Returns: the number of bytes read.
+
+     ### Usage Example: ###
+     ````swift
+     let readData = try self.read(into: data)
+     ````
+    */
     public func read(into data: inout Data) throws -> Int {
         guard buffer != nil else { return 0 }
         return buffer!.fill(data: &data)
     }
 
-    /// Read the whole body of the request.
-    ///
-    /// - Parameter into: An NSMutableData to hold the data in the request.
-    /// - Throws: if an error occurs while reading the data.
-    /// - Returns: the number of bytes read.
+    /**
+     Read a chunk of the body and return it as a String.
+
+     - Throws: if an error occurs while reading the data.
+     - Returns: an Optional string.
+
+     ### Usage Example: ###
+     ````swift
+     let body = try request.readString()
+     ````
+    */
     public func readString() throws -> String? {
         var data = Data(capacity: bufferSize)
         let length = try read(into: &data)
@@ -193,11 +295,18 @@ public class HTTPServerRequest: ServerRequest {
         }
     }
 
-    /// Read the whole body of the request.
-    ///
-    /// - Parameter into: An NSMutableData to hold the data in the request.
-    /// - Throws: if an error occurs while reading the data.
-    /// - Returns: the number of bytes read.
+    /**
+     Read the whole body of the request.
+
+     - Parameter into: An NSMutableData to hold the data in the request.
+     - Throws: if an error occurs while reading the data.
+     - Returns: the number of bytes read.
+
+     ### Usage Example: ###
+     ````swift
+     let length = try request.readAllData(into: &body)
+     ````
+    */
     public func readAllData(into data: inout Data) throws -> Int {
         guard buffer != nil else { return 0 }
         var length = buffer!.fill(data: &data)
