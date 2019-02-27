@@ -23,22 +23,56 @@ import LoggerAPI
 import NIOWebSocket
 import CLinuxHelpers
 
-/// An HTTP server that listens for connections on a socket.
+// MARK: HTTPServer
+/**
+An HTTP server that listens for connections on a socket.
+### Usage Example: ###
+````swift
+ //Create a server that listens for connections on a specified socket.
+ let server = try HTTPServer.listen(on: 0, delegate: delegate)
+ ...
+ //Stop the server.
+ server.stop()
+````
+*/
 public class HTTPServer: Server {
 
     public typealias ServerType = HTTPServer
 
-    /// HTTP `ServerDelegate`.
+    /**
+     HTTP `ServerDelegate`.
+
+     ### Usage Example: ###
+     ````swift
+     httpServer.delegate = self
+     ````
+    */
     public var delegate: ServerDelegate?
 
-    /// Port number for listening for new connections.
+    /**
+     Port number for listening for new connections.
+
+     ### Usage Example: ###
+     ````swift
+     httpServer.port = 8080
+     ````
+    */
     public private(set) var port: Int?
 
     private var _state: ServerState = .unknown
 
     private let syncQ = DispatchQueue(label: "HTTPServer.syncQ")
 
-    /// A server state
+    /**
+     A server state
+
+     ### Usage Example: ###
+     ````swift
+     if(httpSever.state == .unknown) {
+        httpServer.stop()
+     }
+     ````
+    */
     public private(set) var state: ServerState {
         get {
             return self.syncQ.sync {
@@ -55,12 +89,27 @@ public class HTTPServer: Server {
 
     fileprivate let lifecycleListener = ServerLifecycleListener()
 
+    /**
+     Controls the maximum number of requests per Keep-Alive connection.
+
+     ### Usage Example: ###
+     ````swift
+     httpServer.keepAliveState = .unlimited
+     ````
+    */
     public var keepAliveState: KeepAliveState = .unlimited
 
     /// The channel used to listen for new connections
     var serverChannel: Channel?
 
-    /// Whether or not this server allows port reuse (default: disallowed)
+    /**
+     Whether or not this server allows port reuse (default: disallowed).
+
+     ### Usage Example: ###
+     ````swift
+     httpServer.allowPortReuse = true
+     ````
+    */
     public var allowPortReuse = false
 
     /// Maximum number of pending connections
@@ -71,6 +120,15 @@ public class HTTPServer: Server {
 
     private var ctx: ChannelHandlerContext?
 
+    /**
+     Creates an HTTP server object.
+
+     ### Usage Example: ###
+     ````swift
+     let server = HTTPServer()
+     server.listen(on: 8080)
+     ````
+    */
     public init() {
 #if os(Linux)
         let numberOfCores = Int(linux_sched_getaffinity())
@@ -80,7 +138,14 @@ public class HTTPServer: Server {
 #endif
     }
 
-    /// SSL cert configs for handling client requests
+    /**
+     SSL cert configuration for handling client requests.
+
+     ### Usage Example: ###
+     ````swift
+     httpServer.sslConfig = sslConfiguration
+     ````
+    */
     public var sslConfig: SSLService.Configuration? {
         didSet {
             if let sslConfig = sslConfig {
@@ -160,9 +225,16 @@ public class HTTPServer: Server {
         return nil
     }
 
-    /// Listens for connections on a socket
-    ///
-    /// - Parameter on: port number for new connections (eg. 8080)
+    /**
+     Listens for connections on a socket.
+
+     ### Usage Example: ###
+     ````swift
+     try server.listen(on: 8080)
+     ````
+
+     - Parameter on: Port number for new connections, e.g. 8080
+    */
     public func listen(on port: Int) throws {
         self.port = port
 
@@ -231,12 +303,19 @@ public class HTTPServer: Server {
         ListenerGroup.enqueueAsynchronously(on: DispatchQueue.global(), block: queuedBlock)
     }
 
-    /// Static method to create a new HTTPServer and have it listen for connections.
-    ///
-    /// - Parameter on: port number for accepting new connections
-    /// - Parameter delegate: the delegate handler for HTTP connections
-    ///
-    /// - Returns: a new `HTTPServer` instance
+    /**
+     Static method to create a new HTTP server and have it listen for connections.
+
+     ### Usage Example: ###
+     ````swift
+     let server = HTTPServer.listen(on: 8080, delegate: self)
+     ````
+
+     - Parameter on: Port number for accepting new connections.
+     - Parameter delegate: The delegate handler for HTTP connections.
+
+     - Returns: A new instance of a `HTTPServer`.
+    */
     public static func listen(on port: Int, delegate: ServerDelegate?) throws -> ServerType {
         let server = HTTP.createServer()
         server.delegate = delegate
@@ -244,10 +323,16 @@ public class HTTPServer: Server {
         return server
     }
 
-    /// Listens for connections on a socket
-    ///
-    /// - Parameter port: port number for new connections (eg. 8080)
-    /// - Parameter errorHandler: optional callback for error handling
+    /**
+     Listen for connections on a socket.
+
+     ### Usage Example: ###
+     ````swift
+     try server.listen(on: 8080, errorHandler: errorHandler)
+     ````
+     - Parameter port: port number for new connections (eg. 8080)
+     - Parameter errorHandler: optional callback for error handling
+    */
     @available(*, deprecated, message: "use 'listen(on:) throws' with 'server.failed(callback:)' instead")
     public func listen(port: Int, errorHandler: ((Swift.Error) -> Void)?) {
         do {
@@ -261,13 +346,19 @@ public class HTTPServer: Server {
         }
     }
 
-    /// Static method to create a new HTTPServer and have it listen for connections.
-    ///
-    /// - Parameter port: port number for accepting new connections
-    /// - Parameter delegate: the delegate handler for HTTP connections
-    /// - Parameter errorHandler: optional callback for error handling
-    ///
-    /// - Returns: a new `HTTPServer` instance
+    /**
+     Static method to create a new HTTPServer and have it listen for connections.
+
+     ### Usage Example: ###
+     ````swift
+     let server = HTTPServer(port: 8080, delegate: self, errorHandler: errorHandler)
+     ````
+     - Parameter port: port number for new connections (eg. 8080)
+     - Parameter delegate: The delegate handler for HTTP connections.
+     - Parameter errorHandler: optional callback for error handling
+
+     - Returns: A new `HTTPServer` instance.
+    */
     @available(*, deprecated, message: "use 'listen(on:delegate:) throws' with 'server.failed(callback:)' instead")
     public static func listen(port: Int, delegate: ServerDelegate, errorHandler: ((Swift.Error) -> Void)?) -> ServerType {
         let server = HTTP.createServer()
@@ -284,7 +375,14 @@ public class HTTPServer: Server {
         }
     }
 
-    /// Stop listening for new connections.
+    /**
+     Stop listening for new connections.
+
+     ### Usage Example: ###
+     ````swift
+     server.stop()
+     ````
+    */
     public func stop() {
         guard let serverChannel = serverChannel else { return }
         do {
@@ -295,44 +393,67 @@ public class HTTPServer: Server {
         self.state = .stopped
     }
 
-    /// Add a new listener for server beeing started
-    ///
-    /// - Parameter callback: The listener callback that will run on server successfull start-up
-    ///
-    /// - Returns: a `HTTPServer` instance
+    /**
+     Add a new listener for a server being started.
+
+     ### Usage Example: ###
+     ````swift
+     server.started(callback: callBack)
+     ````
+     - Parameter callback: The listener callback that will run after a successfull start-up.
+
+     - Returns: A `HTTPServer` instance.
+    */
     @discardableResult
     public func started(callback: @escaping () -> Void) -> Self {
         self.lifecycleListener.addStartCallback(perform: self.state == .started, callback)
         return self
     }
 
-    /// Add a new listener for server beeing stopped
-    ///
-    /// - Parameter callback: The listener callback that will run when server stops
-    ///
-    /// - Returns: a `HTTPServer` instance
+    /**
+     Add a new listener for a server being stopped.
+
+     ### Usage Example: ###
+     ````swift
+     server.stopped(callback: callBack)
+     ````
+     - Parameter callback: The listener callback that will run when the server stops.
+
+     - Returns: A `HTTPServer` instance.
+    */
     @discardableResult
     public func stopped(callback: @escaping () -> Void) -> Self {
         self.lifecycleListener.addStopCallback(perform: self.state == .stopped, callback)
         return self
     }
 
-    /// Add a new listener for server throwing an error
-    ///
-    /// - Parameter callback: The listener callback that will run when server throws an error
-    ///
-    /// - Returns: a `HTTPServer` instance
+    /**
+     Add a new listener for a server throwing an error.
+
+     ### Usage Example: ###
+     ````swift
+     server.started(callback: callBack)
+     ````
+     - Parameter callback: The listener callback that will run when the server throws an error.
+
+     - Returns: A `HTTPServer` instance.
+    */
     @discardableResult
     public func failed(callback: @escaping (Swift.Error) -> Void) -> Self {
         self.lifecycleListener.addFailCallback(callback)
         return self
     }
+    /**
+     Add a new listener for when `listenSocket.acceptClientConnection` throws an error.
 
-    /// Add a new listener for when listenSocket.acceptClientConnection throws an error
-    ///
-    /// - Parameter callback: The listener callback that will run
-    ///
-    /// - Returns: a Server instance
+     ### Usage Example: ###
+     ````swift
+     server.clientConnectionFailed(callback: callBack)
+     ````
+     - Parameter callback: The listener callback that will run on server after successfull start-up.
+
+     - Returns: A `HTTPServer` instance.
+    */
     @discardableResult
     public func clientConnectionFailed(callback: @escaping (Swift.Error) -> Void) -> Self {
         self.lifecycleListener.addClientConnectionFailCallback(callback)
