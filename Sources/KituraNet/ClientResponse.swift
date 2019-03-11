@@ -24,7 +24,7 @@ public class ClientResponse {
 
     public init() { }
 
-    public internal(set) var httpStatusCode: HTTPStatusCode = .unknown
+    public private(set) var httpStatusCode: HTTPStatusCode = .unknown
 
     /// HTTP Method of the incoming message.
     @available(*, deprecated, message:
@@ -60,7 +60,11 @@ public class ClientResponse {
     }
 
     /// The HTTP Status code, as an `HTTPStatusCode`, sent in the response by the remote server.
-    public internal(set) var statusCode: HTTPStatusCode = HTTPStatusCode.unknown
+    public internal(set) var statusCode: HTTPStatusCode = HTTPStatusCode.unknown {
+        didSet {
+            httpStatusCode = statusCode
+        }
+    }
 
     /// Default buffer size to read the response into
     private static let bufferSize = 2000
