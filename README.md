@@ -7,8 +7,8 @@
 
 <p align="center">
 <img src="https://img.shields.io/badge/Swift-4.2-orange.svg?style=flat" alt="Swift 4.2">
-<a href="https://www.kitura.io/packages.html#all">
-<img src="https://img.shields.io/badge/docs-kitura.io-1FBCE4.svg" alt="Docs">
+<a href="https://ibm-swift.github.io/Kitura-NIO/index.html">
+<img src="https://img.shields.io/badge/apidoc-KituraNIO-1FBCE4.svg?style=flat" alt="APIDoc">
 </a>
 <a href="https://travis-ci.org/IBM-Swift/Kitura-NIO">
 <img src="https://travis-ci.org/IBM-Swift/Kitura-NIO.svg?branch=master" alt="Build Status - Master">
