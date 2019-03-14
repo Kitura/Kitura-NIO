@@ -98,6 +98,20 @@ class ClientRequestTests: KituraNetTest {
         let options = ClientRequest.parse("https://username:password@66o.tech:8080/path?key=value")
         let testRequest = ClientRequest(options: options, callback: testCallback)
         XCTAssertEqual(testRequest.url, "https://username:password@66o.tech:8080/path?key=value")
+
+        let options1: [ClientRequest.Options] = [ .schema("https"),
+                                                  .hostname("66o.tech"),
+                                                  .path("/view/matching?key=\"viewTest\"")
+        ]
+        let testRequest1 = ClientRequest(options: options1, callback: testCallback)
+        XCTAssertEqual(testRequest1.url, "https://66o.tech/view/matching?key=%22viewTest%22")
+
+        let options2: [ClientRequest.Options] = [ .schema("https"),
+                                                  .hostname("66o.tech"),
+                                                  .path("/view/match?key?=value?")
+        ]   
+        let testRequest2 = ClientRequest(options: options2, callback: testCallback)
+        XCTAssertEqual(testRequest2.url, "https://66o.tech/view/match?key?=value?")
     }
 
     func testClientRequestBasicAuthentcation() {
