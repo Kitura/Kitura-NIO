@@ -330,4 +330,8 @@ class HTTPClient: ChannelInboundHandler {
            break
         }
     }
+
+    func errorCaught(ctx: ChannelHandlerContext, error: Error) {
+        ctx.close(promise: nil)
+    }
 }

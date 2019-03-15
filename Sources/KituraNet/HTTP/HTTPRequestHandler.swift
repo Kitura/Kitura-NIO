@@ -134,6 +134,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
             message = "No service has been registered for the path \(target)"
         default:
             // Don't handle any other errors, including `HTTPParserError`s
+            ctx.close(promise: nil)
             return
         }
 

@@ -650,4 +650,9 @@ class HTTPClientHandler: ChannelInboundHandler {
             }
          }
      }
+
+     func errorCaught(ctx: ChannelHandlerContext, error: Error) {
+         // No errors to handle, simply close the channel
+         ctx.close(promise: nil)
+     }
 }
