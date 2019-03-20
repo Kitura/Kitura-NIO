@@ -42,18 +42,12 @@ public struct ConnectionUpgrader {
 }
 
 public protocol ProtocolHandlerFactory {
-    // Name of the protocol
+    //Name of the protocol
     var name: String { get }
 
-    // Supplies an NIO channel handler for the protocol. Every upgrade will return a single handler.
+    //Supplies an NIO channel handler for the protocol. Every upgrade will return a single handler.
     func handler(for request: ServerRequest) -> ChannelHandler
 
-    // Checks if a service is available/registered at the given URI
+    //Checks if a service is available/registered at the given URI
     func isServiceRegistered(at path: String) -> Bool
-
-    // Specially included for the WebSocket protocol. This returns an array of handlers of all enabled extensions.
-    func extensionHandlers(header: String) -> [ChannelHandler]
-
-    // Specially included for the WebSocket protocol. This runs the negotiation handshake logic for enabled extensions.
-    func negotiate(header: String) -> String
 }
