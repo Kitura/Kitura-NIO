@@ -170,6 +170,9 @@ public class ClientRequest {
     /// A semaphore used to make ClientRequest.end() synchronous
     let waitSemaphore = DispatchSemaphore(value: 0)
 
+    // Socket path for Unix domain sockets
+    private var unixDomainSocketPath: String?
+
     /**
     Client request options enum. This allows the client to specify certain parameteres such as HTTP headers, HTTP methods, host names, and SSL credentials.
 
@@ -293,8 +296,9 @@ public class ClientRequest {
     ///
     /// - Parameter options: An array of `Options' describing the request
     /// - Parameter callback: The closure of type `Callback` to be used for the callback.
-    init(options: [Options], callback: @escaping Callback) {
+    init(options: [Options], socketPath: String? = nil, callback: @escaping Callback) {
 
+        self.unixDomainSocketPath = socketPath
         self.callback = callback
 
         var theSchema = "http://"
@@ -558,7 +562,11 @@ public class ClientRequest {
 
         do {
             guard let bootstrap = bootstrap else { return }
-            channel = try bootstrap.connect(host: hostName, port: Int(self.port!)).wait()
+            if let unixDomainSocketPath = self.unixDomainSocketPath {
+                channel = try bootstrap.connect(unixDomainSocketPath: unixDomainSocketPath).wait()
+            } else {
+                channel = try bootstrap.connect(host: hostName, port: Int(self.port!)).wait()
+            }
         } catch let error {
             Log.error("Connection to \(hostName):\(self.port ?? 80) failed with error: \(error)")
             callback(nil)

@@ -123,8 +123,8 @@ public class HTTP {
     }
     ````
     */
-    public static func request(_ options: [ClientRequest.Options], callback: @escaping ClientRequest.Callback) -> ClientRequest {
-        return ClientRequest(options: options, callback: callback)
+    public static func request(_ options: [ClientRequest.Options], socketPath: String? = nil, callback: @escaping ClientRequest.Callback) -> ClientRequest {
+        return ClientRequest(options: options, socketPath: socketPath, callback: callback)
     }
 
     /**

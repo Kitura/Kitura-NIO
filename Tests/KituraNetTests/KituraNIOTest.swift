@@ -35,6 +35,8 @@ class KituraNetTest: XCTestCase {
     var useSSL = useSSLDefault
     var port = portDefault
 
+    var unixDomainSocketPath: String? = nil
+
     static let sslConfig: SSLService.Configuration = {
         let sslConfigDir = URL(fileURLWithPath: #file).appendingPathComponent("../SSLConfig")
 
@@ -62,15 +64,19 @@ class KituraNetTest: XCTestCase {
     func doTearDown() {
     }
 
-    func startServer(_ delegate: ServerDelegate?, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault) throws -> HTTPServer {
+    func startServer(_ delegate: ServerDelegate?, unixDomainSocketPath: String? = nil, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault) throws -> HTTPServer {
 
         let server = HTTP.createServer()
         server.delegate = delegate
-        server.allowPortReuse = allowPortReuse
         if useSSL {
             server.sslConfig = KituraNetTest.sslConfig
         }
-        try server.listen(on: port)
+        if let unixDomainSocketPath = unixDomainSocketPath {
+            try server.listen(unixDomainSocketPath: unixDomainSocketPath)
+        } else {
+            server.allowPortReuse = allowPortReuse
+            try server.listen(on: port)
+        }
         return server
     }
 
@@ -87,13 +93,21 @@ class KituraNetTest: XCTestCase {
         return (server, serverPort)
     }
 
-    func performServerTest(_ delegate: ServerDelegate?, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault,
+
+    func performServerTest(_ delegate: ServerDelegate?, unixDomainSocketPath: String? = nil, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault,
                            line: Int = #line, asyncTasks: (XCTestExpectation) -> Void...) {
 
         do {
+            var server: HTTPServer
+            var ephemeralPort: Int = 0
             self.useSSL = useSSL
-            let (server, ephemeralPort) = try startEphemeralServer(delegate, useSSL: useSSL, allowPortReuse: allowPortReuse)
-            self.port = ephemeralPort
+            if let unixDomainSocketPath = unixDomainSocketPath {
+                server = try startServer(delegate, unixDomainSocketPath: unixDomainSocketPath, useSSL: useSSL, allowPortReuse: allowPortReuse)
+                self.unixDomainSocketPath = unixDomainSocketPath
+            } else {
+                (server, ephemeralPort) = try startEphemeralServer(delegate, useSSL: useSSL, allowPortReuse: allowPortReuse)
+                self.port = ephemeralPort
+            }
             defer {
                 server.stop()
             }
@@ -145,7 +159,7 @@ class KituraNetTest: XCTestCase {
         }
     }*/
 
-    func performRequest(_ method: String, path: String, hostname: String = "localhost", close: Bool=true, callback: @escaping ClientRequest.Callback,
+    func performRequest(_ method: String, path: String, unixDomainSocketPath: String? = nil, hostname: String = "localhost", close: Bool=true, callback: @escaping ClientRequest.Callback,
                         headers: [String: String]? = nil, requestModifier: ((ClientRequest) -> Void)? = nil) {
 
         var allHeaders = [String: String]()
@@ -163,7 +177,7 @@ class KituraNetTest: XCTestCase {
             options.append(.disableSSLVerification)
         }
 
-        let req = HTTP.request(options, callback: callback)
+        let req = HTTP.request(options, socketPath: unixDomainSocketPath, callback: callback)
         if let requestModifier = requestModifier {
             requestModifier(req)
         }

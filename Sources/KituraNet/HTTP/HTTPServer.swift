@@ -59,6 +59,8 @@ public class HTTPServer: Server {
     */
     public private(set) var port: Int?
 
+    var unixDomainSocketPath: String?
+
     private var _state: ServerState = .unknown
 
     private let syncQ = DispatchQueue(label: "HTTPServer.syncQ")
@@ -225,6 +227,16 @@ public class HTTPServer: Server {
         return nil
     }
 
+    enum SocketType {
+        case tcpPort(Int)
+        case unixDomainSocket(String)
+    }
+
+    func listen(unixDomainSocketPath: String) throws {
+        self.unixDomainSocketPath = unixDomainSocketPath
+        try listen(.unixDomainSocket(unixDomainSocketPath))
+    }
+
     /**
      Listens for connections on a socket.
 
@@ -237,6 +249,10 @@ public class HTTPServer: Server {
     */
     public func listen(on port: Int) throws {
         self.port = port
+        try listen(.tcpPort(port))
+    }
+
+    private func listen(_ socket: SocketType) throws {
 
         if let tlsConfig = tlsConfig {
             do {
@@ -276,14 +292,23 @@ public class HTTPServer: Server {
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
 
         do {
-            serverChannel = try bootstrap.bind(host: "0.0.0.0", port: port).wait()
+            if case let SocketType.tcpPort(port) = socket {
+                serverChannel = try bootstrap.bind(host: "0.0.0.0", port: port).wait()
+            } else if case let SocketType.unixDomainSocket(unixDomainSocketPath) = socket {
+                serverChannel = try bootstrap.bind(unixDomainSocketPath: unixDomainSocketPath).wait()
+            }
             self.port = serverChannel?.localAddress?.port.map { Int($0) }
             self.state = .started
             self.lifecycleListener.performStartCallbacks()
         } catch let error {
             self.state = .failed
             self.lifecycleListener.performFailCallbacks(with: error)
-            Log.error("Error trying to bind to \(port): \(error)")
+            switch socket {
+            case .tcpPort(let port):
+                Log.error("Error trying to bind to \(port): \(error)")
+            case .unixDomainSocket(let socketPath):
+                Log.error("Error trying to bind to \(socketPath): \(error)")
+            }
             throw error
         }
 
