@@ -111,6 +111,9 @@ public class HTTPServer: Server {
         if let key =  head.headers["Sec-WebSocket-Key"].first {
             headers.add(name: "Sec-WebSocket-Key", value: key)
         }
+        if let _extension = head.headers["Sec-WebSocket-Extensions"].first {
+            headers.add(name: "Sec-WebSocket-Extensions", value: webSocketHandlerFactory.negotiate(header: _extension))
+        }
         return headers
     }
 
@@ -119,7 +122,16 @@ public class HTTPServer: Server {
         guard let ctx = self.ctx else { fatalError("Cannot create ServerRequest") }
         ///TODO: Handle secure upgrade request ("wss://")
         let serverRequest = HTTPServerRequest(ctx: ctx, requestHead: request, enableSSL: false)
-        return ctx.channel.pipeline.add(handler: webSocketHandlerFactory.handler(for: serverRequest))
+        let websocketConnectionHandler = webSocketHandlerFactory.handler(for: serverRequest)
+        let future = ctx.channel.pipeline.add(handler: websocketConnectionHandler)
+        if let _extensions = request.headers["Sec-WebSocket-Extensions"].first {
+            for handler in webSocketHandlerFactory.extensionHandlers(header: _extensions) {
+                _ = future.then {
+                    ctx.channel.pipeline.add(handler: handler, before: websocketConnectionHandler)
+                }
+            }
+        }
+        return future
     }
 
     private typealias ShouldUpgradeFunction = (HTTPRequestHead) -> HTTPHeaders?
