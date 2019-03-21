@@ -72,8 +72,8 @@ public class HTTPServerResponse: ServerResponse {
     /// - Parameter from: String data to be written.
     public func write(from string: String) throws {
         guard let channel = channel else {
-            Log.error("No channel available to write")
-            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
+            // TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
             return
         }
 
@@ -87,8 +87,8 @@ public class HTTPServerResponse: ServerResponse {
     /// - Parameter from: Data object that contains the data to be written.
     public func write(from data: Data) throws {
         guard let channel = channel else {
-            Log.error("No channel available to write")
-            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
+            // TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API.
             return
         }
 
@@ -109,14 +109,14 @@ public class HTTPServerResponse: ServerResponse {
     ///
     public func end() throws {
         guard let channel = self.channel else {
-            Log.error("No channel available to end the response")
-            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
+            // TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API.
             return
         }
 
         guard let handler = self.handler else {
-            Log.error("No HTTP handler available to end the response")
-            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            // A deallocated channel handler suggests the pipeline and the channel were also de-allocated. The connection was probably closed.
+            // TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API.
             return
         }
 
@@ -135,22 +135,22 @@ public class HTTPServerResponse: ServerResponse {
                 try self.sendResponse(channel: channel, handler: handler, status: status)
             } catch let error {
                 Log.error("Error sending response: \(error)")
-                //TODO: We must be rethrowing/throwing from here, for which we'd need to add a new Error type to the API
+                // TODO: We must be rethrowing/throwing from here, for which we'd need to add a new Error type to the API
             }
         }
     }
 
-    /// End sending the response on an HTTP error
+    // End sending the response on an HTTP error
     private func end(with errorCode: HTTPStatusCode, withBody: Bool = false) throws {
         guard let channel = self.channel else {
-            Log.error("No channel available to end the response")
-            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
+            // TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
             return
         }
 
         guard let handler = self.handler else {
-            Log.error("No HTTP handler available to end the response")
-            //TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
+            // A deallocated channel handler suggests the pipeline and the channel were also de-allocated. The connection was probably closed.
+            // TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
             return
         }
 
