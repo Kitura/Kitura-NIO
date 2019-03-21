@@ -160,25 +160,30 @@ public class HTTPServerResponse: ServerResponse {
         //We don't keep the connection alive on an HTTP error
         headers["Connection"] = ["Close"]
 
+        // We want to close this channel after the error response is sent
+        let responseSentPromise = channel.eventLoop.newPromise(of: Void.self)
         channel.eventLoop.run {
             do {
-                try self.sendResponse(channel: channel, handler: handler, status: status, withBody: withBody)
+                try self.sendResponse(channel: channel, handler: handler, status: status, withBody: withBody, promise: responseSentPromise)
             } catch let error {
                 Log.error("Error sending response: \(error)")
                 //TODO: We must be rethrowing/throwing from here, for which we'd need to add a new Error type to the API
+            }
+            responseSentPromise.futureResult.whenComplete {
+                channel.close(promise: nil)
             }
         }
     }
 
     /// Send response to the client
-    private func sendResponse(channel: Channel, handler: HTTPRequestHandler, status: HTTPResponseStatus, withBody: Bool = true) throws {
+    private func sendResponse(channel: Channel, handler: HTTPRequestHandler, status: HTTPResponseStatus, withBody: Bool = true, promise: EventLoopPromise<Void>? = nil) throws {
         let response = HTTPResponseHead(version: httpVersion, status: status, headers: headers.nioHeaders)
         channel.write(handler.wrapOutboundOut(.head(response)), promise: nil)
         if withBody && buffer.readableBytes > 0 {
             channel.write(handler.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
         }
 
-        channel.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: nil)
+        channel.writeAndFlush(handler.wrapOutboundOut(.end(nil)), promise: promise)
         handler.updateKeepAliveState()
 
         if let request = handler.serverRequest {
