@@ -653,6 +653,7 @@ class HTTPClientHandler: ChannelInboundHandler {
 
      func errorCaught(ctx: ChannelHandlerContext, error: Error) {
          // No errors to handle, simply close the channel
+         Log.error("ClientRequest: Error \(error) was received. The connection will be closed because we are neither handling this error nor can it be propagated.")
          ctx.close(promise: nil)
      }
 }
