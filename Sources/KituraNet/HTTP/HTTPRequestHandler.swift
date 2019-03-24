@@ -133,8 +133,8 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
             let target = server.latestWebSocketURI ?? "/<unknown>"
             message = "No service has been registered for the path \(target)"
         default:
-            // Don't handle any other errors, including `HTTPParserError`s
-            Log.error("HTTPServer: Error \(error) was received. The connection will be closed because we are neither handling this error nor can it be propagated further.")
+            // Don't handle any other errors, including `HTTPParserError`s.
+            // We could log an error message here.
             ctx.close(promise: nil)
             return
         }
