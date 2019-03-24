@@ -50,7 +50,7 @@ class LargePayloadTests: KituraNetTest {
             temporaryDirectory = "/tmp"
         }
 #endif
-        return temporaryDirectory + "/" + ProcessInfo.processInfo.globallyUniqueString
+        return temporaryDirectory + "/" + String(ProcessInfo.processInfo.globallyUniqueString.prefix(20))
     }
 
     func testLargePosts() {
