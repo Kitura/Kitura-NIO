@@ -239,7 +239,7 @@ public class HTTPServer: Server {
 
      - Parameter unixDomainSocketPath: Unix socket path for new connections, eg. "/my/path"
      */
-    func listen(unixDomainSocketPath: String) throws {
+    public func listen(unixDomainSocketPath: String) throws {
         self.unixDomainSocketPath = unixDomainSocketPath
         try listen(.unix(unixDomainSocketPath))
     }
