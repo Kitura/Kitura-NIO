@@ -177,7 +177,7 @@ class KituraNetTest: XCTestCase {
             options.append(.disableSSLVerification)
         }
 
-        let req = HTTP.request(options, socketPath: unixDomainSocketPath, callback: callback)
+        let req = HTTP.request(options, unixDomainSocketPath: unixDomainSocketPath, callback: callback)
         if let requestModifier = requestModifier {
             requestModifier(req)
         }

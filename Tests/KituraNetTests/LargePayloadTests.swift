@@ -39,25 +39,10 @@ class LargePayloadTests: KituraNetTest {
 
     private let delegate = TestServerDelegate()
 
-    private func uniqueTemporaryFilePath() -> String {
-#if os(Linux)
-        let temporaryDirectory = "/tmp"
-#else
-        var temporaryDirectory: String
-        if #available(OSX 10.12, *) {
-            temporaryDirectory = FileManager.default.temporaryDirectory.path
-        } else {
-            temporaryDirectory = "/tmp"
-        }
-#endif
-        return temporaryDirectory + "/" + String(ProcessInfo.processInfo.globallyUniqueString.prefix(20))
-    }
-
     func testLargePosts() {
-        let unixDomainSocketPath = uniqueTemporaryFilePath()
-        performServerTest(delegate, unixDomainSocketPath: unixDomainSocketPath, useSSL: false, asyncTasks: { expectation in
+        performServerTest(delegate, useSSL: false, asyncTasks: { expectation in
             let payload = "[" + contentTypesString + "," + contentTypesString + contentTypesString + "," + contentTypesString + "]"
-            self.performRequest("post", path: "/largepost", unixDomainSocketPath: unixDomainSocketPath, callback: {response in
+            self.performRequest("post", path: "/largepost", callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
                 do {
                     let expectedResult = "Read \(payload.count) bytes"

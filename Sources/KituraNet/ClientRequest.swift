@@ -295,10 +295,11 @@ public class ClientRequest {
     /// Initializes a `ClientRequest` instance
     ///
     /// - Parameter options: An array of `Options' describing the request
+    /// - Parameter unixDomainSocketPath: Specifies a path of a Unix domain socket that the client should connect to.
     /// - Parameter callback: The closure of type `Callback` to be used for the callback.
-    init(options: [Options], socketPath: String? = nil, callback: @escaping Callback) {
+    init(options: [Options], unixDomainSocketPath: String? = nil, callback: @escaping Callback) {
 
-        self.unixDomainSocketPath = socketPath
+        self.unixDomainSocketPath = unixDomainSocketPath
         self.callback = callback
 
         var theSchema = "http://"
