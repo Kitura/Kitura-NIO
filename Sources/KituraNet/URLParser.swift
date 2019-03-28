@@ -16,15 +16,25 @@
 
 import Foundation
 
-/// Splits and parses URLs into components - scheme, host, port, path, query string etc. according to the following format:
-///	**scheme:[//[user:password@]host[:port]][/]path[?query][#fragment]**
-/// We use the URLComponents class from Foundation here.
+// MARK: URLParser
+
+/** Splits and parses URLs into components - scheme, host, port, path, query string etc. according to the following format:
+
+ **scheme:[//[user:password@]host[:port]][/]path[?query][#fragment]**
+
+### Usage Example: ###
+````swift
+ // Initialize a new URLParser instance, and check whether or not a connection has been established.
+ let url = "http://user:password@sample.host.com:8080/a/b/c?query=somestring#hash".data(using: .utf8)!
+ let urlParser = URLParser(url: url, isConnect: false)
+````
+*/
 
 public class URLParser: CustomStringConvertible {
 
     private var urlComponents: URLComponents?
 
-    /// Schema.
+    /// The schema of the URL.
     public var schema: String? {
         get {
             return self.urlComponents?.scheme
@@ -34,7 +44,7 @@ public class URLParser: CustomStringConvertible {
         }
     }
 
-    /// Hostname.
+    /// The hostname component of the URL.
     public var host: String? {
         get {
             return self.urlComponents?.host
@@ -56,7 +66,7 @@ public class URLParser: CustomStringConvertible {
         }
     }
 
-    /// The entire query portion of the URL.
+    /// The query component of the URL.
     public var query: String? {
         get {
             return self.urlComponents?.query
@@ -96,7 +106,14 @@ public class URLParser: CustomStringConvertible {
 
     private var _query: [String: String] = [:]
 
-    /// The query parameters broken out.
+    /**
+    The value of the query component of the URL name/value pair, for the passed in query name.
+
+    ### Usage Example: ###
+    ````swift
+    let parsedURLParameters = urlParser.queryParameters["query"]
+    ````
+    */
     public var queryParameters: [String: String] {
         if !_query.isEmpty {
             return _query
@@ -109,7 +126,14 @@ public class URLParser: CustomStringConvertible {
         return _query
     }
 
-    /// Nicely formatted description of the parsed result.
+    /**
+    Nicely formatted description of the parsed result.
+
+    ### Usage Example: ###
+    ````swift
+    let parsedURLDescription = urlParser.description
+    ````
+    */
     public var description: String {
         var desc = ""
 
@@ -139,9 +163,17 @@ public class URLParser: CustomStringConvertible {
         return desc
     }
 
-    /// Initialize a new `URLParser` instance.
-    ///     - Parameter url: The URL to be parsed.
-    ///     - Parameter isConnect: A boolean, indicating whether or not a connection has been established.
+    /**
+    Initialize a new `URLParser` instance.
+
+    - Parameter url: The URL to be parsed.
+    - Parameter isConnect: A boolean, indicating whether or not a connection has been established.
+
+    ### Usage Example: ###
+    ````swift
+    let parsedURL = URLParser(url: someURL, isConnect: false)
+    ````
+    */
     public init (url: Data, isConnect: Bool) {
         let urlString: String? = String(data: url, encoding: .utf8)
         if let urlString = urlString {

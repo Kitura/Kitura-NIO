@@ -18,6 +18,9 @@ import NIO
 import NIOHTTP1
 import Foundation
 
+/// The struct that manages the process of upgrading connections from HTTP 1.1 to other protocols.
+///
+///  - Note: There a single instance of this struct in a server.
 public struct ConnectionUpgrader {
     static var instance = ConnectionUpgrader()
 
@@ -28,27 +31,37 @@ public struct ConnectionUpgrader {
 
     private var registry = [String: ProtocolHandlerFactory]()
 
+    /// Register a `ProtocolHandlerFactory` class instances used to create appropriate `NIO.ChannelHandler`s
+    /// for upgraded conections
+    ///
+    /// - Parameter factory: The `ConnectionUpgradeFactory` class instance being registered.
     public static func register(handlerFactory: ProtocolHandlerFactory) {
         ConnectionUpgrader.instance.registry[handlerFactory.name.lowercased()] = handlerFactory
     }
 
+    /// Get the ProtocolHandlerFactory implementation for a given protocol, if it has been registered.
     static func getProtocolHandlerFactory(for `protocol`: String) -> ProtocolHandlerFactory? {
         return ConnectionUpgrader.instance.registry[`protocol`.lowercased()]
     }
 
+    /// Clear the `ConnectionUpgradeFactory` registry.
     static func clear() {
         ConnectionUpgrader.instance.registry.removeAll()
     }
 }
 
+/// A protocol that should be implemented by connection upgraders of other protocols like WebSocket.
+/// This protocol provides a common interface to the `HTTPServer` to upgrade an incoming HTTP connection
+/// to the desired protocol.
+
 public protocol ProtocolHandlerFactory {
-    // Name of the protocol
+    /// Name of the protocol
     var name: String { get }
 
-    // Supplies an NIO channel handler for the protocol. Every upgrade will return a single handler.
+    /// Supply an NIO channel handler for the protocol. Every upgrade request must get its own handler.
     func handler(for request: ServerRequest) -> ChannelHandler
 
-    // Checks if a service is available/registered at the given URI
+    /// Checks if a service is available/registered at the given URI
     func isServiceRegistered(at path: String) -> Bool
 
     // Specially included for the WebSocket protocol. This returns an array of handlers of all enabled extensions.

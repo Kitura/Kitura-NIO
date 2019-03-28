@@ -19,8 +19,29 @@ import NIOHTTP1
 import LoggerAPI
 import Foundation
 
-/// This class implements the `ServerResponse` protocol for outgoing server
-/// responses via the HTTP protocol.
+// MARK: HTTPServerResponse
+/**
+This class implements the `ServerResponse` protocol for outgoing server
+responses via the HTTP protocol. Data and Strings can be written.
+
+The example below uses this in its `response` parameter, with the example requesting a connection be upgraded and catch any errors that occur.
+### Usage Example: ###
+````swift
+ func upgradeConnection(handler: IncomingSocketHandler, request: ServerRequest, response: ServerResponse) {
+     guard let protocols = request.headers["Upgrade"] else {
+         do {
+             response.statusCode = HTTPStatusCode.badRequest
+             try response.write(from: "No protocol specified in the Upgrade header")
+             try response.end()
+         }
+         catch {
+             Log.error("Failed to send error response to Upgrade request")
+         }
+         return
+     }
+ }
+````
+*/
 public class HTTPServerResponse: ServerResponse {
 
     /// The channel to which the HTTP response should be written
@@ -32,7 +53,14 @@ public class HTTPServerResponse: ServerResponse {
     /// Status code
     private var status = HTTPStatusCode.OK.rawValue
 
-    /// HTTP status code of the response.
+    /**
+    HTTP status code of the response.
+
+    ### Usage Example: ###
+    ````swift
+    ServerResponse.statusCode = HTTPStatusCode.badRequest
+    ````
+    */
     public var statusCode: HTTPStatusCode? {
         get {
             return HTTPStatusCode(rawValue: status)
@@ -45,7 +73,14 @@ public class HTTPServerResponse: ServerResponse {
         }
     }
 
-    /// The HTTP headers to be sent to the client as part of the response.
+    /**
+    The HTTP headers to be sent to the client as part of the response.
+
+    ### Usage Example: ###
+    ````swift
+    ServerResponse.headers["Content-Type"] = ["text/plain"]
+    ````
+    */
     public var headers: HeadersContainer = HeadersContainer()
 
     /// The HTTP version to be sent in the response.
@@ -67,9 +102,17 @@ public class HTTPServerResponse: ServerResponse {
         headers["Date"] = [SPIUtils.httpDate()]
     }
 
-    /// Write a string as a response.
-    ///
-    /// - Parameter from: String data to be written.
+    /**
+    Write a string as a response.
+
+    - Parameter from: String data to be written.
+    - Throws: Socket.error if an error occurred while writing to a socket.
+
+    ### Usage Example: ###
+    ````swift
+     try ServerResponse.write(from: "Some string")
+    ````
+    */
     public func write(from string: String) throws {
         guard let channel = channel else {
             // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
@@ -82,9 +125,17 @@ public class HTTPServerResponse: ServerResponse {
         }
     }
 
-    /// Write data as a response.
-    ///
-    /// - Parameter from: Data object that contains the data to be written.
+    /**
+    Write data as a response.
+
+    - Parameter from: Data object that contains the data to be written.
+    - Throws: Socket.error if an error occurred while writing to a socket.
+
+    ### Usage Example: ###
+    ````swift
+    try ServerResponse.write(from: someData)
+    ````
+    */
     public func write(from data: Data) throws {
         guard let channel = channel else {
             // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
@@ -97,16 +148,32 @@ public class HTTPServerResponse: ServerResponse {
         }
     }
 
-    /// Write a string and end sending the response.
-    ///
-    /// - Parameter text: String to write to a socket.
+    /**
+    Write a String to the body of a HTTP response and complete sending the HTTP response.
+
+    - Parameter text: String to write to a socket.
+    - Throws: Socket.error if an error occurred while writing to a socket.
+
+    ### Usage Example: ###
+    ````swift
+    try ServerResponse.end("Some string")
+    ````
+    */
     public func end(text: String) throws {
         try write(from: text)
         try end()
     }
 
-    /// End sending the response.
-    ///
+    /**
+    Complete sending the HTTP response.
+
+    - Throws: Socket.error if an error occurred while writing to a socket.
+
+    ### Usage Example: ###
+    ````swift
+    try ServerResponse.end()
+    ````
+    */
     public func end() throws {
         guard let channel = self.channel else {
             // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
@@ -198,7 +265,14 @@ public class HTTPServerResponse: ServerResponse {
         try end(with: errorCode, withBody: message != nil)
     }
 
-    /// Reset this response object back to its initial state
+    /**
+    Reset this response object back to its initial state.
+
+    ### Usage Example: ###
+    ````swift
+    try ServerResponse.reset()
+    ````
+    */
     public func reset() {
         status = HTTPStatusCode.OK.rawValue
         buffer.clear()

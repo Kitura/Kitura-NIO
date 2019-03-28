@@ -23,7 +23,7 @@
         <a class="header-link" href="../index.html">
           KituraNet Docs
         </a>
-         (73% documented)
+         (94% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -170,8 +170,40 @@
 
                 </div>
               </div>
-            <p>This is a BufferList implementation using a ByteBuffer as the backing store.
-In future, we may want to do away with the BufferList abstraction and use SwiftNIO.ByteBuffer directly.</p>
+            <p>This class provides an implementation of a buffer that can be added to and taken from in chunks. Data is always added to the end of the buffer (using <code><a href="../Classes/BufferList.html#/s:9KituraNet10BufferListC6appendySPys5UInt8VG5bytes_Si6lengthtF">BufferList.append(...)</a></code> and taken out of the buffer (using <code><a href="../Classes/BufferList.html#/s:9KituraNet10BufferListC4fillSiSays5UInt8VGz5array_tF">BufferList.fill(...)</a></code>) from the beginning towards the end. The location indicating where the next chunk of data will be taken from is maintained, this location can then be reset to enable data to be taken out of the buffer from the beginning again.</p>
+
+<p>In the below example, we create an empty <code>BufferList</code> instance. You can then append data to your <code>BufferList</code> instance, in our case <code>writeBuffer</code>. We then make two seperate appends. When <code>writeBuffer</code> contains the data which you wish to write out you can use <code><a href="../Classes/BufferList.html#/s:9KituraNet10BufferListC4fillSiSays5UInt8VGz5array_tF">BufferList.fill(...)</a></code> to write out the data from the buffer to your chosen location, which in this case is <code>finalArrayOfNumbers</code>.</p>
+<h3 id='usage-example' class='heading'>Usage Example:</h3>
+<pre class="highlight swift"><code><span class="k">var</span> <span class="nv">writeBuffer</span> <span class="o">=</span> <span class="kt">BufferList</span><span class="p">()</span>
+
+<span class="k">let</span> <span class="nv">firstArrayOfNumbers</span><span class="p">:</span> <span class="p">[</span><span class="kt">UInt8</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+
+<span class="c1">// Append a set of data to the 'writeBuffer' object</span>
+<span class="n">writeBuffer</span><span class="o">.</span><span class="nf">append</span><span class="p">(</span><span class="nv">bytes</span><span class="p">:</span> <span class="kt">UnsafePointer</span><span class="o">&lt;</span><span class="kt">UInt8</span><span class="o">&gt;</span><span class="p">(</span><span class="n">firstArrayOfNumbers</span><span class="p">),</span>
+                   <span class="nv">length</span><span class="p">:</span> <span class="kt">MemoryLayout</span><span class="o">&lt;</span><span class="kt">UInt8</span><span class="o">&gt;.</span><span class="n">size</span> <span class="o">*</span> <span class="n">firstArrayOfNumbers</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+
+<span class="c1">// Number of bytes stored in the 'writeBuffer' object</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">writeBuffer</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+<span class="c1">// Prints "4"</span>
+
+<span class="k">let</span> <span class="nv">secondArrayOfNumbers</span><span class="p">:</span> <span class="p">[</span><span class="kt">UInt8</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+
+<span class="c1">// Append a second set of data to the 'writeBuffer' object</span>
+<span class="n">writeBuffer</span><span class="o">.</span><span class="nf">append</span><span class="p">(</span><span class="nv">bytes</span><span class="p">:</span> <span class="kt">UnsafePointer</span><span class="o">&lt;</span><span class="kt">UInt8</span><span class="o">&gt;</span><span class="p">(</span><span class="n">secondArrayOfNumbers</span><span class="p">),</span>
+                   <span class="nv">length</span><span class="p">:</span> <span class="kt">MemoryLayout</span><span class="o">&lt;</span><span class="kt">UInt8</span><span class="o">&gt;.</span><span class="n">size</span> <span class="o">*</span> <span class="n">secondArrayOfNumbers</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">writeBuffer</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+<span class="c1">// Prints "8"</span>
+<span class="k">let</span> <span class="nv">finalArrayOfNumbers</span><span class="p">:</span> <span class="p">[</span><span class="kt">UInt8</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">]</span>
+
+<span class="c1">// Fill the destination buffer 'finalArrayOfNumbers' with the data from 'writeBuffer'</span>
+<span class="k">let</span> <span class="nv">count</span> <span class="o">=</span> <span class="n">writeBuffer</span><span class="o">.</span><span class="nf">fill</span><span class="p">(</span><span class="nv">buffer</span><span class="p">:</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">(</span><span class="nv">mutating</span><span class="p">:</span> <span class="n">finalArrayOfNumbers</span><span class="p">)</span>
+                       <span class="o">.</span><span class="nf">assumingMemoryBound</span><span class="p">(</span><span class="nv">to</span><span class="p">:</span> <span class="kt">UInt8</span><span class="o">.</span><span class="k">self</span><span class="p">),</span> <span class="nv">length</span><span class="p">:</span> <span class="p">((</span><span class="kt">MemoryLayout</span><span class="o">&lt;</span><span class="kt">UInt8</span><span class="o">&gt;.</span><span class="n">size</span><span class="p">)</span>
+                       <span class="o">*</span> <span class="n">finalArrayOfNumbers</span><span class="o">.</span><span class="n">count</span><span class="p">))</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="s">"count = </span><span class="se">\(</span><span class="n">count</span><span class="se">)</span><span class="s">, buffer is = </span><span class="se">\(</span><span class="n">finalArrayOfNumbers</span><span class="se">)</span><span class="s">"</span> <span class="p">)</span>
+<span class="c1">// Prints "count = 8, buffer is = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"</span>
+</code></pre>
 
           </div>
         </section>
@@ -179,6 +211,13 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
         <section class="section">
           <div class="section-content">
             <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Public"></a>
+                <a name="//apple_ref/swift/Section/Public" class="dashAnchor"></a>
+                <a href="#/Public">
+                  <h3 class="section-name">Public</h3>
+                </a>
+              </div>
               <ul class="item-container">
                 <li class="item">
                   <div>
@@ -193,7 +232,10 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a <code>BufferList</code> instance to store bytes to be written</p>
+                        <p>Creates a <code>BufferList</code> instance to store bytes to be written.</p>
+<h3 id='usage-example' class='heading'>Usage Example:</h3>
+<pre class="highlight swift"><code><span class="k">var</span> <span class="nv">writeBuffer</span> <span class="o">=</span> <span class="kt">BufferList</span><span class="p">()</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -203,6 +245,10 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">()</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>A <code>BufferList</code> instance.</p>
                       </div>
                     </section>
                   </div>
@@ -247,7 +293,7 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Read the data from the <code>BufferList</code></p>
+                        <p>Read the data from the <code>BufferList</code>.</p>
 
                       </div>
                       <div class="declaration">
@@ -275,6 +321,12 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Append bytes to the buffer.</p>
+<h3 id='usage-example' class='heading'>Usage Example:</h3>
+<pre class="highlight swift"><code><span class="k">var</span> <span class="nv">writeBuffer</span> <span class="o">=</span> <span class="kt">BufferList</span><span class="p">()</span>
+<span class="k">let</span> <span class="nv">firstArrayOfNumbers</span><span class="p">:</span> <span class="p">[</span><span class="kt">UInt8</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">writeBuffer</span><span class="o">.</span><span class="nf">append</span><span class="p">(</span><span class="nv">bytes</span><span class="p">:</span> <span class="kt">UnsafePointer</span><span class="o">&lt;</span><span class="kt">UInt8</span><span class="o">&gt;</span><span class="p">(</span><span class="n">firstArrayOfNumbers</span><span class="p">),</span>
+                   <span class="nv">length</span><span class="p">:</span> <span class="kt">MemoryLayout</span><span class="o">&lt;</span><span class="kt">UInt8</span><span class="o">&gt;.</span><span class="n">size</span> <span class="o">*</span> <span class="n">firstArrayOfNumbers</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -284,6 +336,37 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">append</span><span class="p">(</span><span class="nv">bytes</span><span class="p">:</span> <span class="kt">UnsafePointer</span><span class="o">&lt;</span><span class="kt">UInt8</span><span class="o">&gt;</span><span class="p">,</span> <span class="nv">length</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>bytes</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The pointer to the bytes.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>length</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The number of bytes to append.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -302,6 +385,9 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Append data into the <code>BufferList</code>.</p>
+<h3 id='usage-example' class='heading'>Usage Example:</h3>
+<pre class="highlight swift"><code><span class="n">writeBuffer</span><span class="o">.</span><span class="nf">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -311,6 +397,25 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">append</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>data</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The data to append.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -329,6 +434,9 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Fill an array with data from the buffer. The data is copied from the BufferList to <code>array</code>.</p>
+<h3 id='usage-example' class='heading'>Usage Example:</h3>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">count</span> <span class="o">=</span> <span class="n">writeBuffer</span><span class="o">.</span><span class="nf">fill</span><span class="p">(</span><span class="nv">array</span><span class="p">:</span> <span class="p">[</span><span class="kt">UInt8</span><span class="p">])</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -338,6 +446,29 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">fill</span><span class="p">(</span><span class="nv">array</span><span class="p">:</span> <span class="k">inout</span> <span class="p">[</span><span class="kt">UInt8</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kt">Int</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>array</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A [UInt8] for the data you want from the buffer.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The number of bytes copied from this <code>BufferList</code> to <code>array</code>. This will be the length of <code>array</code> or the number of bytes in the buffer, whichever is smaller.</p>
                       </div>
                     </section>
                   </div>
@@ -356,6 +487,9 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Fill memory with data from a <code>BufferList</code>. The data is copied from the <code>BufferList</code> to <code>buffer</code>.</p>
+<h3 id='usage-example' class='heading'>Usage Example:</h3>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">count</span> <span class="o">=</span> <span class="n">writeBuffer</span><span class="o">.</span><span class="nf">fill</span><span class="p">(</span><span class="nv">buffer</span><span class="p">:</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span><span class="o">.</span><span class="nf">assumingMemoryBound</span><span class="p">(</span><span class="nv">to</span><span class="p">:</span> <span class="kt">UInt8</span><span class="o">.</span><span class="k">self</span><span class="p">),</span> <span class="nv">length</span><span class="p">:</span> <span class="n">size</span><span class="p">)</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -365,6 +499,41 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">fill</span><span class="p">(</span><span class="nv">buffer</span><span class="p">:</span> <span class="kt">UnsafeMutablePointer</span><span class="o">&lt;</span><span class="kt">UInt8</span><span class="o">&gt;</span><span class="p">,</span> <span class="nv">length</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Int</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>buffer</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A <code>NSMutablePointer</code> to the beginning of the memory to be filled.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>length</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The number of bytes to fill.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The number of bytes copied from this <code>BufferList</code> to <code>buffer</code>. This will be <code>length</code> or the number of bytes in this <code>BufferList</code>, whichever is smaller.</p>
                       </div>
                     </section>
                   </div>
@@ -383,6 +552,9 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Fill a <code>Data</code> structure with data from the buffer.</p>
+<h3 id='usage-example' class='heading'>Usage Example:</h3>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">count</span> <span class="o">=</span> <span class="n">writeBuffer</span><span class="o">.</span><span class="nf">fill</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">)</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -392,6 +564,29 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">fill</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span> <span class="k">inout</span> <span class="kt">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Int</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>data</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The <code>Data</code> structure to fill from the data in the buffer.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The number of bytes actually copied from the buffer.</p>
                       </div>
                     </section>
                   </div>
@@ -410,6 +605,9 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Fill a <code>NSMutableData</code> with data from the buffer.</p>
+<h3 id='usage-example' class='heading'>Usage Example:</h3>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">count</span> <span class="o">=</span> <span class="n">writeBuffer</span><span class="o">.</span><span class="nf">fill</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">)</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -419,6 +617,29 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">fill</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span> <span class="kt">NSMutableData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Int</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>data</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The <code>NSMutableData</code> object to fill from the data in the buffer.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The number of bytes actually copied from the buffer.</p>
                       </div>
                     </section>
                   </div>
@@ -437,6 +658,9 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Reset the buffer to the beginning position and the buffer length to zero.</p>
+<h3 id='usage-example' class='heading'>Usage Example:</h3>
+<pre class="highlight swift"><code><span class="n">writeBuffer</span><span class="o">.</span><span class="nf">reset</span><span class="p">()</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -464,6 +688,9 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Sets the buffer back to the beginning position. The next <code>BufferList.fill()</code> will take data from the beginning of the buffer.</p>
+<h3 id='usage-example' class='heading'>Usage Example:</h3>
+<pre class="highlight swift"><code><span class="n">writeBuffer</span><span class="o">.</span><span class="nf">rewind</span><span class="p">()</span>
+</code></pre>
 
                       </div>
                       <div class="declaration">
@@ -485,7 +712,7 @@ In future, we may want to do away with the BufferList abstraction and use SwiftN
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-01-04)</p>
+      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-03-28)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
