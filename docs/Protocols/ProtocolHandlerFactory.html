@@ -23,7 +23,7 @@
         <a class="header-link" href="../index.html">
           KituraNet Docs
         </a>
-         (73% documented)
+         (94% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -170,7 +170,9 @@
 
                 </div>
               </div>
-            <p>Undocumented</p>
+            <p>A protocol that should be implemented by connection upgraders of other protocols like WebSocket.
+This protocol provides a common interface to the <code><a href="../Classes/HTTPServer.html">HTTPServer</a></code> to upgrade an incoming HTTP connection
+to the desired protocol.</p>
 
           </div>
         </section>
@@ -192,7 +194,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>Name of the protocol</p>
 
                       </div>
                       <div class="declaration">
@@ -219,7 +221,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>Supply an NIO channel handler for the protocol. Every upgrade request must get its own handler.</p>
 
                       </div>
                       <div class="declaration">
@@ -246,7 +248,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>Checks if a service is available/registered at the given URI</p>
 
                       </div>
                       <div class="declaration">
@@ -254,6 +256,60 @@
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">isServiceRegistered</span><span class="p">(</span><span class="n">at</span> <span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9KituraNet22ProtocolHandlerFactoryP17extensionHandlersSay3NIO07ChannelD0_pGSS6header_tF"></a>
+                    <a name="//apple_ref/swift/Method/extensionHandlers(header:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9KituraNet22ProtocolHandlerFactoryP17extensionHandlersSay3NIO07ChannelD0_pGSS6header_tF">extensionHandlers(header:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">extensionHandlers</span><span class="p">(</span><span class="nv">header</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="kt">ChannelHandler</span><span class="p">]</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9KituraNet22ProtocolHandlerFactoryP9negotiateS2S6header_tF"></a>
+                    <a name="//apple_ref/swift/Method/negotiate(header:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9KituraNet22ProtocolHandlerFactoryP9negotiateS2S6header_tF">negotiate(header:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">func</span> <span class="nf">negotiate</span><span class="p">(</span><span class="nv">header</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">String</span></code></pre>
 
                         </div>
                       </div>
@@ -268,7 +324,7 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-01-04)</p>
+      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-03-28)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
