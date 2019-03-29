@@ -298,10 +298,14 @@ public class HTTPServer: Server {
             }
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
 
+        let listenerDescription: String
         do {
-            if case let SocketType.tcp(port) = socket {
+            switch socket {
+            case SocketType.tcp(let port):
+                listenerDescription = "port \(port)"
                 serverChannel = try bootstrap.bind(host: "0.0.0.0", port: port).wait()
-            } else if case let SocketType.unix(unixDomainSocketPath) = socket {
+            case SocketType.unix(let unixDomainSocketPath):
+                listenerDescription = "path \(unixDomainSocketPath)"
                 serverChannel = try bootstrap.bind(unixDomainSocketPath: unixDomainSocketPath).wait()
             }
             self.port = serverChannel?.localAddress?.port.map { Int($0) }
@@ -319,8 +323,8 @@ public class HTTPServer: Server {
             throw error
         }
 
-        Log.info("Listening on port \(self.port!)")
-        Log.verbose("Options for port \(self.port!): maxPendingConnections: \(maxPendingConnections), allowPortReuse: \(self.allowPortReuse)")
+        Log.info("Listening on \(listenerDescription)")
+        Log.verbose("Options for \(listenerDescription): maxPendingConnections: \(maxPendingConnections), allowPortReuse: \(self.allowPortReuse)")
 
         let queuedBlock = DispatchWorkItem(block: {
             guard let serverChannel = self.serverChannel else { return }
