@@ -23,6 +23,12 @@ import LoggerAPI
 import NIOWebSocket
 import CLinuxHelpers
 
+#if os(Linux)
+import Glibc
+#else
+import Darwin
+#endif
+
 // MARK: HTTPServer
 /**
 An HTTP server that listens for connections on a socket.
@@ -306,6 +312,12 @@ public class HTTPServer: Server {
                 serverChannel = try bootstrap.bind(host: "0.0.0.0", port: port).wait()
             case SocketType.unix(let unixDomainSocketPath):
                 listenerDescription = "path \(unixDomainSocketPath)"
+                // Ensure the path doesn't exist...
+                #if os(Linux)
+                _ = Glibc.unlink(unixDomainSocketPath)
+                #else
+                _ = Darwin.unlink(unixDomainSocketPath)
+                #endif
                 serverChannel = try bootstrap.bind(unixDomainSocketPath: unixDomainSocketPath).wait()
             }
             self.port = serverChannel?.localAddress?.port.map { Int($0) }
