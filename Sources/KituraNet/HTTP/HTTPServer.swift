@@ -308,10 +308,10 @@ public class HTTPServer: Server {
         do {
             switch socket {
             case SocketType.tcp(let port):
-                listenerDescription = "port \(port)"
                 serverChannel = try bootstrap.bind(host: "0.0.0.0", port: port).wait()
+                self.port = serverChannel?.localAddress?.port.map { Int($0) }
+                listenerDescription = "port \(self.port)"
             case SocketType.unix(let unixDomainSocketPath):
-                listenerDescription = "path \(unixDomainSocketPath)"
                 // Ensure the path doesn't exist...
                 #if os(Linux)
                 _ = Glibc.unlink(unixDomainSocketPath)
@@ -319,8 +319,9 @@ public class HTTPServer: Server {
                 _ = Darwin.unlink(unixDomainSocketPath)
                 #endif
                 serverChannel = try bootstrap.bind(unixDomainSocketPath: unixDomainSocketPath).wait()
+                self.unixDomainSocketPath = unixDomainSocketPath
+                listenerDescription = "path \(unixDomainSocketPath)"
             }
-            self.port = serverChannel?.localAddress?.port.map { Int($0) }
             self.state = .started
             self.lifecycleListener.performStartCallbacks()
         } catch let error {
