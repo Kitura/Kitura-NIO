@@ -168,7 +168,7 @@ private class PipelinedRequestsHandler: ChannelInboundHandler {
         case .body(let buffer):
             let len = buffer.readableBytes
             responses.append(buffer.getString(at: 0, length: len)!)
-            if responses == expectedResponses {
+            if responses.count == expectedResponses.count && responses.sorted() == expectedResponses {
                 expectation.fulfill()
             }
         case .end:
