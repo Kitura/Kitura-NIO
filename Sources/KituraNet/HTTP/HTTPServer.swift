@@ -310,7 +310,7 @@ public class HTTPServer: Server {
             case SocketType.tcp(let port):
                 serverChannel = try bootstrap.bind(host: "0.0.0.0", port: port).wait()
                 self.port = serverChannel?.localAddress?.port.map { Int($0) }
-                listenerDescription = "port \(self.port)"
+                listenerDescription = "port \(self.port ?? port)"
             case SocketType.unix(let unixDomainSocketPath):
                 // Ensure the path doesn't exist...
                 #if os(Linux)
