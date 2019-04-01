@@ -569,7 +569,9 @@ public class ClientRequest {
                 channel = try bootstrap.connect(host: hostName, port: Int(self.port!)).wait()
             }
         } catch let error {
-            Log.error("Connection to \(hostName): self.unixDomainSocketPath ?? \(self.port ?? 80) failed with error: \(error)")
+            let target = self.unixDomainSocketPath ?? "\(self.port ?? 80)"
+            print("Connection to \(hostName): \(target) failed with error: \(error)")
+            Log.error("Connection to \(hostName): \(target) failed with error: \(error)")
             callback(nil)
             return
         }
