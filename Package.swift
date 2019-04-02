@@ -28,7 +28,6 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        // TODO: Update after swift-nio and swift-nio-ssl are tagged
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.0.0"),
         .package(url: "https://github.com/IBM-Swift/BlueSSLService.git", from: "1.0.0"),
