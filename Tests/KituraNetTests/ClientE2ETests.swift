@@ -263,7 +263,7 @@ class ClientE2ETests: KituraNetTest {
 
     func testUrlURL() {
         let delegate = TestURLDelegate()
-        performServerTest(delegate) { expectation in
+        performServerTest(delegate, socketType: .tcp) { expectation in
             delegate.port = self.port
             self.performRequest("post", path: ClientE2ETests.urlPath, callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
@@ -344,7 +344,7 @@ class ClientE2ETests: KituraNetTest {
     }
 
     class TestServerDelegate: ServerDelegate {
-        let remoteAddress = ["127.0.0.1", "::1", "::ffff:127.0.0.1"]
+        let remoteAddress = ["127.0.0.1", "::1", "::ffff:127.0.0.1", "uds"]
 
         func handle(request: ServerRequest, response: ServerResponse) {
             XCTAssertTrue(remoteAddress.contains(request.remoteAddress), "Remote address wasn't ::1 or 127.0.0.1 or ::ffff:127.0.0.1, it was \(request.remoteAddress)")

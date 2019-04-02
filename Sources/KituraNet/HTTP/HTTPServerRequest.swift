@@ -238,7 +238,7 @@ public class HTTPServerRequest: ServerRequest {
         case .v6(let addr):
             return addr.host
         case .unixDomainSocket:
-            return "n/a"
+            return "uds"
         }
     }
 

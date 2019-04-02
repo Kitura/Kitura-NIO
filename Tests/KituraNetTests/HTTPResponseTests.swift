@@ -28,6 +28,14 @@ class HTTPResponseTests: KituraNetTest {
         ]
     }
 
+    override func setUp() {
+        doSetUp()
+    }
+
+    override func tearDown() {
+        doTearDown()
+    }
+
     func testContentTypeHeaders() {
         let headers = HeadersContainer()
 

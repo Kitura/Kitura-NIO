@@ -23,6 +23,12 @@ import LoggerAPI
 import NIOWebSocket
 import CLinuxHelpers
 
+#if os(Linux)
+import Glibc
+#else
+import Darwin
+#endif
+
 // MARK: HTTPServer
 /**
 An HTTP server that listens for connections on a socket.
@@ -49,15 +55,11 @@ public class HTTPServer: Server {
     */
     public var delegate: ServerDelegate?
 
-    /**
-     Port number for listening for new connections.
-
-     ### Usage Example: ###
-     ````swift
-     httpServer.port = 8080
-     ````
-    */
+    /// The TCP port on which this server listens for new connections. If `nil`, this server does not listen on a TCP socket.
     public private(set) var port: Int?
+
+    /// The Unix domain socket path on which this server listens for new connections. If `nil`, this server does not listen on a Unix socket.
+    public private(set) var unixDomainSocketPath: String?
 
     private var _state: ServerState = .unknown
 
@@ -225,8 +227,31 @@ public class HTTPServer: Server {
         return nil
     }
 
+    // Sockets could either be TCP/IP sockets or Unix domain sockets
+    private enum SocketType {
+        // An TCP/IP socket has an associated port number
+        case tcp(Int)
+        // A unix domain socket has an associated filename
+        case unix(String)
+    }
+
     /**
-     Listens for connections on a socket.
+     Listens for connections on a Unix socket.
+
+     ### Usage Example: ###
+     ````swift
+     try server.listen(unixDomainSocketPath: "/my/path")
+     ````
+
+     - Parameter unixDomainSocketPath: Unix socket path for new connections, eg. "/my/path"
+     */
+    public func listen(unixDomainSocketPath: String) throws {
+        self.unixDomainSocketPath = unixDomainSocketPath
+        try listen(.unix(unixDomainSocketPath))
+    }
+
+    /**
+     Listens for connections on a TCP socket.
 
      ### Usage Example: ###
      ````swift
@@ -237,6 +262,10 @@ public class HTTPServer: Server {
     */
     public func listen(on port: Int) throws {
         self.port = port
+        try listen(.tcp(port))
+    }
+
+    private func listen(_ socket: SocketType) throws {
 
         if let tlsConfig = tlsConfig {
             do {
@@ -275,20 +304,40 @@ public class HTTPServer: Server {
             }
             .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
 
+        let listenerDescription: String
         do {
-            serverChannel = try bootstrap.bind(host: "0.0.0.0", port: port).wait()
-            self.port = serverChannel?.localAddress?.port.map { Int($0) }
+            switch socket {
+            case SocketType.tcp(let port):
+                serverChannel = try bootstrap.bind(host: "0.0.0.0", port: port).wait()
+                self.port = serverChannel?.localAddress?.port.map { Int($0) }
+                listenerDescription = "port \(self.port ?? port)"
+            case SocketType.unix(let unixDomainSocketPath):
+                // Ensure the path doesn't exist...
+                #if os(Linux)
+                _ = Glibc.unlink(unixDomainSocketPath)
+                #else
+                _ = Darwin.unlink(unixDomainSocketPath)
+                #endif
+                serverChannel = try bootstrap.bind(unixDomainSocketPath: unixDomainSocketPath).wait()
+                self.unixDomainSocketPath = unixDomainSocketPath
+                listenerDescription = "path \(unixDomainSocketPath)"
+            }
             self.state = .started
             self.lifecycleListener.performStartCallbacks()
         } catch let error {
             self.state = .failed
             self.lifecycleListener.performFailCallbacks(with: error)
-            Log.error("Error trying to bind to \(port): \(error)")
+            switch socket {
+            case .tcp(let port):
+                Log.error("Error trying to bind to \(port): \(error)")
+            case .unix(let socketPath):
+                Log.error("Error trying to bind to \(socketPath): \(error)")
+            }
             throw error
         }
 
-        Log.info("Listening on port \(self.port!)")
-        Log.verbose("Options for port \(self.port!): maxPendingConnections: \(maxPendingConnections), allowPortReuse: \(self.allowPortReuse)")
+        Log.info("Listening on \(listenerDescription)")
+        Log.verbose("Options for \(listenerDescription): maxPendingConnections: \(maxPendingConnections), allowPortReuse: \(self.allowPortReuse)")
 
         let queuedBlock = DispatchWorkItem(block: {
             guard let serverChannel = self.serverChannel else { return }
@@ -320,6 +369,26 @@ public class HTTPServer: Server {
         let server = HTTP.createServer()
         server.delegate = delegate
         try server.listen(on: port)
+        return server
+    }
+
+    /**
+     Static method to create a new HTTP server and have it listen for connections on a Unix domain socket.
+
+     ### Usage Example: ###
+     ````swift
+     let server = HTTPServer.listen(unixDomainSocketPath: "/my/path", delegate: self)
+     ````
+
+     - Parameter unixDomainSocketPath: The path of the Unix domain socket that this server should listen on.
+     - Parameter delegate: The delegate handler for HTTP connections.
+
+     - Returns: A new instance of a `HTTPServer`.
+     */
+    public static func listen(unixDomainSocketPath: String, delegate: ServerDelegate?) throws -> HTTPServer {
+        let server = HTTP.createServer()
+        server.delegate = delegate
+        try server.listen(unixDomainSocketPath: unixDomainSocketPath)
         return server
     }
 

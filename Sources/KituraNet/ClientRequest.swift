@@ -170,6 +170,9 @@ public class ClientRequest {
     /// A semaphore used to make ClientRequest.end() synchronous
     let waitSemaphore = DispatchSemaphore(value: 0)
 
+    // Socket path for Unix domain sockets
+    var unixDomainSocketPath: String?
+
     /**
     Client request options enum. This allows the client to specify certain parameteres such as HTTP headers, HTTP methods, host names, and SSL credentials.
 
@@ -292,9 +295,11 @@ public class ClientRequest {
     /// Initializes a `ClientRequest` instance
     ///
     /// - Parameter options: An array of `Options' describing the request
+    /// - Parameter unixDomainSocketPath: Specifies a path of a Unix domain socket that the client should connect to.
     /// - Parameter callback: The closure of type `Callback` to be used for the callback.
-    init(options: [Options], callback: @escaping Callback) {
+    init(options: [Options], unixDomainSocketPath: String? = nil, callback: @escaping Callback) {
 
+        self.unixDomainSocketPath = unixDomainSocketPath
         self.callback = callback
 
         var theSchema = "http://"
@@ -558,9 +563,15 @@ public class ClientRequest {
 
         do {
             guard let bootstrap = bootstrap else { return }
-            channel = try bootstrap.connect(host: hostName, port: Int(self.port!)).wait()
+            if let unixDomainSocketPath = self.unixDomainSocketPath {
+                channel = try bootstrap.connect(unixDomainSocketPath: unixDomainSocketPath).wait()
+            } else {
+                channel = try bootstrap.connect(host: hostName, port: Int(self.port!)).wait()
+            }
         } catch let error {
-            Log.error("Connection to \(hostName):\(self.port ?? 80) failed with error: \(error)")
+            let target = self.unixDomainSocketPath ?? "\(self.port ?? 80)"
+            print("Connection to \(hostName): \(target) failed with error: \(error)")
+            Log.error("Connection to \(hostName): \(target) failed with error: \(error)")
             callback(nil)
             return
         }
@@ -759,13 +770,17 @@ class HTTPClientHandler: ChannelInboundHandler {
                     }
                     if url.starts(with: "/") {
                         let scheme = URL(string: clientRequest.url)?.scheme
-                        let port = clientRequest.port.map { UInt16($0) }.map { $0.toInt16() }!
-                        let request = ClientRequest(options: [.schema(scheme!),
-                                                              .hostname(clientRequest.hostName!),
-                                                              .port(port),
-                                                              .path(url)],
-                                                    callback: clientRequest.callback)
+                        var options: [ClientRequest.Options] = [.schema(scheme!), .hostname(clientRequest.hostName!), .path(url)]
+                        let request: ClientRequest
+                        if let socketPath = self.clientRequest.unixDomainSocketPath {
+                            request = ClientRequest(options: options, unixDomainSocketPath: socketPath, callback: clientRequest.callback)
+                        } else {
+                            let port = clientRequest.port.map { UInt16($0) }.map { $0.toInt16() }!
+                            options.append(.port(port))
+                            request = ClientRequest(options: options, callback: clientRequest.callback)
+                        }
                         request.maxRedirects = self.clientRequest.maxRedirects - 1
+
                         // The next request can be asynchronously moved to a DispatchQueue.
                         // ClientRequest.end() calls connect().wait(), so we better move this to a dispatch queue.
                         // Because ClientRequest.end() is blocking, we mark the current task complete after the new task also completes.

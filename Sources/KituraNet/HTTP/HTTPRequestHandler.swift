@@ -72,7 +72,6 @@ internal class HTTPRequestHandler: ChannelInboundHandler {
 
     public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
         let request = self.unwrapInboundIn(data)
-
         // If an error response was already sent, we'd want to spare running through this for now.
         // If an upgrade to WebSocket fails, both `errorCaught` and `channelRead` are triggered.
         // We'd want to return the error via `errorCaught`.

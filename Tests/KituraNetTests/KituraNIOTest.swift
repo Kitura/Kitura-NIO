@@ -35,6 +35,12 @@ class KituraNetTest: XCTestCase {
     var useSSL = useSSLDefault
     var port = portDefault
 
+    var unixDomainSocketPath: String? = nil
+
+    var socketFilePath = ""
+
+    var socketType: SocketType = .tcp
+
     static let sslConfig: SSLService.Configuration = {
         let sslConfigDir = URL(fileURLWithPath: #file).appendingPathComponent("../SSLConfig")
 
@@ -53,24 +59,45 @@ class KituraNetTest: XCTestCase {
 
     static let clientSSLConfig = SSLService.Configuration(withCipherSuite: nil, clientAllowsSelfSignedCertificates: true)
 
-    //private static let initOnce: () = PrintLogger.use(colored: true)
-
     func doSetUp() {
-        //KituraNetTest.initOnce
+        // set up the unix socket file
+#if os(Linux)
+        let temporaryDirectory = "/tmp"
+#else
+        var temporaryDirectory: String
+        if #available(OSX 10.12, *) {
+            temporaryDirectory = FileManager.default.temporaryDirectory.path
+        } else {
+            temporaryDirectory = "/tmp"
+        }
+#endif
+        self.socketFilePath = temporaryDirectory + "/" + String(ProcessInfo.processInfo.globallyUniqueString.prefix(20))
     }
 
     func doTearDown() {
+        guard self.socketType != .tcp else { return }
+        let fileURL = URL(fileURLWithPath: socketFilePath)
+        let fm = FileManager.default
+        do {
+            try fm.removeItem(at: fileURL)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
     }
 
-    func startServer(_ delegate: ServerDelegate?, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault) throws -> HTTPServer {
+    func startServer(_ delegate: ServerDelegate?, unixDomainSocketPath: String? = nil, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault) throws -> HTTPServer {
 
         let server = HTTP.createServer()
         server.delegate = delegate
-        server.allowPortReuse = allowPortReuse
         if useSSL {
             server.sslConfig = KituraNetTest.sslConfig
         }
-        try server.listen(on: port)
+        if let unixDomainSocketPath = unixDomainSocketPath {
+            try server.listen(unixDomainSocketPath: unixDomainSocketPath)
+        } else {
+            server.allowPortReuse = allowPortReuse
+            try server.listen(on: port)
+        }
         return server
     }
 
@@ -87,13 +114,58 @@ class KituraNetTest: XCTestCase {
         return (server, serverPort)
     }
 
-    func performServerTest(_ delegate: ServerDelegate?, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault,
-                           line: Int = #line, asyncTasks: (XCTestExpectation) -> Void...) {
 
+    enum SocketType {
+        case tcp
+        case unixDomainSocket
+        case both
+    }
+
+    func performServerTest(_ delegate: ServerDelegate?, socketType: SocketType = .both, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: (XCTestExpectation) -> Void...) {
+        self.socketType = socketType
+        if socketType != .tcp {
+            performServerTestWithUnixSocket(delegate: delegate, useSSL: useSSL, allowPortReuse: allowPortReuse, line: line, asyncTasks: asyncTasks)
+        }
+        if socketType != .unixDomainSocket {
+            performServerTestWithTCPPort(delegate: delegate, useSSL: useSSL, allowPortReuse:  allowPortReuse, line: line, asyncTasks: asyncTasks)
+        }
+    }
+
+    func performServerTestWithUnixSocket(delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: [(XCTestExpectation) -> Void]) { 
         do {
+            var server: HTTPServer
             self.useSSL = useSSL
-            let (server, ephemeralPort) = try startEphemeralServer(delegate, useSSL: useSSL, allowPortReuse: allowPortReuse)
+            self.unixDomainSocketPath = self.socketFilePath
+            server = try startServer(delegate, unixDomainSocketPath: self.unixDomainSocketPath, useSSL: useSSL, allowPortReuse: allowPortReuse)
+            defer {
+                server.stop()
+            }
+
+            let requestQueue = DispatchQueue(label: "Request queue")
+            for (index, asyncTask) in asyncTasks.enumerated() {
+                let expectation = self.expectation(line: line, index: index)
+                requestQueue.async {
+                    asyncTask(expectation)
+                }
+            }
+
+            // wait for timeout or for all created expectations to be fulfilled
+            waitExpectation(timeout: 10) { error in
+                XCTAssertNil(error)
+            }
+        } catch {
+            XCTFail("Error: \(error)")
+        }
+    }
+
+    func performServerTestWithTCPPort(delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: [(XCTestExpectation) -> Void]) { 
+        do {
+            var server: HTTPServer
+            var ephemeralPort: Int = 0
+            self.useSSL = useSSL
+            (server, ephemeralPort) = try startEphemeralServer(delegate, useSSL: useSSL, allowPortReuse: allowPortReuse)
             self.port = ephemeralPort
+            self.unixDomainSocketPath = nil
             defer {
                 server.stop()
             }
@@ -157,13 +229,18 @@ class KituraNetTest: XCTestCase {
         allHeaders["Content-Type"] = "text/plain"
 
         let schema = self.useSSL ? "https" : "http"
-        var options: [ClientRequest.Options] =
-            [.method(method), .schema(schema), .hostname(hostname), .port(UInt16(self.port).toInt16()), .path(path), .headers(allHeaders)]
+        var options: [ClientRequest.Options] = [.method(method), .schema(schema), .hostname(hostname), .path(path), .headers(allHeaders)]
         if self.useSSL {
             options.append(.disableSSLVerification)
         }
 
-        let req = HTTP.request(options, callback: callback)
+        let req: ClientRequest
+        if let unixDomainSocketPath = self.unixDomainSocketPath {
+            req = HTTP.request(options, unixDomainSocketPath: unixDomainSocketPath, callback: callback)
+        } else {
+            options.append(.port(UInt16(self.port).toInt16()))
+            req = HTTP.request(options, callback: callback)
+        }
         if let requestModifier = requestModifier {
             requestModifier(req)
         }
