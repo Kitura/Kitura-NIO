@@ -15,25 +15,25 @@ matrix:
       dist: xenial
       sudo: required
       services: docker
-      env: DOCKER_IMAGE=swift:4.2.3 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT DOCKER_PRIVILEGED=true
+      env: DOCKER_IMAGE=swift:5.0-xenial DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel"
     - os: linux
       dist: xenial
       sudo: required
       services: docker
-      env: DOCKER_IMAGE=swift:4.2.3 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel"
+      env: DOCKER_IMAGE=swift:5.0 DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel"
     - os: linux
       dist: xenial
       sudo: required
       services: docker
-      env: DOCKER_IMAGE=ubuntu:18.04 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT DOCKER_PRIVILEGED=true
+      env: DOCKER_IMAGE=swift:5.0 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel"
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode10.2
       sudo: required
-      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT JAZZY_ELIGIBLE=true SWIFT_TEST_ARGS="--parallel"
+      env: JAZZY_ELIGIBLE=true SWIFT_TEST_ARGS="--parallel"
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode10.2
       sudo: required
-      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT
+      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT SWIFT_TEST_ARGS="--parallel"
 
 before_install:
   - git clone https://github.com/IBM-Swift/Package-Builder.git
