@@ -118,7 +118,7 @@ public class HTTPServerRequest: ServerRequest {
         _urlComponents?.scheme = self.enableSSL ? "https" : "http"
 
         var localAddress = ""
-        var localAddressPort = Int(0)
+        var localAddressPort = 0
 
         do {
             try ctx.eventLoop.runAndWait {
