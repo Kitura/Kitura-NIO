@@ -57,8 +57,8 @@ class PipeliningTests: KituraNetTest {
         do {
            let clientChannel = try ClientBootstrap(group: group)
             .channelInitializer { channel in
-                channel.pipeline.addHTTPClientHandlers().then {
-                    channel.pipeline.add(handler: PipelinedRequestsHandler(with: expectation))
+                channel.pipeline.addHTTPClientHandlers().flatMap {
+                    channel.pipeline.addHandler(PipelinedRequestsHandler(with: expectation))
                 }
             }
             .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
@@ -95,8 +95,8 @@ class PipeliningTests: KituraNetTest {
         do {
             let clientChannel = try ClientBootstrap(group: group)
                 .channelInitializer { channel in
-                    channel.pipeline.addHTTPClientHandlers().then {
-                        channel.pipeline.add(handler: PipelinedRequestsHandler(with: expectation))
+                    channel.pipeline.addHTTPClientHandlers().flatMap {
+                        channel.pipeline.addHandler(PipelinedRequestsHandler(with: expectation))
                     }
                 }
                 .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
@@ -160,7 +160,7 @@ private class PipelinedRequestsHandler: ChannelInboundHandler {
 
     private var responses: [String] = []
 
-    public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
+    public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let request = self.unwrapInboundIn(data)
         switch request {
         case .head:

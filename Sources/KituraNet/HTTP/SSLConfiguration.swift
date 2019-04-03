@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import NIOOpenSSL
+import NIOSSL
 import SSLService
 import LoggerAPI
 
-/// A helper class to bridge between SSLService.Configuration (used by Kitura) and TLSConfiguration required by NIOOpenSSL
+/// A helper class to bridge between SSLService.Configuration (used by Kitura) and TLSConfiguration required by NIOSSL
 internal class SSLConfiguration {
 
     private var certificateFilePath: String?
@@ -39,7 +39,7 @@ internal class SSLConfiguration {
         self.password = sslConfig.password
     }
 
-    /// Convert SSLService.Configuration to NIOOpenSSL.TLSConfiguration
+    /// Convert SSLService.Configuration to NIOSSL.TLSConfiguration
     func tlsServerConfig() -> TLSConfiguration? {
             // TODO: Consider other configuration options
             if let certificateFilePath = certificateFilePath, let keyFilePath = keyFilePath {
@@ -48,8 +48,8 @@ internal class SSLConfiguration {
                 /// TLSConfiguration for PKCS#12 formatted certificate
                 guard let certificateChainFilePath = certificateChainFilePath, let password = password else { return nil }
                 do {
-                    let pkcs12Bundle = try OpenSSLPKCS12Bundle(file: certificateChainFilePath, passphrase: password.utf8)
-                    var sslCertificateSource: [OpenSSLCertificateSource] = []
+                    let pkcs12Bundle = try NIOSSLPKCS12Bundle(file: certificateChainFilePath, passphrase: password.utf8)
+                    var sslCertificateSource: [NIOSSLCertificateSource] = []
                     pkcs12Bundle.certificateChain.forEach {
                         sslCertificateSource.append(.certificate($0))
                     }

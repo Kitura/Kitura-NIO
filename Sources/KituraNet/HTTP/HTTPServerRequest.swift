@@ -118,7 +118,7 @@ public class HTTPServerRequest: ServerRequest {
         _urlComponents?.scheme = self.enableSSL ? "https" : "http"
 
         var localAddress = ""
-        var localAddressPort = UInt16(0)
+        var localAddressPort = 0
 
         do {
             try ctx.eventLoop.runAndWait {
@@ -246,8 +246,8 @@ public class HTTPServerRequest: ServerRequest {
         self.ctx = ctx
         self.headers = HeadersContainer(with: requestHead.headers)
         self.method = requestHead.method.string()
-        self.httpVersionMajor = requestHead.version.major
-        self.httpVersionMinor = requestHead.version.minor
+        self.httpVersionMajor = UInt16(requestHead.version.major)
+        self.httpVersionMinor = UInt16(requestHead.version.minor)
         self.rawURLString = requestHead.uri
         self.enableSSL = enableSSL
     }
@@ -388,6 +388,8 @@ extension HTTPMethod {
             return "MKACTIVITY"
         case .UNSUBSCRIBE:
             return "UNSUBSCRIBE"
+        case .SOURCE:
+            return "SOURCE"
         case .RAW(let value):
             return value
         }

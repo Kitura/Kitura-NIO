@@ -1,4 +1,4 @@
-// swift-tools-version:4.0
+// swift-tools-version:5.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 /*
  * Copyright IBM Corporation 2016, 2017, 2018
@@ -28,8 +28,8 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/apple/swift-nio.git", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "1.0.1"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.0.0"),
         .package(url: "https://github.com/IBM-Swift/BlueSSLService.git", from: "1.0.0"),
         .package(url: "https://github.com/IBM-Swift/LoggerAPI.git", from: "1.7.3")
     ],
@@ -41,7 +41,7 @@ let package = Package(
             dependencies: []),
         .target(
             name: "KituraNet",
-            dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOOpenSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "CLinuxHelpers"]),
+            dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "CLinuxHelpers"]),
         .testTarget(
             name: "KituraNetTests",
             dependencies: ["KituraNet"])
