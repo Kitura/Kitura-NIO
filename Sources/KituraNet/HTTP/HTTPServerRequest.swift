@@ -130,7 +130,8 @@ public class HTTPServerRequest: ServerRequest {
         }
 
         if let hostname = headers["Host"]?.first {
-            _urlComponents?.host = hostname
+            // Handle Host header values of the kind "localhost:8080"
+            _urlComponents?.host = String(hostname.split(separator: ":")[0])
         } else {
             Log.error("Host header not received")
             let hostname = localAddress
