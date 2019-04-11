@@ -4,6 +4,7 @@
 branches:
   only:
     - master
+    - kitura-nio-1.0
     - /^issue.*$/
 
 # the matrix of builds should cover each combination of Swift version
