@@ -4,6 +4,7 @@
 branches:
   only:
     - master
+    - kitura-nio-1.0
     - /^issue.*$/
 
 # the matrix of builds should cover each combination of Swift version
@@ -14,11 +15,11 @@ matrix:
     - os: linux
       dist: trusty
       sudo: required
-      env: SWIFT_SNAPSHOT=4.0.3 CUSTOM_TEST_SCRIPT=.kitura-test.sh
+      env: SWIFT_SNAPSHOT=4.0.3
     - os: linux
       dist: trusty
       sudo: required
-      env: SWIFT_SNAPSHOT=4.1.3 CUSTOM_TEST_SCRIPT=.kitura-test.sh
+      env: SWIFT_SNAPSHOT=4.1.3
     - os: linux
       dist: trusty
       sudo: required
@@ -41,7 +42,7 @@ matrix:
     - os: osx
       osx_image: xcode9.2
       sudo: required
-      env: SWIFT_SNAPSHOT=4.0.3 BREW_INSTALL_PACKAGES="libressl" CUSTOM_TEST_SCRIPT=.kitura-test.sh
+      env: SWIFT_SNAPSHOT=4.0.3 BREW_INSTALL_PACKAGES="libressl"
     - os: osx
       osx_image: xcode9.4
       sudo: required
@@ -53,7 +54,7 @@ matrix:
     - os: osx
       osx_image: xcode10.1
       sudo: required
-      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT BREW_INSTALL_PACKAGES="libressl" CUSTOM_TEST_SCRIPT=.kitura-test.sh
+      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT BREW_INSTALL_PACKAGES="libressl"
 
 before_install:
   - git clone https://github.com/IBM-Swift/Package-Builder.git
