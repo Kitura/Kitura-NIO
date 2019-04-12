@@ -57,3 +57,11 @@ public protocol ProtocolHandlerFactory {
     // Specially included for the WebSocket protocol. This runs the negotiation handshake logic for enabled extensions.
     func negotiate(header: String) -> String
 }
+extension ProtocolHandlerFactory {
+    public func extensionHandlers(header: String) -> [ChannelHandler] { 
+        return []
+    }
+    public func negotiate(header: String) -> String {
+        return ""
+    }
+}
