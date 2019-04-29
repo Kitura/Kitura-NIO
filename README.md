@@ -6,7 +6,7 @@
 
 
 <p align="center">
-<img src="https://img.shields.io/badge/Swift-4.2-orange.svg?style=flat" alt="Swift 4.2">
+<img src="https://img.shields.io/badge/Swift-5.0-orange.svg?style=flat" alt="Swift 5.0">
 <a href="https://ibm-swift.github.io/Kitura-NIO/index.html">
 <img src="https://img.shields.io/badge/apidoc-KituraNIO-1FBCE4.svg?style=flat" alt="APIDoc">
 </a>
@@ -23,16 +23,17 @@
 
 # Kitura-NIO
 
-Kitura-NIO is a [SwiftNIO](https://github.com/apple/swift-nio) based networking library for Kitura. Kitura-NIO adopts the same API as [KituraNet](https://github.com/IBM-Swift/Kitura-net), making the transition from KituraNet to Kitura-NIO seamless. While Kitura-NIO shares some code with Kitura-Net, the core comprising of HTTPServer, ClientRequest/ClientResponse and TLS support have been implemented using SwiftNIO. Kitura-NIO uses [NIOOpenSSL](https://github.com/apple/swift-nio-ssl) for TLS support.
+Kitura-NIO is a [SwiftNIO](https://github.com/apple/swift-nio) based networking library for Kitura. Kitura-NIO adopts the same API as [KituraNet](https://github.com/IBM-Swift/Kitura-net), making the transition from KituraNet to Kitura-NIO seamless. While Kitura-NIO shares some code with Kitura-Net, the core comprising of HTTPServer, ClientRequest/ClientResponse and TLS support have been implemented using SwiftNIO. Kitura-NIO uses [NIOSSL](https://github.com/apple/swift-nio-ssl) for TLS support.
 
-We expect most of our users to require higher level concepts such as routing, templates and middleware, these are not provided in Kitura-NIO, if you want to use those facilities you should be coding at the Kitura level, for this please see the [Kitura](https://github.com/IBM-Swift/Kitura) project. Kitura-NIO, like  [Kitura-net](https://github.com/IBM-Swift/Kitura-net), underpins Kitura which offers a higher abstraction level to users.
+We expect most of our users to require higher level concepts such as routing, templates and middleware. These are not provided in Kitura-NIO. If you want to use those facilities you should be coding at the Kitura level, for this please see the [Kitura](https://github.com/IBM-Swift/Kitura) project. Kitura-NIO, like  [Kitura-net](https://github.com/IBM-Swift/Kitura-net), underpins Kitura which offers a higher abstraction level to users.
 
-Kitura-NIO works with Swift 4.2. It is also being tested with the development binaries for Swift 5.
+Kitura-NIO 2 has been tested with Swift 5. If you are using Swift 4, please use Kitura-NIO 1. See the [release history](https://github.com/IBM-Swift/Kitura-NIO/releases) for details.
 
 ## Features
 
 - Port Listening
 - HTTP Server support (request and response)
+- Basic HTTP client support
 
 ## Using Kitura-NIO
 
