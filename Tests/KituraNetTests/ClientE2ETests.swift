@@ -36,6 +36,7 @@ class ClientE2ETests: KituraNetTest {
             ("testUrlURL", testUrlURL),
             ("testQueryParameters", testQueryParameters),
             ("testRedirect", testRedirect),
+            ("testPercentEncodedQuery", testPercentEncodedQuery),
         ]
     }
 
@@ -339,6 +340,33 @@ class ClientE2ETests: KituraNetTest {
                 XCTAssertEqual(response?.statusCode, .OK, "Expected response code OK(200), but received \"(response?.statusCode)")
                 let responseString = try! response?.readString() ?? ""
                 XCTAssertEqual(responseString, "from redirected route", "Redirection failed")
+                expectation.fulfill()
+            })
+        }
+    }
+
+    func testPercentEncodedQuery() {
+        class TestDelegate: ServerDelegate {
+            func handle(request: ServerRequest, response: ServerResponse) {
+                do {
+                   let urlComponents = URLComponents(url: request.urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
+                   XCTAssertNotNil(urlComponents.queryItems)
+                   for queryItem in urlComponents.queryItems! {
+                       XCTAssertEqual(queryItem.name, "parameter", "Query name should have been parameter, received \(queryItem.name)")
+                       XCTAssertEqual(queryItem.value, "Hi There", "Query value should have been Hi There, received \(queryItem.value ?? "")")
+                    }
+                    response.statusCode = .OK
+                    try response.end()
+                } catch {
+                    XCTFail("Error while writing response")
+                }   
+            }
+        }
+
+        let delegate = TestDelegate()
+        performServerTest(delegate) { expectation in
+            self.performRequest("get", path: "/zxcv?parameter=Hi%20There", callback: { response in
+                XCTAssertEqual(response?.statusCode, .OK, "Expected response code OK(200), but received \"(response?.statusCode)")
                 expectation.fulfill()
             })
         }
