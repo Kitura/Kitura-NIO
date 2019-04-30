@@ -265,7 +265,7 @@ class ClientE2ETests: KituraNetTest {
         let delegate = TestURLDelegate()
         performServerTest(delegate, socketType: .tcp) { expectation in
             delegate.port = self.port
-            let headers = ["Host": "localhost:8080"]
+            let headers = ["Host": "localhost:\(self.port)"]
             self.performRequest("post", path: ClientE2ETests.urlPath, callback: { response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
                 expectation.fulfill()
