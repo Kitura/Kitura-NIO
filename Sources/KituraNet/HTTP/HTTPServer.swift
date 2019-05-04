@@ -165,12 +165,12 @@ public class HTTPServer: Server {
     private var sslContext: NIOSSLContext?
 
     /// URI for which the latest WebSocket upgrade was requested by a client
-    var latestWebSocketURI: String?
+    var latestWebSocketURI: String = "/<unknown>"
 
     /// Determines if the request should be upgraded and adds additional upgrade headers to the request
     private func shouldUpgradeToWebSocket(channel: Channel, webSocketHandlerFactory: ProtocolHandlerFactory, head: HTTPRequestHead) -> EventLoopFuture<HTTPHeaders?> {
-        self.latestWebSocketURI = head.uri
-        guard webSocketHandlerFactory.isServiceRegistered(at: head.uri) else { return channel.eventLoop.makeSucceededFuture(nil) }
+        self.latestWebSocketURI = String(head.uri.split(separator: "?")[0])
+        guard webSocketHandlerFactory.isServiceRegistered(at: self.latestWebSocketURI) else { return channel.eventLoop.makeSucceededFuture(nil) }
         var headers = HTTPHeaders()
         if let wsProtocol = head.headers["Sec-WebSocket-Protocol"].first {
             headers.add(name: "Sec-WebSocket-Protocol", value: wsProtocol)
@@ -187,7 +187,6 @@ public class HTTPServer: Server {
     /// Creates upgrade request and adds WebSocket handler to pipeline
     private func upgradeHandler(webSocketHandlerFactory: ProtocolHandlerFactory, request: HTTPRequestHead) -> EventLoopFuture<Void> {
         guard let ctx = self.ctx else { fatalError("Cannot create ServerRequest") }
-        ///TODO: Handle secure upgrade request ("wss://")
         let serverRequest = HTTPServerRequest(ctx: ctx, requestHead: request, enableSSL: false)
         let websocketConnectionHandler = webSocketHandlerFactory.handler(for: serverRequest)
         let future = ctx.channel.pipeline.addHandler(websocketConnectionHandler)

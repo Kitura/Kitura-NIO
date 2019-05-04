@@ -131,7 +131,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
         default:
             // Handle only NIOWebSocketUpgradeError here, nothing else
             if let upgradeError = error as? NIOWebSocketUpgradeError, upgradeError == .unsupportedWebSocketTarget {
-                let target = server.latestWebSocketURI ?? "/<unknown>"
+                let target = server.latestWebSocketURI
                 message = "No service has been registered for the path \(target)"
             } else {
                 context.close(promise: nil)
