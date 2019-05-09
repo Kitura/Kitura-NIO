@@ -37,7 +37,7 @@ Kitura-NIO 2 has been tested with Swift 5. If you are using Swift 4, please use 
 
 ## Using Kitura-NIO
 
-With Kitura 2.5 and future releases, to run on top of Kitura-NIO (instead of Kitura-Net) all you need to do is set an environment variable called `KITURA_NIO` before building your Kitura appilication:
+With Kitura 2.5 and future releases, to run on top of Kitura-NIO (instead of Kitura-Net) all you need to do is set an environment variable called `KITURA_NIO` before building your Kitura application:
 
 ```shell
     export KITURA_NIO=1 && swift build
@@ -51,7 +51,7 @@ If you have already built your Kitura application using Kitura-Net and want to s
 
 Using the environment variable we make sure that only one out of Kitura-NIO and Kitura-Net is linked into the final binary.
 
-Please note that though Kitura-NIO has its own GitHub repository, the package name is `KituraNet`. This is because the Kitura-NIO and Kitura-Net are expected to provide identical APIs, and it make sense if they share the package name too.
+Please note that though Kitura-NIO has its own GitHub repository, the package name is `KituraNet`. This is because the Kitura-NIO and Kitura-Net are expected to provide identical APIs, and it makes sense if they share the package name too.
 
 
 ## Getting Started
@@ -83,4 +83,4 @@ Join the [Kitura on Swift Forums](https://forums.swift.org/c/related-projects/ki
 
 ## License
 
-This library is licensed under Apache 2.0. Full license text is available in [LICENSE](https://github.com/IBM-Swift/Kitura-NIO/blob/master/LICENSE.txt).
+This library is licensed under Apache 2.0. The full license text is available in [LICENSE](https://github.com/IBM-Swift/Kitura-NIO/blob/master/LICENSE.txt).
