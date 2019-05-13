@@ -179,7 +179,11 @@ public class HTTPServer: Server {
             headers.add(name: "Sec-WebSocket-Key", value: key)
         }
         if let _extension = head.headers["Sec-WebSocket-Extensions"].first {
-            headers.add(name: "Sec-WebSocket-Extensions", value: webSocketHandlerFactory.negotiate(header: _extension))
+            let responseExtensions = webSocketHandlerFactory.negotiate(header: _extension)
+            // A Safari bug causes the connection to be dropped if an empty header is sent
+            if !responseExtensions.isEmpty {
+                headers.add(name: "Sec-WebSocket-Extensions", value: responseExtensions)
+            }
         }
         return channel.eventLoop.makeSucceededFuture(headers)
     }
