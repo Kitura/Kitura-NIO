@@ -246,7 +246,7 @@ public class HTTPServerRequest: ServerRequest {
     init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead, enableSSL: Bool) {
         self.ctx = ctx
         self.headers = HeadersContainer(with: requestHead.headers)
-        self.method = requestHead.method.string()
+        self.method = requestHead.method.rawValue
         self.httpVersionMajor = UInt16(requestHead.version.major)
         self.httpVersionMinor = UInt16(requestHead.version.minor)
         self.rawURLString = requestHead.uri
@@ -317,82 +317,5 @@ public class HTTPServerRequest: ServerRequest {
             bytesRead += length
         }
         return bytesRead
-    }
-}
-
-extension HTTPMethod {
-    func string() -> String {
-        switch self {
-        case .GET:
-            return "GET"
-        case .PUT:
-            return "PUT"
-        case .ACL:
-            return "ACL"
-        case .HEAD:
-            return "HEAD"
-        case .POST:
-            return "POST"
-        case .COPY:
-            return "COPY"
-        case .LOCK:
-            return "LOCK"
-        case .MOVE:
-            return "MOVE"
-        case .BIND:
-            return "BIND"
-        case .LINK:
-            return "LINK"
-        case .PATCH:
-           return "PATCH"
-        case .TRACE:
-           return "TRACE"
-        case .MKCOL:
-            return "MKCOL"
-        case .MERGE:
-            return "MERGE"
-        case .PURGE:
-            return "PURGE"
-        case .NOTIFY:
-            return "NOTIFY"
-        case .SEARCH:
-            return "SEARCH"
-        case .UNLOCK:
-            return "UNLOCK"
-        case .REBIND:
-            return "REBIND"
-        case .UNBIND:
-            return "UNBIND"
-        case .REPORT:
-            return "REPORT"
-        case .DELETE:
-            return "DELETE"
-        case .UNLINK:
-            return "UNLINK"
-        case .CONNECT:
-            return "CONNECT"
-        case .MSEARCH:
-            return "MSEARCH"
-        case .OPTIONS:
-            return "OPTIONS"
-        case .PROPFIND:
-            return "PROPFIND"
-        case .CHECKOUT:
-            return "CHECKOUT"
-        case .PROPPATCH:
-            return "PROPPATCH"
-        case .SUBSCRIBE:
-            return "SUBSCRIBE"
-        case .MKCALENDAR:
-            return "MKCALENDAR"
-        case .MKACTIVITY:
-            return "MKACTIVITY"
-        case .UNSUBSCRIBE:
-            return "UNSUBSCRIBE"
-        case .SOURCE:
-            return "SOURCE"
-        case .RAW(let value):
-            return value
-        }
     }
 }
