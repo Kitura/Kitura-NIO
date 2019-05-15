@@ -572,12 +572,12 @@ class HTTPDummyServerDelegate: ServerDelegate {
 
 // TODO: Re-evaluate the need for this class when swift-nio 2.0 is released.
 final class KituraWebSocketUpgrader: HTTPServerProtocolUpgrader {
-    private let _wrappedUpgrader: WebSocketUpgrader
+    private let _wrappedUpgrader: NIOWebSocketServerUpgrader
 
     public init(maxFrameSize: Int, automaticErrorHandling: Bool = true,
                 shouldUpgrade: @escaping (Channel, HTTPRequestHead) -> EventLoopFuture<HTTPHeaders?>,
                 upgradePipelineHandler: @escaping (Channel, HTTPRequestHead) -> EventLoopFuture<Void>) {
-        _wrappedUpgrader = WebSocketUpgrader(maxFrameSize: maxFrameSize, automaticErrorHandling: automaticErrorHandling, shouldUpgrade: shouldUpgrade,
+        _wrappedUpgrader = NIOWebSocketServerUpgrader(maxFrameSize: maxFrameSize, automaticErrorHandling: automaticErrorHandling, shouldUpgrade: shouldUpgrade,
                                              upgradePipelineHandler: upgradePipelineHandler)
     }
 
