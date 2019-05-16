@@ -29,6 +29,9 @@ public class FastCGIServer: Server {
     /// Port number for listening for new connections
     public private(set) var port: Int?
 
+    /// Has the same meaning as in `getaddrinfo()`.
+    public private(set) var node: String?
+
     /// A server state.
     public private(set) var state: ServerState = .unknown
 
@@ -53,8 +56,28 @@ public class FastCGIServer: Server {
     /// Listens for connections on a socket
     ///
     /// - Parameter on: port number for new connections
+    /// - Parameter node: has the same meaning as in `getaddrinfo()`
+    public func listen(on port: Int, node: String?) throws {
+        fatalError("FastCGI is not implemented yet.")
+    }
+
+    /// Listens for connections on a socket
+    ///
+    /// - Parameter on: port number for new connections
+    @available(*, deprecated, message: "use 'listen(on:node) throws' instead")
     public func listen(on port: Int) throws {
         fatalError("FastCGI is not implemented yet.")
+    }
+
+    /// Static method to create a new `FastCGIServer` and have it listen for conenctions
+    ///
+    /// - Parameter on: port number for accepting new connections
+    /// - Parameter node: has the same meaning as in `getaddrinfo()`
+    /// - Parameter delegate: the delegate handler for FastCGI/HTTP connections
+    ///
+    /// - Returns: a new `FastCGIServer` instance
+    public static func listen(on port: Int, node: String?, delegate: ServerDelegate?) throws -> FastCGIServer {
+        fatalError("FastCGI not implemented yet.")
     }
 
     /// Static method to create a new `FastCGIServer` and have it listen for conenctions
@@ -63,6 +86,7 @@ public class FastCGIServer: Server {
     /// - Parameter delegate: the delegate handler for FastCGI/HTTP connections
     ///
     /// - Returns: a new `FastCGIServer` instance
+    @available(*, deprecated, message: "use 'listen(on:node:delegate) throws' instead")
     public static func listen(on port: Int, delegate: ServerDelegate?) throws -> FastCGIServer {
         fatalError("FastCGI not implemented yet.")
     }

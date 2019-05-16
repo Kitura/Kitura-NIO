@@ -55,7 +55,7 @@ class LifecycleListenerTests: KituraNetTest {
         }
 
         do {
-            try server.listen(on: 0)
+            try server.listen(on: 0, node: "localhost")
 
             self.waitForExpectations(timeout: 5) { error in
                 XCTAssertNil(error)
@@ -127,7 +127,7 @@ class LifecycleListenerTests: KituraNetTest {
         }
 
         do {
-            try server.listen(on: 0)
+            try server.listen(on: 0, node: "localhost")
 
             self.waitForExpectations(timeout: 5) { error in
                 XCTAssertNil(error)
@@ -155,7 +155,7 @@ class LifecycleListenerTests: KituraNetTest {
         })
 
         do {
-            try server.listen(on: -1)
+            try server.listen(on: -1, node: nil)
         } catch {
             // Do NOT fail the test if an error is thrown.
             // In this test case an error should be thrown.
