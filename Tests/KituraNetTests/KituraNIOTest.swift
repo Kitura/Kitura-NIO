@@ -96,7 +96,7 @@ class KituraNetTest: XCTestCase {
             try server.listen(unixDomainSocketPath: unixDomainSocketPath)
         } else {
             server.allowPortReuse = allowPortReuse
-            try server.listen(on: port, node: "localhost")
+            try server.listen(on: port, address: "localhost")
         }
         return server
     }

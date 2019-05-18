@@ -58,8 +58,8 @@ public class HTTPServer: Server {
     /// The TCP port on which this server listens for new connections. If `nil`, this server does not listen on a TCP socket.
     public private(set) var port: Int?
 
-    /// Has the same meaning as in `getaddrinfo()`.
-    public private(set) var node: String?
+    /// Has the same meaning as node in `getaddrinfo()`.
+    public private(set) var address: String?
 
     /// The Unix domain socket path on which this server listens for new connections. If `nil`, this server does not listen on a Unix socket.
     public private(set) var unixDomainSocketPath: String?
@@ -235,7 +235,7 @@ public class HTTPServer: Server {
 
     // Sockets could either be TCP/IP sockets or Unix domain sockets
     private enum SocketType {
-        // An TCP/IP socket has an associated port number and optional node value
+        // An TCP/IP socket has an associated port number and optional address value
         case tcp(Int, String?)
         // A unix domain socket has an associated filename
         case unix(String)
@@ -261,21 +261,16 @@ public class HTTPServer: Server {
 
      ### Usage Example: ###
      ````swift
-     try server.listen(on: 8080, node: "localhost")
+     try server.listen(on: 8080, address: "localhost")
      ````
 
      - Parameter on: Port number for new connections, e.g. 8080
-     - Parameter node: has the same meaning as in `getaddrinfo()`
+     - Parameter address: has the same meaning as node in `getaddrinfo()`
      */
-    public func listen(on port: Int, node: String?) throws {
+    public func listen(on port: Int, address: String?) throws {
         self.port = port
-        self.node = node
-        try listen(.tcp(port, node))
-    }
-
-    @available(*, deprecated, message: "use 'listen(on:node) throws' instead")
-    public func listen(on port: Int) throws {
-        try listen(on: port, node: nil)
+        self.address = address
+        try listen(.tcp(port, address))
     }
 
     private func listen(_ socket: SocketType) throws {
@@ -320,8 +315,8 @@ public class HTTPServer: Server {
         let listenerDescription: String
         do {
             switch socket {
-            case SocketType.tcp(let port, let node):
-                serverChannel = try bootstrap.bind(host: node ?? "0.0.0.0", port: port).wait()
+            case SocketType.tcp(let port, let address):
+                serverChannel = try bootstrap.bind(host: address ?? "0.0.0.0", port: port).wait()
                 self.port = serverChannel?.localAddress?.port.map { Int($0) }
                 listenerDescription = "port \(self.port ?? port)"
             case SocketType.unix(let unixDomainSocketPath):
@@ -374,21 +369,16 @@ public class HTTPServer: Server {
      ````
 
      - Parameter on: Port number for accepting new connections.
-     - Parameter node: has the same meaning as in `getaddrinfo()`
+     - Parameter address: has the same meaning as node in `getaddrinfo()`
      - Parameter delegate: The delegate handler for HTTP connections.
 
      - Returns: A new instance of a `HTTPServer`.
     */
-    public static func listen(on port: Int, node: String?, delegate: ServerDelegate?) throws -> ServerType {
+    public static func listen(on port: Int, address: String?, delegate: ServerDelegate?) throws -> ServerType {
         let server = HTTP.createServer()
         server.delegate = delegate
-        try server.listen(on: port, node: node)
+        try server.listen(on: port, address: address)
         return server
-    }
-
-    @available(*, deprecated, message: "use 'listen(on:node:delagate) throws' instead")
-    public static func listen(on port: Int, delegate: ServerDelegate?) throws -> ServerType {
-        return try listen(on: port, node: nil, delegate: delegate)
     }
 
     /**

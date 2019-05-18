@@ -65,7 +65,7 @@ class MonitoringTests: KituraNetTest {
         }
 
         do {
-            try server.listen(on: 0, node: nil)
+            try server.listen(on: 0, address: nil)
             self.waitForExpectations(timeout: 10) { error in
                 server.stop()
                 XCTAssertNil(error)
