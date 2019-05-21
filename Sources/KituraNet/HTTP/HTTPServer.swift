@@ -58,7 +58,8 @@ public class HTTPServer: Server {
     /// The TCP port on which this server listens for new connections. If `nil`, this server does not listen on a TCP socket.
     public private(set) var port: Int?
 
-    /// Has the same meaning as node in `getaddrinfo()`.
+    /// The address of a network interface to listen on, for example "localhost". The default is nil,
+    /// which listens for connections on all interfaces.
     public private(set) var address: String?
 
     /// The Unix domain socket path on which this server listens for new connections. If `nil`, this server does not listen on a Unix socket.
@@ -265,7 +266,8 @@ public class HTTPServer: Server {
      ````
 
      - Parameter on: Port number for new connections, e.g. 8080
-     - Parameter address: has the same meaning as node in `getaddrinfo()`
+     - Parameter address: The address of the network interface to listen on. Defaults to nil, which means this server
+                          will listen on all interfaces.
      */
     public func listen(on port: Int, address: String?) throws {
         self.port = port
@@ -369,7 +371,8 @@ public class HTTPServer: Server {
      ````
 
      - Parameter on: Port number for accepting new connections.
-     - Parameter address: has the same meaning as node in `getaddrinfo()`
+     - Parameter address: The address of the network interface to listen on. Defaults to nil, which means this server
+                 will listen on all interfaces.
      - Parameter delegate: The delegate handler for HTTP connections.
 
      - Returns: A new instance of a `HTTPServer`.
