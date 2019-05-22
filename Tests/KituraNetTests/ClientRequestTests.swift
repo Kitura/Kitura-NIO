@@ -104,7 +104,7 @@ class ClientRequestTests: KituraNetTest {
                                                   .path("/view/matching?key=\"viewTest\"")
         ]
         let testRequest1 = ClientRequest(options: options1, callback: testCallback)
-        XCTAssertEqual(testRequest1.url, "https://66o.tech/view/matching?key=%22viewTest%22")
+        XCTAssertEqual(testRequest1.url, "https://66o.tech/view/matching?key=\"viewTest\"")
 
         let options2: [ClientRequest.Options] = [ .schema("https"),
                                                   .hostname("66o.tech"),
