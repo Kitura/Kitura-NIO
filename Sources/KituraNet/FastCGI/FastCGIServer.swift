@@ -59,7 +59,7 @@ public class FastCGIServer: Server {
     /// - Parameter on: port number for new connections
     /// - Parameter address: The address of the network interface to listen on. Defaults to nil, which means this
     ///             server will listen on all interfaces.
-    public func listen(on port: Int, address: String?) throws {
+    public func listen(on port: Int, address: String? = nil) throws {
         fatalError("FastCGI is not implemented yet.")
     }
 
@@ -71,7 +71,7 @@ public class FastCGIServer: Server {
     /// - Parameter delegate: the delegate handler for FastCGI/HTTP connections
     ///
     /// - Returns: a new `FastCGIServer` instance
-    public static func listen(on port: Int, address: String?, delegate: ServerDelegate?) throws -> FastCGIServer {
+    public static func listen(on port: Int, address: String? = nil, delegate: ServerDelegate?) throws -> FastCGIServer {
         fatalError("FastCGI not implemented yet.")
     }
 

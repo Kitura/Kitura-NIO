@@ -269,7 +269,7 @@ public class HTTPServer: Server {
      - Parameter address: The address of the network interface to listen on. Defaults to nil, which means this server
                           will listen on all interfaces.
      */
-    public func listen(on port: Int, address: String?) throws {
+    public func listen(on port: Int, address: String? = nil) throws {
         self.port = port
         self.address = address
         try listen(.tcp(port, address))
@@ -377,7 +377,7 @@ public class HTTPServer: Server {
 
      - Returns: A new instance of a `HTTPServer`.
     */
-    public static func listen(on port: Int, address: String?, delegate: ServerDelegate?) throws -> ServerType {
+    public static func listen(on port: Int, address: String? = nil, delegate: ServerDelegate?) throws -> ServerType {
         let server = HTTP.createServer()
         server.delegate = delegate
         try server.listen(on: port, address: address)
