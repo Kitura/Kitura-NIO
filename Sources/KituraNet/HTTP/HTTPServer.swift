@@ -58,6 +58,10 @@ public class HTTPServer: Server {
     /// The TCP port on which this server listens for new connections. If `nil`, this server does not listen on a TCP socket.
     public private(set) var port: Int?
 
+    /// The address of a network interface to listen on, for example "localhost". The default is nil,
+    /// which listens for connections on all interfaces.
+    public private(set) var address: String?
+
     /// The Unix domain socket path on which this server listens for new connections. If `nil`, this server does not listen on a Unix socket.
     public private(set) var unixDomainSocketPath: String?
 
@@ -232,8 +236,8 @@ public class HTTPServer: Server {
 
     // Sockets could either be TCP/IP sockets or Unix domain sockets
     private enum SocketType {
-        // An TCP/IP socket has an associated port number
-        case tcp(Int)
+        // An TCP/IP socket has an associated port number and optional address value
+        case tcp(Int, String?)
         // A unix domain socket has an associated filename
         case unix(String)
     }
@@ -258,14 +262,17 @@ public class HTTPServer: Server {
 
      ### Usage Example: ###
      ````swift
-     try server.listen(on: 8080)
+     try server.listen(on: 8080, address: "localhost")
      ````
 
      - Parameter on: Port number for new connections, e.g. 8080
-    */
-    public func listen(on port: Int) throws {
+     - Parameter address: The address of the network interface to listen on. Defaults to nil, which means this server
+                          will listen on all interfaces.
+     */
+    public func listen(on port: Int, address: String? = nil) throws {
         self.port = port
-        try listen(.tcp(port))
+        self.address = address
+        try listen(.tcp(port, address))
     }
 
     private func listen(_ socket: SocketType) throws {
@@ -310,8 +317,8 @@ public class HTTPServer: Server {
         let listenerDescription: String
         do {
             switch socket {
-            case SocketType.tcp(let port):
-                serverChannel = try bootstrap.bind(host: "0.0.0.0", port: port).wait()
+            case SocketType.tcp(let port, let address):
+                serverChannel = try bootstrap.bind(host: address ?? "0.0.0.0", port: port).wait()
                 self.port = serverChannel?.localAddress?.port.map { Int($0) }
                 listenerDescription = "port \(self.port ?? port)"
             case SocketType.unix(let unixDomainSocketPath):
@@ -360,18 +367,20 @@ public class HTTPServer: Server {
 
      ### Usage Example: ###
      ````swift
-     let server = HTTPServer.listen(on: 8080, delegate: self)
+     let server = HTTPServer.listen(on: 8080, node: "localhost", delegate: self)
      ````
 
      - Parameter on: Port number for accepting new connections.
+     - Parameter address: The address of the network interface to listen on. Defaults to nil, which means this server
+                 will listen on all interfaces.
      - Parameter delegate: The delegate handler for HTTP connections.
 
      - Returns: A new instance of a `HTTPServer`.
     */
-    public static func listen(on port: Int, delegate: ServerDelegate?) throws -> ServerType {
+    public static func listen(on port: Int, address: String? = nil, delegate: ServerDelegate?) throws -> ServerType {
         let server = HTTP.createServer()
         server.delegate = delegate
-        try server.listen(on: port)
+        try server.listen(on: port, address: address)
         return server
     }
 

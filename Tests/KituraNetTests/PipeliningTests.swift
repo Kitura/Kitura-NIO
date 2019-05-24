@@ -47,7 +47,7 @@ class PipeliningTests: KituraNetTest {
         let server = HTTPServer()
         server.delegate = Delegate()
         do {
-            try server.listen(on: 0)
+            try server.listen(on: 0, address: "localhost")
         } catch let error {
             Log.error("Server failed to listen. Error: \(error)")
         }
@@ -85,7 +85,7 @@ class PipeliningTests: KituraNetTest {
         server.delegate = Delegate()
         server.delegate = Delegate()
         do {
-            try server.listen(on: 0)
+            try server.listen(on: 0, address: "localhost")
         } catch let error {
             Log.error("Server failed to listen. Error: \(error)")
         }
