@@ -80,6 +80,8 @@ public class ClientRequest {
      */
     public private(set) var url: String = ""
 
+    private var percentEncodedURL: String = ""
+
     /**
      The HTTP method (i.e. GET, POST, PUT, DELETE) for the request.
 
@@ -226,14 +228,30 @@ public class ClientRequest {
         case useHTTP2
     }
 
+    private func percentEncode(_ url: String) -> String {
+        var _url = url
+        let isPercentEncoded = _url.contains("%") && URL(string: _url) != nil
+        if !isPercentEncoded {
+            _url = _url.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? _url
+        }
+        return _url
+    }
+
     /// Initializes a `ClientRequest` instance
     ///
     /// - Parameter url: url for the request
     /// - Parameter callback: The closure of type `Callback` to be used for the callback.
     init(url: String, callback: @escaping Callback) {
+        self.callback = callback
         self.url = url
-        let url = URL(string: url)!
+        self.percentEncodedURL = percentEncode(url)
 
+        if let url = URL(string: self.percentEncodedURL) {
+            initialize(url)
+        }
+    }
+
+    private func initialize(_ url: URL) {
         if let host = url.host {
             self.hostName = host
         }
@@ -257,7 +275,6 @@ public class ClientRequest {
         if let password = url.password {
             self.password = password
         }
-        self.callback = callback
     }
 
     /**
@@ -329,7 +346,7 @@ public class ClientRequest {
                 if thePath.first != "/" {
                     thePath = "/" + thePath
                 }
-                path = thePath.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed) ?? thePath
+                path = thePath
                 self.path = path
             case .username(let userName):
                 self.userName = userName
@@ -348,8 +365,8 @@ public class ClientRequest {
         }
 
         //the url string
-        url = "\(theSchema)\(authenticationClause)\(hostName)\(port)\(path)"
-
+        self.url = "\(theSchema)\(authenticationClause)\(hostName)\(port)\(path)"
+        self.percentEncodedURL = percentEncode(self.url)
     }
 
     /**
@@ -520,7 +537,7 @@ public class ClientRequest {
         var isHTTPS = false
 
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        if (URL(string: url)?.scheme)! == "https" {
+        if (URL(string: percentEncodedURL)?.scheme)! == "https" {
            isHTTPS = true
            self.sslConfig = TLSConfiguration.forClient(certificateVerification: .none)
         }
@@ -531,7 +548,7 @@ public class ClientRequest {
             initializeClientBootstrap(eventLoopGroup: group)
         }
 
-        let hostName = URL(string: url)?.host ?? "" //TODO: what could be the failure path here
+        let hostName = URL(string: percentEncodedURL)?.host ?? "" //TODO: what could be the failure path here
         if self.headers["Host"] == nil {
            self.headers["Host"] = hostName
         }

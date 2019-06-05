@@ -65,7 +65,7 @@ public class HTTPServerRequest: ServerRequest {
     */
     @available(*, deprecated, message: "This contains just the path and query parameters starting with '/'. use 'urlURL' instead")
     public var urlString: String {
-        return _urlString
+        return rawURLString
     }
 
     /**
@@ -80,7 +80,7 @@ public class HTTPServerRequest: ServerRequest {
     */
     public var url: Data {
         //The url needs to retain the percent encodings. URL.path doesn't, so we do this.
-        return Data(_urlString.utf8)
+        return Data(rawURLString.utf8)
     }
 
     /**
@@ -99,8 +99,6 @@ public class HTTPServerRequest: ServerRequest {
 
     private var _url: URL?
 
-    private var _urlComponents: URLComponents?
-
     /**
      Create and validate the full URL.
 
@@ -114,8 +112,8 @@ public class HTTPServerRequest: ServerRequest {
             return _url
         }
 
-        _urlComponents = URLComponents()
-        _urlComponents?.scheme = self.enableSSL ? "https" : "http"
+        var url = ""
+        url.append(self.enableSSL ? "https://" : "http://")
 
         var localAddress = ""
         var localAddressPort = 0
@@ -131,31 +129,26 @@ public class HTTPServerRequest: ServerRequest {
 
         if let hostname = headers["Host"]?.first {
             // Handle Host header values of the kind "localhost:8080"
-            _urlComponents?.host = String(hostname.split(separator: ":")[0])
+            url.append(hostname)
+            if !hostname.contains(":") {
+                url.append(":")
+                url.append(String(describing: localAddressPort))
+            }
         } else {
             Log.error("Host header not received")
             let hostname = localAddress
-            _urlComponents?.host = hostname == "127.0.0.1" ? "localhost" : hostname
+            url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
+            url.append(":")
+            url.append(String(describing: localAddressPort))
         }
+        url.append(rawURLString)
 
-        _urlComponents?.port = Int(localAddressPort)
-
-        let uriComponents = _urlString.split(separator: "?")
-        if uriComponents.count > 0 {
-            _urlComponents?.path = String(uriComponents[0])
-        }
-
-        if uriComponents.count > 1 {
-            _urlComponents?.percentEncodedQuery = String(uriComponents[1])
-        }
-
-        if let urlURL = _urlComponents?.url {
+        if let urlURL = URL(string: url) {
             self._url = urlURL
         } else {
             Log.error("URL init failed from: \(url)")
             self._url = URL(string: "http://not_available/")!
         }
-
         return self._url!
     }
 
@@ -219,15 +212,6 @@ public class HTTPServerRequest: ServerRequest {
     private var rawURLString: String
 
     private var urlStringPercentEncodingRemoved: String?
-
-    private var _urlString: String {
-        guard let urlStringPercentEncodingRemoved = self.urlStringPercentEncodingRemoved else {
-            let _urlStringPercentEncodingRemoved = rawURLString.removingPercentEncoding ?? rawURLString
-            self.urlStringPercentEncodingRemoved = _urlStringPercentEncodingRemoved
-            return _urlStringPercentEncodingRemoved
-        }
-        return urlStringPercentEncodingRemoved
-    }
 
     private static func host(socketAddress: SocketAddress?) -> String {
         guard let socketAddress = socketAddress else {
