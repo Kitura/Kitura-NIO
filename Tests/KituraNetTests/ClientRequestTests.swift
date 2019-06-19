@@ -97,7 +97,7 @@ class ClientRequestTests: KituraNetTest {
         testRequest.set(.headers(["X-Custom": "Swift"]))
         testRequest.set(.maxRedirects(3))
         testRequest.set(.disableSSLVerification)
-        XCTAssertEqual(testRequest.url, "https://66o.tech:8080")
+        XCTAssertEqual(testRequest.url, "https://66o.tech:8080/")
     }
 
     func testClientRequestParse() {
