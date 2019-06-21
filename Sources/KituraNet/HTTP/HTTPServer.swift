@@ -312,7 +312,6 @@ public class HTTPServer: Server {
                     return channel.pipeline.addHandler(httpHandler)
                 }
             }
-            .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
 
         let listenerDescription: String
         do {
