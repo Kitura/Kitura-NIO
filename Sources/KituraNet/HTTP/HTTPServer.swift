@@ -301,7 +301,7 @@ public class HTTPServer: Server {
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
-                let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { ctx in
+                let config: NIOHTTPServerUpgradeConfiguration = (upgraders: upgraders, completionHandler: { ctx in
                     self.ctx = ctx
                     _ = channel.pipeline.removeHandler(httpHandler)
                 })
@@ -312,7 +312,6 @@ public class HTTPServer: Server {
                     return channel.pipeline.addHandler(httpHandler)
                 }
             }
-            .childChannelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
 
         let listenerDescription: String
         do {

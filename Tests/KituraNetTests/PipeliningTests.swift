@@ -61,7 +61,6 @@ class PipeliningTests: KituraNetTest {
                     channel.pipeline.addHandler(PipelinedRequestsHandler(with: expectation))
                 }
             }
-            .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
             .connect(host: "localhost", port: server.port!).wait()
             let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .GET, uri: "/")
             for _ in 0...4 {
@@ -99,7 +98,6 @@ class PipeliningTests: KituraNetTest {
                         channel.pipeline.addHandler(PipelinedRequestsHandler(with: expectation))
                     }
                 }
-                .channelOption(ChannelOptions.socket(IPPROTO_TCP, TCP_NODELAY), value: 1)
                 .connect(host: "localhost", port: server.port!).wait()
             let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .POST, uri: "/")
             for _ in 0...5 {
