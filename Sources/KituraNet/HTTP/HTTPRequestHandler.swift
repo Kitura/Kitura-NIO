@@ -22,6 +22,8 @@ import Foundation
 import Dispatch
 
 internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandler {
+    var requestSize: Int = 0
+    //var byteCount: Int = 0
 
     /// The HTTPServer instance on which this handler is installed
     var server: HTTPServer
@@ -82,6 +84,9 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
+            requestSize += buffer.readableBytes
+            print("request size is : \(requestSize)")
+            
             guard let serverRequest = serverRequest else {
                 Log.error("No ServerRequest available")
                 return
@@ -91,7 +96,9 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             } else {
                 serverRequest.buffer!.byteBuffer.writeBuffer(&buffer)
             }
+
         case .end:
+            requestSize = 0
             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
             //Make sure we use the latest delegate registered with the server
             DispatchQueue.global().async {
