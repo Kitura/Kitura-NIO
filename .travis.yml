@@ -34,15 +34,16 @@ matrix:
     - os: osx
       osx_image: xcode10.2
       sudo: required
-      env: JAZZY_ELIGIBLE=true SWIFT_TEST_ARGS="--parallel"
-    - os: osx
-      osx_image: xcode10.2
-      sudo: required
-      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT SWIFT_TEST_ARGS="--parallel"
-    - os: osx
-      osx_image: xcode10.2
-      sudo: required
-      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT CUSTOM_TEST_SCRIPT=.kitura-test.sh
+      env: JAZZY_ELIGIBLE=true SWIFT_TEST_ARGS="--parallel" CUSTOM_TEST_SCRIPT=.kitura-test.sh
+# Pending Travis Xcode 11 image
+#    - os: osx
+#      osx_image: xcode11
+#      sudo: required
+#      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT SWIFT_TEST_ARGS="--parallel"
+#    - os: osx
+#      osx_image: xcode11
+#      sudo: required
+#      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT CUSTOM_TEST_SCRIPT=.kitura-test.sh
 
 
 before_install:
