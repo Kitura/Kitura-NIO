@@ -557,7 +557,7 @@ public class ClientRequest {
 
         // To keep Kitura-NIO's behaviour similar to Kitura-net, add the Accept header with default value '*/*'.
         // Note:libcurl adds default value for Accept header for Kitura-net
-        if self.headers["Accept"] == nil {
+        if self.headers["Accept"] == nil && self.headers["accept"] == nil {
            self.headers["Accept"] = "*/*"
         }
 
