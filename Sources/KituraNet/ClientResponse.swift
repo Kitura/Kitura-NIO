@@ -53,16 +53,13 @@ public class ClientResponse {
         }
     }
     /// The HTTP Status code, as an Int, sent in the response by the remote server.
-    public internal(set) var status = -1 {
-        didSet {
-            statusCode = HTTPStatusCode(rawValue: status) ?? .unknown
-        }
-    }
+    public internal(set) var status = -1
 
     /// The HTTP Status code, as an `HTTPStatusCode`, sent in the response by the remote server.
     public internal(set) var statusCode: HTTPStatusCode = HTTPStatusCode.unknown {
         didSet {
             httpStatusCode = statusCode
+            status = statusCode.rawValue
         }
     }
 
