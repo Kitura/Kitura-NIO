@@ -194,18 +194,21 @@ public class HTTPServer: Server {
 
     /// Creates upgrade request and adds WebSocket handler to pipeline
     private func upgradeHandler(webSocketHandlerFactory: ProtocolHandlerFactory, request: HTTPRequestHead) -> EventLoopFuture<Void> {
-        guard let ctx = self.ctx else { fatalError("Cannot create ServerRequest") }
-        let serverRequest = HTTPServerRequest(ctx: ctx, requestHead: request, enableSSL: false)
-        let websocketConnectionHandler = webSocketHandlerFactory.handler(for: serverRequest)
-        let future = ctx.channel.pipeline.addHandler(websocketConnectionHandler)
-        if let _extensions = request.headers["Sec-WebSocket-Extensions"].first {
-            for handler in webSocketHandlerFactory.extensionHandlers(header: _extensions) {
-                _ = future.flatMap {
-                    ctx.channel.pipeline.addHandler(handler, position: .before(websocketConnectionHandler))
+        guard let ctx = self.ctx else { fatalError("The channel was probably closed during a protocol upgrade.") }
+        return ctx.eventLoop.submit {
+            let request = HTTPServerRequest(ctx: ctx, requestHead: request, enableSSL: false)
+            return webSocketHandlerFactory.handler(for: request)
+            }.flatMap { (handler: ChannelHandler) -> EventLoopFuture<Void> in
+                return ctx.channel.pipeline.addHandler(handler).flatMap {
+                    if let _extensions = request.headers["Sec-WebSocket-Extensions"].first {
+                        let handlers = webSocketHandlerFactory.extensionHandlers(header: _extensions)
+                        return ctx.channel.pipeline.addHandlers(handlers, position: .before(handler))
+                    } else {
+                        // No extensions. We must return success.
+                        return ctx.channel.eventLoop.makeSucceededFuture(())
+                    }
                 }
             }
-        }
-        return future
     }
 
     private typealias ShouldUpgradeFunction = (Channel, HTTPRequestHead) -> EventLoopFuture<HTTPHeaders?>
