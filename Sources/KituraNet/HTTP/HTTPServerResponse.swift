@@ -294,9 +294,4 @@ extension EventLoop {
             }
         }
     }
-
-    func runAndWait(_ task: @escaping () -> Void) throws {
-        guard let eventLoopFuture = run(task) else { return }
-        try eventLoopFuture.wait()
-    }
 }

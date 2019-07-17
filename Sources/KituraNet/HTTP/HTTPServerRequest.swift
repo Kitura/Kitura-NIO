@@ -115,31 +115,19 @@ public class HTTPServerRequest: ServerRequest {
         var url = ""
         url.append(self.enableSSL ? "https://" : "http://")
 
-        var localAddress = ""
-        var localAddressPort = 0
-
-        do {
-            try ctx.eventLoop.runAndWait {
-                localAddress = HTTPServerRequest.host(socketAddress: self.ctx.localAddress)
-                localAddressPort = self.ctx.localAddress?.port ?? 0
-            }
-        } catch {
-            Log.error("Unable to get the local address")
-        }
-
         if let hostname = headers["Host"]?.first {
             // Handle Host header values of the kind "localhost:8080"
             url.append(hostname)
             if !hostname.contains(":") {
                 url.append(":")
-                url.append(String(describing: localAddressPort))
+                url.append(String(describing: self.localAddressPort))
             }
         } else {
             Log.error("Host header not received")
-            let hostname = localAddress
+            let hostname = self.localAddressHost
             url.append(hostname == "127.0.0.1" ? "localhost" : hostname)
             url.append(":")
-            url.append(String(describing: localAddressPort))
+            url.append(String(describing: self.localAddressPort))
         }
         url.append(rawURLString)
 
@@ -152,8 +140,6 @@ public class HTTPServerRequest: ServerRequest {
         return self._url!
     }
 
-    private var _remoteAddress: String?
-
     /**
      Server IP address pulled from socket.
 
@@ -162,18 +148,7 @@ public class HTTPServerRequest: ServerRequest {
      request.remoteAddress
      ````
     */
-    public var remoteAddress: String {
-        if _remoteAddress == nil {
-            do {
-                try ctx.eventLoop.runAndWait {
-                    self._remoteAddress = HTTPServerRequest.host(socketAddress: self.ctx.remoteAddress)
-                }
-            } catch {
-                Log.error("Unable to get the remote address")
-            }
-        }
-        return _remoteAddress!
-    }
+    public var remoteAddress: String
 
     /**
      Major version of HTTP of the request
@@ -213,6 +188,12 @@ public class HTTPServerRequest: ServerRequest {
 
     private var urlStringPercentEncodingRemoved: String?
 
+    // The hostname of the server
+    private var localAddressHost: String
+
+    // The port number on which the server is listening
+    private var localAddressPort: Int
+
     private static func host(socketAddress: SocketAddress?) -> String {
         guard let socketAddress = socketAddress else {
             return ""
@@ -228,6 +209,9 @@ public class HTTPServerRequest: ServerRequest {
     }
 
     init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead, enableSSL: Bool) {
+        // An HTTPServerRequest may be created only on the EventLoop assigned to handle
+        // the connection on which the HTTP request arrived.
+        assert(ctx.eventLoop.inEventLoop)
         self.ctx = ctx
         self.headers = HeadersContainer(with: requestHead.headers)
         self.method = requestHead.method.rawValue
@@ -235,6 +219,9 @@ public class HTTPServerRequest: ServerRequest {
         self.httpVersionMinor = UInt16(requestHead.version.minor)
         self.rawURLString = requestHead.uri
         self.enableSSL = enableSSL
+        self.localAddressHost = HTTPServerRequest.host(socketAddress: ctx.localAddress)
+        self.localAddressPort = ctx.localAddress?.port ?? 0
+        self.remoteAddress = HTTPServerRequest.host(socketAddress: ctx.remoteAddress)
     }
 
     var buffer: BufferList?
