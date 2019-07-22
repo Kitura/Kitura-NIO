@@ -127,22 +127,36 @@ public class HTTPServer: Server {
 
     var quiescingHelper: ServerQuiescingHelper?
 
+    private var ctx: ChannelHandlerContext?
+    
+    /// server configuration
+    public var serverConfig: HTTPServerConfiguration
+    
+    //counter for no of connections
+    public var connectionCount = 0
+
+    // The data to be written as a part of the response.
+    private var buffer: ByteBuffer
+
     /**
      Creates an HTTP server object.
 
      ### Usage Example: ###
      ````swift
-     let server = HTTPServer()
+     let config =HTTPServerConfiguration(requestSize: 1000, coonectionLimit: 100)
+     let server = HTTPServer(serverconfig: config)
      server.listen(on: 8080)
      ````
     */
-    public init() {
+    public init(serverConfig: HTTPServerConfiguration = .default) {
 #if os(Linux)
         let numberOfCores = Int(linux_sched_getaffinity())
         self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
 #else
         self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 #endif
+        self.serverConfig = serverConfig
+        self.buffer = ((serverChannel?.allocator.buffer(capacity: 1024))!)
     }
 
     /**
@@ -309,7 +323,8 @@ public class HTTPServer: Server {
             }
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
-                let config: NIOHTTPServerUpgradeConfiguration = (upgraders: upgraders, completionHandler: { _ in
+                let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { ctx in
+                    self.ctx = ctx
                     _ = channel.pipeline.removeHandler(httpHandler)
                 })
                 return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).flatMap {

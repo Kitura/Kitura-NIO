@@ -68,7 +68,7 @@ class LargePayloadTests: KituraNetTest {
     func testLargeGets() {
         performServerTest(delegate, socketType: .tcp, useSSL: false, asyncTasks: { expectation in
             // This test is NOT using self.performRequest, in order to test an extra signature of HTTP.request
-            let request = HTTP.request("http://localhost:\(self.port)/largepost") {response in
+            let request = HTTP.request("http://localhost:\(self.port)/largepost") { response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .Ok was \(String(describing: response?.statusCode))")
                 expectation.fulfill()
             }
@@ -80,6 +80,7 @@ class LargePayloadTests: KituraNetTest {
 
         func handle(request: ServerRequest, response: ServerResponse) {
             if  request.method.uppercased() == "GET" {
+                print("hello world")
                 handleGet(request: request, response: response)
             } else {
                 handlePost(request: request, response: response)
@@ -87,6 +88,7 @@ class LargePayloadTests: KituraNetTest {
         }
 
         func handleGet(request: ServerRequest, response: ServerResponse) {
+            print("handle Get")
             var payload = "[" + contentTypesString
             for _ in 0 ... 320 {
                 payload += "," + contentTypesString

@@ -37,6 +37,7 @@ class ClientE2ETests: KituraNetTest {
             ("testQueryParameters", testQueryParameters),
             ("testRedirect", testRedirect),
             ("testPercentEncodedQuery", testPercentEncodedQuery),
+            ("testRequestSize",testRequestSize),
         ]
     }
 
@@ -51,6 +52,33 @@ class ClientE2ETests: KituraNetTest {
     static let urlPath = "/urltest"
 
     let delegate = TestServerDelegate()
+
+    func testRequestSize() {
+        performServerTest(serverConfig: HTTPServerConfiguration(requestSizeLimit: 10000, connectionLimit: 100),delegate, useSSL: false, asyncTasks: { expectation in
+            let payload = "[" + contentTypesString + "," + contentTypesString + contentTypesString + "," + contentTypesString + "]"
+            self.performRequest("post", path: "/largepost", callback: {response in
+                XCTAssertEqual(response?.statusCode, HTTPStatusCode.requestTooLong)
+                do {
+                    let expectedResult = "Request Entity Too Large"
+                    var data = Data()
+                    let count = try response?.readAllData(into: &data)
+                    XCTAssertEqual(count, expectedResult.count, "Result should have been \(expectedResult.count) bytes, was \(String(describing: count)) bytes")
+                    let postValue = String(data: data, encoding: .utf8)
+                    if  let postValue = postValue {
+                        print("postvalue:", postValue)
+                        XCTAssertEqual(postValue, expectedResult)
+                    } else {
+                        XCTFail("postValue's value wasn't an UTF8 string")
+                    }
+                } catch {
+                    XCTFail("Failed reading the body of the response")
+                }
+                expectation.fulfill()
+            }) {request in
+                request.write(from: payload)
+            }
+        })
+    }
 
     func testHeadRequests() {
         performServerTest(delegate) { expectation in

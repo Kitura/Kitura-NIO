@@ -22,6 +22,10 @@ import Foundation
 import Dispatch
 
 internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandler {
+    //default request size limit
+    
+    let requestSizeLimit: Int
+    
     var requestSize: Int = 0
     //var byteCount: Int = 0
 
@@ -63,12 +67,12 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
 
     public init(for server: HTTPServer) {
         self.server = server
+        self.requestSizeLimit = server.serverConfig.requestSizeLimit
         self.keepAliveState = server.keepAliveState
         if server.sslConfig != nil {
             self.enableSSLVerification = true
         }
     }
-
     public typealias InboundIn = HTTPServerRequestPart
     public typealias OutboundOut = HTTPServerResponsePart
 
@@ -78,15 +82,29 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
         // If an upgrade to WebSocket fails, both `errorCaught` and `channelRead` are triggered.
         // We'd want to return the error via `errorCaught`.
         if errorResponseSent { return }
-
         switch request {
         case .head(let header):
+<<<<<<< HEAD
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
+=======
+             if let contentLength = header.headers["Content-Length"].first,
+                let contentLengthValue = Int(contentLength) {
+                    if contentLengthValue > requestSizeLimit {
+                        sendStatus(context: context)
+                }
+            }
+            let headerSize = getHeaderSize(of: header)
+            if headerSize > requestSizeLimit {
+                sendStatus(context: context)
+             }
+            serverRequest = HTTPServerRequest(ctx: context, requestHead: header, enableSSL: enableSSLVerification)
+>>>>>>> Ckeck maximum request size and connection limit
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
             requestSize += buffer.readableBytes
-            print("request size is : \(requestSize)")
-            
+            if requestSize > requestSizeLimit {
+                sendStatus(context: context)
+            }
             guard let serverRequest = serverRequest else {
                 Log.error("No ServerRequest available")
                 return
@@ -158,5 +176,32 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
 
     func updateKeepAliveState() {
         keepAliveState.decrement()
+    }
+
+    func channelInactive(context: ChannelHandlerContext, httpServer: HTTPServer) {
+        httpServer.connectionCount =  httpServer.connectionCount - 1
+    }
+    
+    func getHeaderSize(of header: HTTPRequestHead) -> Int {
+        var headerSize = 0
+        headerSize += header.uri.cString(using: .utf8)?.count ?? 0
+        headerSize += header.version.description.cString(using: .utf8)?.count ?? 0
+        headerSize += header.method.rawValue.cString(using: .utf8)?.count ?? 0
+        for headers in header.headers {
+            headerSize += headers.name.cString(using: .utf8)?.count ?? 0
+            headerSize += headers.value.cString(using: .utf8)?.count ?? 0
+        }
+       return headerSize
+    }
+
+    func sendStatus(context: ChannelHandlerContext) {
+        let statusDescription = HTTP.statusCodes[HTTPStatusCode.requestTooLong.rawValue] ?? ""
+        do {
+        serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
+        errorResponseSent = true
+        try serverResponse?.end(with: .requestTooLong, message: statusDescription)
+        } catch {
+            Log.error("Failed to send error response")
+        }
     }
 }
