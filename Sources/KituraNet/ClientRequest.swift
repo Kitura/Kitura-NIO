@@ -269,6 +269,14 @@ public class ClientRequest {
         }
         self.path = fullPath
 
+        if let username = url.user {
+             self.userName = username
+        }
+
+        if let password = url.password {
+            self.password = password
+        }
+
         if let username = self.userName, let password = self.password {
             self.headers["Authorization"] = createHTTPBasicAuthHeader(username: username, password: password)
         }
