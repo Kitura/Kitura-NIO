@@ -549,8 +549,16 @@ public class ClientRequest {
         }
 
         let hostName = URL(string: percentEncodedURL)?.host ?? "" //TODO: what could be the failure path here
+        let portNumber = URL(string: percentEncodedURL)?.port ?? 8080
         if self.headers["Host"] == nil {
-           self.headers["Host"] = hostName
+           let isNotDefaultPort = (portNumber != 443 && portNumber != 80) //Check whether port is not 443/80
+           self.headers["Host"] = hostName + (isNotDefaultPort ? (":" + String(portNumber)) : "")
+        }
+
+        // To keep Kitura-NIO's behaviour similar to Kitura-net, add the Accept header with default value '*/*'.
+        // Note:libcurl adds default value for Accept header for Kitura-net
+        if self.headers["Accept"] == nil && self.headers["accept"] == nil {
+           self.headers["Accept"] = "*/*"
         }
 
         self.headers["User-Agent"] = "Kitura"
