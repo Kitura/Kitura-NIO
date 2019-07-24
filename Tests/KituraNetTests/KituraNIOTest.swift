@@ -174,7 +174,7 @@ class KituraNetTest: XCTestCase {
             defer {
                 server.stop()
             }
-
+            print("server listening on \(self.port)")
             let requestQueue = DispatchQueue(label: "Request queue")
             for (index, asyncTask) in asyncTasks.enumerated() {
                 let expectation = self.expectation(line: line, index: index)

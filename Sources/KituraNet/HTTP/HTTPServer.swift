@@ -136,7 +136,7 @@ public class HTTPServer: Server {
     public var connectionCount = 0
 
     // The data to be written as a part of the response.
-    private var buffer: ByteBuffer
+    //private var buffer: ByteBuffer
 
     /**
      Creates an HTTP server object.
@@ -156,7 +156,6 @@ public class HTTPServer: Server {
         self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 #endif
         self.serverConfig = serverConfig
-        self.buffer = ((serverChannel?.allocator.buffer(capacity: 1024))!)
     }
 
     /**
@@ -322,6 +321,8 @@ public class HTTPServer: Server {
                 return channel.pipeline.addHandler(self.quiescingHelper!.makeServerChannelHandler(channel: channel))
             }
             .childChannelInitializer { channel in
+                //var buffer: ByteBuffer = ((channel.allocator.buffer(capacity: 1024)))
+                print("In childChannelInitializer",channel.pipeline)
                 let httpHandler = HTTPRequestHandler(for: self)
                 let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { ctx in
                     self.ctx = ctx
@@ -332,7 +333,7 @@ public class HTTPServer: Server {
                         _ = channel.pipeline.addHandler(nioSSLServerHandler, position: .first)
                     }
                     return channel.pipeline.addHandler(httpHandler)
-                }
+                    }.flatMap { return self.checkConcurrentConnectionCount(channel: channel, requestHandler: httpHandler) }
             }
 
         let listenerDescription: String
@@ -383,6 +384,24 @@ public class HTTPServer: Server {
         ListenerGroup.enqueueAsynchronously(on: DispatchQueue.global(), block: queuedBlock)
     }
 
+    private func checkConcurrentConnectionCount(channel: Channel, requestHandler: HTTPRequestHandler) -> EventLoopFuture<Void> {
+        var buffer: ByteBuffer = channel.allocator.buffer(capacity: 100)
+        self.connectionCount = self.connectionCount + 1
+        let connectionLimit = self.serverConfig.connectionLimit
+        if self.connectionCount > connectionLimit {
+            print("In check connection limit")
+            let statusCode = HTTPStatusCode.serviceUnavailable.rawValue
+            let statusDescription = HTTP.statusCodes[statusCode] ?? ""
+              let response = HTTPResponseHead(version: HTTPVersion(major: 1, minor: 1), status: .serviceUnavailable)
+            buffer.writeString(statusDescription)
+            channel.write(requestHandler.wrapOutboundOut(.head(response)), promise: nil)
+        channel.write(requestHandler.wrapOutboundOut(HTTPServerResponsePart.body(.byteBuffer(buffer))),promise: nil)
+            channel.writeAndFlush(requestHandler.wrapOutboundOut(.end(nil)), promise: nil)
+            return channel.close()
+        }
+        //connection count lesser than limit
+        return channel.eventLoop.makeSucceededFuture(())
+    }
     /**
      Static method to create a new HTTP server and have it listen for connections.
 

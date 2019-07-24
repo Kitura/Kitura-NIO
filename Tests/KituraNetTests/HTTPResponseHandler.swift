@@ -10,13 +10,8 @@ internal class HTTPResponseHandler: ChannelInboundHandler {
     internal var statusCode: HTTPResponseStatus = .ok
     typealias InboundIn = HTTPServerResponsePart
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        let response = self.unwrapInboundIn(data)
-        switch response {
-        case .head(let header):
-            statusCode = header.status
-        default:
-            break
-        }
+        //let response = self.unwrapInboundIn(data)
+        print(data)
     }
 }
 
