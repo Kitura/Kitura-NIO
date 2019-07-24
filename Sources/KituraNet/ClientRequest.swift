@@ -272,9 +272,17 @@ public class ClientRequest {
         if let username = url.user {
             self.userName = username
         }
+
         if let password = url.password {
             self.password = password
         }
+
+        if let username = self.userName, let password = self.password {
+            self.headers["Authorization"] = createHTTPBasicAuthHeader(username: username, password: password)
+        }
+
+        self.url = "\(url.scheme ?? "http")://\(self.hostName ?? "unknown")\(self.port.map { ":\($0)" } ?? "")/\(fullPath)"
+        
     }
 
     /**
@@ -355,17 +363,11 @@ public class ClientRequest {
             }
         }
 
-        // Support for Basic HTTP authentication
-        let user = self.userName ?? ""
-        let pwd = self.password ?? ""
-        var authenticationClause = ""
-        // If either the userName or password are non-empty, add the authenticationClause
-        if !user.isEmpty || !pwd.isEmpty {
-          authenticationClause = "\(user):\(pwd)@"
+        if let username = self.userName, let password = self.password {
+            self.headers["Authorization"] = createHTTPBasicAuthHeader(username: username, password: password)
         }
-
         //the url string
-        self.url = "\(theSchema)\(authenticationClause)\(hostName)\(port)\(path)"
+        self.url = "\(theSchema)\(hostName)\(port)\(path)"
         self.percentEncodedURL = percentEncode(self.url)
     }
 
@@ -565,10 +567,6 @@ public class ClientRequest {
 
         if closeConnection {
             self.headers["Connection"] = "close"
-        }
-
-        if let username = self.userName, let password = self.password {
-            self.headers["Authorization"] = createHTTPBasicAuthHeader(username: username, password: password)
         }
 
         if self.port == nil {
