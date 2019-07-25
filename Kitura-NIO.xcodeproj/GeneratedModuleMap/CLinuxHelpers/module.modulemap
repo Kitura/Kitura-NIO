@@ -1,0 +1,4 @@
+module CLinuxHelpers {
+    umbrella "/Users/hariskumars/Kitura-NIO/Sources/CLinuxHelpers/include"
+    export *
+}
