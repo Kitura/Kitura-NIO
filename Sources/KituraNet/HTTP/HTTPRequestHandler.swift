@@ -117,6 +117,18 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
 
         case .end:
             requestSize = 0
+            server.connectionCount.mutate { $0 += 1 }
+            if server.connectionCount.value > server.serverConfig.connectionLimit {
+                let statusCode = HTTPStatusCode.serviceUnavailable.rawValue
+                let statusDescription = HTTP.statusCodes[statusCode] ?? ""
+                do {
+                    serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
+                    errorResponseSent = true
+                    try serverResponse?.end(with: .serviceUnavailable, message: statusDescription)
+                } catch {
+                Log.error("Failed to send error response")
+                }
+            }
             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
             //Make sure we use the latest delegate registered with the server
             DispatchQueue.global().async {
@@ -179,7 +191,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
     }
 
     func channelInactive(context: ChannelHandlerContext, httpServer: HTTPServer) {
-        httpServer.connectionCount =  httpServer.connectionCount - 1
+        httpServer.connectionCount.mutate { $0 -= 1 }
     }
     
     func getHeaderSize(of header: HTTPRequestHead) -> Int {
