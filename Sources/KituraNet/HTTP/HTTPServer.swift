@@ -124,6 +124,8 @@ public class HTTPServer: Server {
     /// The event loop group on which the HTTP handler runs
     private let eventLoopGroup: MultiThreadedEventLoopGroup
 
+    var quiescingHelper: ServerQuiescingHelper?
+
     /**
      Creates an HTTP server object.
 
@@ -276,7 +278,6 @@ public class HTTPServer: Server {
     }
 
     private func listen(_ socket: SocketType) throws {
-
         if let tlsConfig = tlsConfig {
             do {
                 self.sslContext = try NIOSSLContext(configuration: tlsConfig)
@@ -299,6 +300,11 @@ public class HTTPServer: Server {
             .serverChannelOption(ChannelOptions.backlog, value: BacklogOption.Value(self.maxPendingConnections))
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
+            .serverChannelInitializer { channel in
+                // Adding the quiescing helper will help us do a graceful stop()
+                self.quiescingHelper = ServerQuiescingHelper(group: self.eventLoopGroup)
+                return channel.pipeline.addHandler(self.quiescingHelper!.makeServerChannelHandler(channel: channel))
+            }
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
                 let config: NIOHTTPServerUpgradeConfiguration = (upgraders: upgraders, completionHandler: { _ in
@@ -343,7 +349,6 @@ public class HTTPServer: Server {
             }
             throw error
         }
-
         Log.info("Listening on \(listenerDescription)")
         Log.verbose("Options for \(listenerDescription): maxPendingConnections: \(maxPendingConnections), allowPortReuse: \(self.allowPortReuse)")
 
@@ -463,13 +468,21 @@ public class HTTPServer: Server {
      ````
     */
     public func stop() {
+        // Close the listening channel
         guard let serverChannel = serverChannel else { return }
         do {
             try serverChannel.close().wait()
         } catch let error {
             Log.error("Failed to close the server channel. Error: \(error)")
         }
-        self.state = .stopped
+
+        // Now close all the open channels
+        guard let quiescingHelper = self.quiescingHelper else { return }
+        let fullShutdownPromise: EventLoopPromise<Void> = eventLoopGroup.next().makePromise()
+        quiescingHelper.initiateShutdown(promise: fullShutdownPromise)
+        fullShutdownPromise.futureResult.whenComplete { _ in
+            self.state = .stopped
+        }
     }
 
     /**
