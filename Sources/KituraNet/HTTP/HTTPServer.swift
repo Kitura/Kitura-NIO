@@ -124,8 +124,6 @@ public class HTTPServer: Server {
     /// The event loop group on which the HTTP handler runs
     private let eventLoopGroup: MultiThreadedEventLoopGroup
 
-    private var ctx: ChannelHandlerContext?
-
     /**
      Creates an HTTP server object.
 
@@ -193,19 +191,18 @@ public class HTTPServer: Server {
     }
 
     /// Creates upgrade request and adds WebSocket handler to pipeline
-    private func upgradeHandler(webSocketHandlerFactory: ProtocolHandlerFactory, request: HTTPRequestHead) -> EventLoopFuture<Void> {
-        guard let ctx = self.ctx else { fatalError("The channel was probably closed during a protocol upgrade.") }
-        return ctx.eventLoop.submit {
-            let request = HTTPServerRequest(ctx: ctx, requestHead: request, enableSSL: false)
+    private func upgradeHandler(channel: Channel, webSocketHandlerFactory: ProtocolHandlerFactory, request: HTTPRequestHead) -> EventLoopFuture<Void> {
+        return channel.eventLoop.submit {
+            let request = HTTPServerRequest(channel: channel, requestHead: request, enableSSL: false)
             return webSocketHandlerFactory.handler(for: request)
             }.flatMap { (handler: ChannelHandler) -> EventLoopFuture<Void> in
-                return ctx.channel.pipeline.addHandler(handler).flatMap {
+                return channel.pipeline.addHandler(handler).flatMap {
                     if let _extensions = request.headers["Sec-WebSocket-Extensions"].first {
                         let handlers = webSocketHandlerFactory.extensionHandlers(header: _extensions)
-                        return ctx.channel.pipeline.addHandlers(handlers, position: .before(handler))
+                        return channel.pipeline.addHandlers(handlers, position: .before(handler))
                     } else {
                         // No extensions. We must return success.
-                        return ctx.channel.eventLoop.makeSucceededFuture(())
+                        return channel.eventLoop.makeSucceededFuture(())
                     }
                 }
             }
@@ -222,7 +219,7 @@ public class HTTPServer: Server {
 
     private func generateUpgradePipelineHandler(_ webSocketHandlerFactory: ProtocolHandlerFactory) -> UpgradePipelineHandlerFunction {
         return { (channel: Channel, request: HTTPRequestHead) in
-            return self.upgradeHandler(webSocketHandlerFactory: webSocketHandlerFactory, request: request)
+            return self.upgradeHandler(channel: channel, webSocketHandlerFactory: webSocketHandlerFactory, request: request)
         }
     }
 
@@ -304,8 +301,7 @@ public class HTTPServer: Server {
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
-                let config: NIOHTTPServerUpgradeConfiguration = (upgraders: upgraders, completionHandler: { ctx in
-                    self.ctx = ctx
+                let config: NIOHTTPServerUpgradeConfiguration = (upgraders: upgraders, completionHandler: { _ in
                     _ = channel.pipeline.removeHandler(httpHandler)
                 })
                 return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).flatMap {

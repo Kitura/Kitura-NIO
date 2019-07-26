@@ -180,7 +180,7 @@ public class HTTPServerRequest: ServerRequest {
     */
     public var method: String
 
-    private let ctx: ChannelHandlerContext
+    private let channel: Channel
 
     private var enableSSL: Bool = false
 
@@ -208,20 +208,20 @@ public class HTTPServerRequest: ServerRequest {
         }
     }
 
-    init(ctx: ChannelHandlerContext, requestHead: HTTPRequestHead, enableSSL: Bool) {
+    init(channel: Channel, requestHead: HTTPRequestHead, enableSSL: Bool) {
         // An HTTPServerRequest may be created only on the EventLoop assigned to handle
         // the connection on which the HTTP request arrived.
-        assert(ctx.eventLoop.inEventLoop)
-        self.ctx = ctx
+        assert(channel.eventLoop.inEventLoop)
+        self.channel = channel
         self.headers = HeadersContainer(with: requestHead.headers)
         self.method = requestHead.method.rawValue
         self.httpVersionMajor = UInt16(requestHead.version.major)
         self.httpVersionMinor = UInt16(requestHead.version.minor)
         self.rawURLString = requestHead.uri
         self.enableSSL = enableSSL
-        self.localAddressHost = HTTPServerRequest.host(socketAddress: ctx.localAddress)
-        self.localAddressPort = ctx.localAddress?.port ?? 0
-        self.remoteAddress = HTTPServerRequest.host(socketAddress: ctx.remoteAddress)
+        self.localAddressHost = HTTPServerRequest.host(socketAddress: channel.localAddress)
+        self.localAddressPort = channel.localAddress?.port ?? 0
+        self.remoteAddress = HTTPServerRequest.host(socketAddress: channel.remoteAddress)
     }
 
     var buffer: BufferList?

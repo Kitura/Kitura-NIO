@@ -79,7 +79,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
 
         switch request {
         case .head(let header):
-            serverRequest = HTTPServerRequest(ctx: context, requestHead: header, enableSSL: enableSSLVerification)
+            serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
             guard let serverRequest = serverRequest else {
