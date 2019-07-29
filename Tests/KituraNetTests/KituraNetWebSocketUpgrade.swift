@@ -25,7 +25,14 @@ import XCTest
 @testable import KituraNet
 
 class KituraNetWebSocketUpgradeTest: KituraNetTest {
-    var httpHandler : HTTPResponseHandler?
+    static var allTests: [(String, (KituraNetWebSocketUpgradeTest) -> () throws -> Void)] {
+        return [
+            ("testWebSocketUpgrade", testWebSocketUpgrade),
+        ]
+    }
+    
+    var httpHandler: HTTPResponseHandler?
+
     func clientChannelInitializer(channel: Channel) -> EventLoopFuture<Void> {
         var httpRequestEncoder: HTTPRequestEncoder
         var httpResponseDecoder: ByteToMessageHandler<HTTPResponseDecoder>
