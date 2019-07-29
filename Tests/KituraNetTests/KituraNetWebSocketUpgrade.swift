@@ -1,26 +1,28 @@
-//
-//  KituraNetWebSocketUpgrade.swift
-//  KituraNetTests
-//
-//  Created by Haris Kumar S on 22/07/19.
-//
-
-
-import Dispatch
+/**
+ * Copyright IBM Corporation 2016
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 
 import Foundation
-@testable import KituraNet
-
 import LoggerAPI
 import NIO
 import NIOHTTP1
 import NIOWebSocket
 import Dispatch
-import CryptoKit
-
-import Socket
 import XCTest
 
+@testable import KituraNet
 
 class KituraNetWebSocketUpgradeTest:KituraNetTest{
     var httpHandler : HTTPResponseHandler?
@@ -33,7 +35,6 @@ class KituraNetWebSocketUpgradeTest:KituraNetTest{
             channel.pipeline.addHandler(self.httpHandler!)
         }
     }
-
     
     func testWebSocketUpgrade () {
         let factory = WSConnectionUpgradeFactory()
@@ -46,21 +47,21 @@ class KituraNetWebSocketUpgradeTest:KituraNetTest{
             XCTAssertEqual(self.httpHandler!.responseStatus, .switchingProtocols, "Protocol upgrade to websocket failed with response code \(self.httpHandler!.responseStatus)")
             expectation.fulfill()
             
-        },{expectation in
+        },{ expectation in
             let upgraded = DispatchSemaphore(value: 0)
             self.sendUpgradeRequest(toPath: "/wstester", usingKey: "test", wsVersion: "12", semaphore: upgraded)
             upgraded.wait()
             XCTAssertEqual(self.httpHandler!.responseStatus, .badRequest, "Test case failed as status code \(self.httpHandler!.responseStatus) was returned instead of badRequest " )
             expectation.fulfill()
             
-        },{expectation in
+        },{ expectation in
             let upgraded = DispatchSemaphore(value: 0)
             self.sendUpgradeRequest(toPath: "/", usingKey: "test", wsVersion: "13", semaphore: upgraded)
             upgraded.wait()
             XCTAssertEqual(self.httpHandler!.responseStatus, .badRequest, "Test case failed as status code    \(self.httpHandler!.responseStatus) was returned instead of badRequest")
             expectation.fulfill()
             
-        },{expectation in
+        },{ expectation in
             let upgraded = DispatchSemaphore(value: 0)
             self.sendUpgradeRequest(toPath: "/", usingKey: "test", wsVersion: "1", semaphore: upgraded)
             upgraded.wait()
@@ -68,7 +69,7 @@ class KituraNetWebSocketUpgradeTest:KituraNetTest{
             expectation.fulfill()
             
         })
-}
+    }
     
     class WebSocketUpgradeDelegate: ServerDelegate {
         func handle(request: ServerRequest, response: ServerResponse) {}
@@ -76,7 +77,7 @@ class KituraNetWebSocketUpgradeTest:KituraNetTest{
     
     func sendUpgradeRequest(toPath: String, usingKey: String, wsVersion: String, semaphore: DispatchSemaphore, errorMessage: String? = nil) {
         
-        self.httpHandler = HTTPResponseHandler(key: usingKey,semaphore: semaphore, errorMessage: errorMessage)
+        self.httpHandler = HTTPResponseHandler(key: usingKey,semaphore: semaphore)
         let clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: 1)
             .channelInitializer(clientChannelInitializer)
@@ -94,8 +95,8 @@ class KituraNetWebSocketUpgradeTest:KituraNetTest{
             try channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
         } catch let error {
             Log.error("Error: \(error)")
+        }
     }
-}
 }
 
 class HTTPResponseHandler: ChannelInboundHandler {
@@ -103,14 +104,12 @@ class HTTPResponseHandler: ChannelInboundHandler {
     public typealias InboundIn = HTTPClientResponsePart
     public var responseStatus : HTTPResponseStatus
 
-    let errorMessage: String?
     let key: String
     let upgradeDoneOrRefused: DispatchSemaphore
     
-    public init(key: String, semaphore: DispatchSemaphore, errorMessage: String? = nil) {
+    public init(key: String, semaphore: DispatchSemaphore) {
         self.key = key
         self.upgradeDoneOrRefused = semaphore
-        self.errorMessage = errorMessage
         self.responseStatus = .ok
     }
     
@@ -140,7 +139,6 @@ public class WSConnectionUpgradeFactory: ProtocolHandlerFactory {
     
     init() {
         ConnectionUpgrader.register(handlerFactory: self)
-        //We configure the default `permessage-deflate` extension here.
     }
 
     public func handler(for request: ServerRequest) -> ChannelHandler {
@@ -152,8 +150,7 @@ public class WSConnectionUpgradeFactory: ProtocolHandlerFactory {
     }
     
     public func extensionHandlers(header: String) -> [ChannelHandler] {
-        let handlers: [ChannelHandler] = []
-        return handlers
+        return [ChannelHandler]()
     }
     
     public func negotiate(header: String) -> String {
@@ -172,4 +169,3 @@ public class WSConnectionUpgradeFactory: ProtocolHandlerFactory {
 }
 
 public class WebSocketService { }
-
