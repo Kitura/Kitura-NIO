@@ -279,6 +279,7 @@ public class HTTPServer: Server {
     }
 
     private func listen(_ socket: SocketType) throws {
+
         if let tlsConfig = tlsConfig {
             do {
                 self.sslContext = try NIOSSLContext(configuration: tlsConfig)
@@ -350,6 +351,7 @@ public class HTTPServer: Server {
             }
             throw error
         }
+
         Log.info("Listening on \(listenerDescription)")
         Log.verbose("Options for \(listenerDescription): maxPendingConnections: \(maxPendingConnections), allowPortReuse: \(self.allowPortReuse)")
 
