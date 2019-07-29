@@ -22,6 +22,7 @@ import SSLService
 import LoggerAPI
 import NIOWebSocket
 import CLinuxHelpers
+import NIOExtras
 
 #if os(Linux)
 import Glibc
