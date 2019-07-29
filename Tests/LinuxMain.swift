@@ -54,4 +54,5 @@ XCTMain([
     testCase(PipeliningTests.allTests.shuffled()),
     testCase(RegressionTests.allTests.shuffled()),
     testCase(MonitoringTests.allTests.shuffled()),
+    testCase(KituraNetWebSocketUpgradeTest.allTests.shuffled()),
 ].shuffled())

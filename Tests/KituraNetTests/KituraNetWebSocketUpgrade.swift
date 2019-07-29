@@ -1,5 +1,5 @@
 /**
- * Copyright IBM Corporation 2016
+ * Copyright IBM Corporation 2019
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import XCTest
 
 @testable import KituraNet
 
-class KituraNetWebSocketUpgradeTest:KituraNetTest{
+class KituraNetWebSocketUpgradeTest: KituraNetTest {
     var httpHandler : HTTPResponseHandler?
     func clientChannelInitializer(channel: Channel) -> EventLoopFuture<Void> {
-        var httpRequestEncoder : HTTPRequestEncoder
+        var httpRequestEncoder: HTTPRequestEncoder
         var httpResponseDecoder: ByteToMessageHandler<HTTPResponseDecoder>
         httpRequestEncoder = HTTPRequestEncoder()
         httpResponseDecoder =  ByteToMessageHandler(HTTPResponseDecoder(leftOverBytesStrategy: .dropBytes))
-        return channel.pipeline.addHandlers(httpRequestEncoder, httpResponseDecoder, position: .last).flatMap {_ in
+        return channel.pipeline.addHandlers(httpRequestEncoder, httpResponseDecoder, position: .last).flatMap { _ in
             channel.pipeline.addHandler(self.httpHandler!)
         }
     }
@@ -47,21 +47,21 @@ class KituraNetWebSocketUpgradeTest:KituraNetTest{
             XCTAssertEqual(self.httpHandler!.responseStatus, .switchingProtocols, "Protocol upgrade to websocket failed with response code \(self.httpHandler!.responseStatus)")
             expectation.fulfill()
             
-        },{ expectation in
+        }, { expectation in
             let upgraded = DispatchSemaphore(value: 0)
             self.sendUpgradeRequest(toPath: "/wstester", usingKey: "test", wsVersion: "12", semaphore: upgraded)
             upgraded.wait()
             XCTAssertEqual(self.httpHandler!.responseStatus, .badRequest, "Test case failed as status code \(self.httpHandler!.responseStatus) was returned instead of badRequest " )
             expectation.fulfill()
             
-        },{ expectation in
+        }, { expectation in
             let upgraded = DispatchSemaphore(value: 0)
             self.sendUpgradeRequest(toPath: "/", usingKey: "test", wsVersion: "13", semaphore: upgraded)
             upgraded.wait()
             XCTAssertEqual(self.httpHandler!.responseStatus, .badRequest, "Test case failed as status code    \(self.httpHandler!.responseStatus) was returned instead of badRequest")
             expectation.fulfill()
             
-        },{ expectation in
+        }, { expectation in
             let upgraded = DispatchSemaphore(value: 0)
             self.sendUpgradeRequest(toPath: "/", usingKey: "test", wsVersion: "1", semaphore: upgraded)
             upgraded.wait()
@@ -113,7 +113,7 @@ class HTTPResponseHandler: ChannelInboundHandler {
         self.responseStatus = .ok
     }
     
-    func channelRead(context: ChannelHandlerContext, data: NIOAny){
+    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let response = self.unwrapInboundIn(data)
         switch response {
         case .head(let header):
@@ -127,7 +127,7 @@ class HTTPResponseHandler: ChannelInboundHandler {
     }
 }
 
-public class WebSocketHandler: ChannelInboundHandler{
+public class WebSocketHandler: ChannelInboundHandler {
     public typealias InboundIn = NIOAny
 }
 
