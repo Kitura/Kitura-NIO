@@ -117,8 +117,8 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
 
         case .end:
             requestSize = 0
-            server.connectionCount.mutate { $0 += 1 }
-            if server.connectionCount.value > server.serverConfig.connectionLimit {
+            server.connectionCount.add(1)
+            if server.connectionCount.load() > server.serverConfig.connectionLimit {
                 let statusCode = HTTPStatusCode.serviceUnavailable.rawValue
                 let statusDescription = HTTP.statusCodes[statusCode] ?? ""
                 do {
@@ -191,7 +191,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
     }
 
     func channelInactive(context: ChannelHandlerContext, httpServer: HTTPServer) {
-        httpServer.connectionCount.mutate { $0 -= 1 }
+        httpServer.connectionCount.sub(1)
     }
     
     func getHeaderSize(of header: HTTPRequestHead) -> Int {

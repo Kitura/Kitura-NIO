@@ -24,6 +24,7 @@ import NIOWebSocket
 import CLinuxHelpers
 import NIOExtras
 import Foundation
+import NIOConcurrencyHelpers
 
 #if os(Linux)
 import Glibc
@@ -134,7 +135,7 @@ public class HTTPServer: Server {
     public var serverConfig: HTTPServerConfiguration
     
     //counter for no of connections
-    var connectionCount = Atomic<Int>(0)
+    var connectionCount = Atomic(value: 0)
 
     // The data to be written as a part of the response.
     //private var buffer: ByteBuffer
@@ -688,24 +689,4 @@ enum KituraWebSocketUpgradeError: Error {
 
     // Unknown upgrade error
     case unknownUpgradeError
-}
-
-class Atomic<A> {
-    private let queue = DispatchQueue(label: "Atomic serial queue")
-    private var _value: A
-    init(_ value: A) {
-        self._value = value
-    }
-
-    var value: A {
-        get {
-            return queue.sync { self._value }
-        }
-    }
-
-    func mutate(_ transform: (inout A) -> ()) {
-        queue.sync {
-            transform(&self._value)
-        }
-    }
 }
