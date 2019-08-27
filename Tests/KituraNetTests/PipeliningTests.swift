@@ -80,7 +80,7 @@ class PipeliningTests: KituraNetTest {
     /// spanning several packets. It is necessary to sleep between writes to allow
     /// the server time to receive and process the data.
     func testPipeliningSpanningPackets() {
-        let server = HTTPServer()
+        let server = HTTPServer(serverConfig: HTTPServerConfiguration(requestSizeLimit: 100*1024, connectionLimit: 1))
         server.delegate = Delegate()
         server.delegate = Delegate()
         do {

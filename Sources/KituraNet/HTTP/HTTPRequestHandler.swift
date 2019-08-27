@@ -22,7 +22,6 @@ import Foundation
 import Dispatch
 
 internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandler {
-
     /// The HTTPServer instance on which this handler is installed
     var server: HTTPServer
 
@@ -79,6 +78,13 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
 
         switch request {
         case .head(let header):
+            if let requestSizeLimit = server.serverConfig.requestSizeLimit,
+                let contentLength = header.headers["Content-Length"].first,
+                    let contentLengthValue = Int(contentLength) {
+                    if contentLengthValue > requestSizeLimit {
+                        sendStatus(context: context)
+                    }
+            }
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
@@ -151,5 +157,16 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
 
     func updateKeepAliveState() {
         keepAliveState.decrement()
+    }
+
+    func sendStatus(context: ChannelHandlerContext) {
+        let statusDescription = HTTP.statusCodes[HTTPStatusCode.requestTooLong.rawValue] ?? ""
+        do {
+            serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
+            errorResponseSent = true
+            try serverResponse?.end(with: .requestTooLong, message: statusDescription)
+        } catch {
+            Log.error("Failed to send error response")
+        }
     }
 }

@@ -23,6 +23,8 @@ import LoggerAPI
 import NIOWebSocket
 import CLinuxHelpers
 import NIOExtras
+import Foundation
+import NIOConcurrencyHelpers
 
 #if os(Linux)
 import Glibc
@@ -127,6 +129,12 @@ public class HTTPServer: Server {
 
     var quiescingHelper: ServerQuiescingHelper?
 
+    /// server configuration
+    public var serverConfig: HTTPServerConfiguration
+
+    //counter for no of connections
+    var connectionCount = Atomic(value: 0)
+
     /**
      Creates an HTTP server object.
 
@@ -136,13 +144,14 @@ public class HTTPServer: Server {
      server.listen(on: 8080)
      ````
     */
-    public init() {
+    public init(serverConfig: HTTPServerConfiguration = .default) {
 #if os(Linux)
         let numberOfCores = Int(linux_sched_getaffinity())
         self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
 #else
         self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 #endif
+        self.serverConfig = serverConfig
     }
 
     /**
@@ -309,6 +318,7 @@ public class HTTPServer: Server {
             }
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
+                let serverConfigurationHandler = HTTPServerConfigurationHandler(for: self)
                 let config: NIOHTTPServerUpgradeConfiguration = (upgraders: upgraders, completionHandler: { _ in
                     _ = channel.pipeline.removeHandler(httpHandler)
                 })
@@ -316,6 +326,7 @@ public class HTTPServer: Server {
                     if let nioSSLServerHandler = self.createNIOSSLServerHandler() {
                         _ = channel.pipeline.addHandler(nioSSLServerHandler, position: .first)
                     }
+                    _ = channel.pipeline.addHandler(serverConfigurationHandler, position: .first)
                     return channel.pipeline.addHandler(httpHandler)
                 }
             }
