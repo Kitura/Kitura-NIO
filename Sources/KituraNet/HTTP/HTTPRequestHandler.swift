@@ -82,7 +82,8 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                 let contentLength = header.headers["Content-Length"].first,
                     let contentLengthValue = Int(contentLength) {
                     if contentLengthValue > requestSizeLimit {
-                        sendStatus(context: context)
+                        sendRequestTooLongResponse(context: context)
+                        context.close()
                     }
             }
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
@@ -159,7 +160,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
         keepAliveState.decrement()
     }
 
-    func sendStatus(context: ChannelHandlerContext) {
+    func sendRequestTooLongResponse(context: ChannelHandlerContext) {
         let statusDescription = HTTP.statusCodes[HTTPStatusCode.requestTooLong.rawValue] ?? ""
         do {
             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
