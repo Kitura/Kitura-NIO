@@ -99,6 +99,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                 serverRequest.buffer!.byteBuffer.writeBuffer(&buffer)
             }
         case .end:
+            let resetRequestSize = 0
             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
             //Make sure we use the latest delegate registered with the server
             DispatchQueue.global().async {
@@ -107,14 +108,12 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                 Monitor.delegate?.started(request: serverRequest, response: serverResponse)
                 delegate.handle(request: serverRequest, response: serverResponse)
             }
+            self.userInboundEventTriggered(context: context, event: resetRequestSize)
         }
     }
 
-    //IdleStateEvents are received on this method
     public func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
-        if event is IdleStateHandler.IdleStateEvent {
-            _ = context.close()
-        }
+        context.triggerUserOutboundEvent(event, promise: nil)
     }
 
     public func channelReadComplete(context: ChannelHandlerContext) {

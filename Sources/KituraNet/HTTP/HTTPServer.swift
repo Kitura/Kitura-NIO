@@ -324,11 +324,11 @@ public class HTTPServer: Server {
                 })
                 return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).flatMap {
                     if let nioSSLServerHandler = self.createNIOSSLServerHandler() {
-                        _ = channel.pipeline.addHandler(nioSSLServerHandler, position: .first)
+                        return channel.pipeline.addHandler(nioSSLServerHandler, position: .first)
                     }
-                    _ = channel.pipeline.addHandler(serverConfigurationHandler, position: .first)
-                    return channel.pipeline.addHandler(httpHandler)
-                }
+                    return channel.eventLoop.makeSucceededFuture(()) } .flatMap {
+                        return channel.pipeline.addHandler(serverConfigurationHandler, position: .first) }.flatMap {
+                            return channel.pipeline.addHandler(httpHandler)}
             }
 
         let listenerDescription: String

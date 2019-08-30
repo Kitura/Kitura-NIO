@@ -46,11 +46,9 @@ internal class HTTPServerConfigurationHandler: ChannelDuplexHandler {
         context.fireChannelRead(wrapInboundOut(data))
     }
     
-    public func channelReadComplete(context: ChannelHandlerContext){
-        requestSize = 0
-        context.fireChannelReadComplete()
+    public func triggerUserOutboundEvent(context: ChannelHandlerContext, event: Any, promise: EventLoopPromise<Void>?) {
+        requestSize = event as? Int ?? 0
     }
-    
     public func channelActive(context: ChannelHandlerContext) {
         _ = server.connectionCount.add(1)
         if let connectionLimit1 = connectionLimit {
