@@ -19,13 +19,12 @@ import Foundation
 public struct HTTPServerConfiguration {
     /// Defines the maximum size of an incoming request, in bytes. If requests are received that are larger
     /// than this limit, they will be rejected and the connection will be closed.
-    ///
-    /// A value of `nil` means no limit.
-    public let requestSizeLimit: Int
+
+    public let requestSizeLimit: Int?
     
     /// Defines the maximum number of concurrent connections that a server should accept. Clients attempting
     /// to connect when this limit has been reached will be rejected.
-    public let connectionLimit: Int
+    public let connectionLimit: Int?
     
     public static var `default` = HTTPServerConfiguration(requestSizeLimit: 1024 * 1024, connectionLimit: 1024)
     
@@ -35,7 +34,7 @@ public struct HTTPServerConfiguration {
     /// - parameter requestSizeLimit: The maximum size of an incoming request. Defaults to `IncomingSocketOptions.defaultRequestSizeLimit`.
     /// - parameter connectionLimit: The maximum number of concurrent connections. Defaults to `IncomingSocketOptions.defaultConnectionLimit`.
     
-    public init(requestSizeLimit: Int,connectionLimit: Int)
+    public init(requestSizeLimit: Int?,connectionLimit: Int?)
     {
         self.requestSizeLimit = requestSizeLimit
         self.connectionLimit = connectionLimit

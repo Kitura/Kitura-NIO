@@ -22,15 +22,11 @@ import Foundation
 import Dispatch
 
 internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandler {
-    //default request size limit
-    
-    let requestSizeLimit: Int
-    
-    var requestSize: Int = 0
-    //var byteCount: Int = 0
 
     /// The HTTPServer instance on which this handler is installed
     var server: HTTPServer
+
+    var requestSize: Int = 0
 
     /// The serverRequest related to this handler instance
     var serverRequest: HTTPServerRequest?
@@ -67,7 +63,6 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
 
     public init(for server: HTTPServer) {
         self.server = server
-        self.requestSizeLimit = server.serverConfig.requestSizeLimit
         self.keepAliveState = server.keepAliveState
         if server.sslConfig != nil {
             self.enableSSLVerification = true
@@ -84,26 +79,29 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
         if errorResponseSent { return }
         switch request {
         case .head(let header):
-<<<<<<< HEAD
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
-=======
-             if let contentLength = header.headers["Content-Length"].first,
+            if let requestSizeLimit = server.serverConfig.requestSizeLimit,
+                let contentLength = header.headers["Content-Length"].first,
                 let contentLengthValue = Int(contentLength) {
-                    if contentLengthValue > requestSizeLimit {
-                        sendStatus(context: context)
+                if contentLengthValue > requestSizeLimit {
+                    sendStatus(context: context)
+                    context.close()
                 }
             }
             let headerSize = getHeaderSize(of: header)
+            if let requestSizeLimit = server.serverConfig.requestSizeLimit {
             if headerSize > requestSizeLimit {
                 sendStatus(context: context)
-             }
+                }
+            }
             serverRequest = HTTPServerRequest(ctx: context, requestHead: header, enableSSL: enableSSLVerification)
->>>>>>> Ckeck maximum request size and connection limit
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
             requestSize += buffer.readableBytes
-            if requestSize > requestSizeLimit {
-                sendStatus(context: context)
+            if let requestSizeLimit = server.serverConfig.requestSizeLimit {
+                if requestSize > requestSizeLimit {
+                    sendStatus(context: context)
+                }
             }
             guard let serverRequest = serverRequest else {
                 Log.error("No ServerRequest available")
@@ -118,15 +116,17 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
         case .end:
             requestSize = 0
             server.connectionCount.add(1)
-            if server.connectionCount.load() > server.serverConfig.connectionLimit {
-                let statusCode = HTTPStatusCode.serviceUnavailable.rawValue
-                let statusDescription = HTTP.statusCodes[statusCode] ?? ""
-                do {
-                    serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
-                    errorResponseSent = true
-                    try serverResponse?.end(with: .serviceUnavailable, message: statusDescription)
-                } catch {
-                Log.error("Failed to send error response")
+            if let connectionLimit = server.serverConfig.connectionLimit {
+                if server.connectionCount.load() > connectionLimit {
+                    let statusCode = HTTPStatusCode.serviceUnavailable.rawValue
+                    let statusDescription = HTTP.statusCodes[statusCode] ?? ""
+                    do {
+                        serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
+                        errorResponseSent = true
+                        try serverResponse?.end(with: .serviceUnavailable, message: statusDescription)
+                    } catch {
+                    Log.error("Failed to send error response")
+                    }
                 }
             }
             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)

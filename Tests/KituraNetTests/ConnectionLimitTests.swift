@@ -44,15 +44,23 @@ class ConnectionLimitTests: KituraNetTest {
             XCTFail("Connection is not established.")
         }
     }
-    func testConnectionLimit () {
-        let delegate = TestConnectionLimitDelegate()
-        performServerTest(serverConfig: HTTPServerConfiguration(requestSizeLimit: 10000, connectionLimit: 1), delegate, socketType: .tcp, useSSL: false, asyncTasks: { expectation in
-            expectation.expectedFulfillmentCount = 2
-            self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus:HTTPResponseStatus.ok, expectation: expectation))
-            self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus:HTTPResponseStatus.serviceUnavailable, expectation: expectation))
-            })
-    }
+
+func testConnectionLimit() {
+    let delegate = TestConnectionLimitDelegate()
+    performServerTest(serverConfig: HTTPServerConfiguration(requestSizeLimit: 10000, connectionLimit: 1), delegate, socketType: .tcp, useSSL: false, asyncTasks: { expectation in
+        let payload = "Hello, World!"
+        var payloadBuffer = ByteBufferAllocator().buffer(capacity: 1024)
+        payloadBuffer.writeString(payload)
+        _ = self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus:HTTPResponseStatus.ok, expectation: expectation))
+    }, { expectation in
+        let payload = "Hello, World!"
+        var payloadBuffer = ByteBufferAllocator().buffer(capacity: 1024)
+        payloadBuffer.writeString(payload)
+        _ =  self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus:HTTPResponseStatus.serviceUnavailable, expectation: expectation))
+    })
 }
+}
+
 class TestConnectionLimitDelegate: ServerDelegate {
     func handle(request: ServerRequest, response: ServerResponse) {
         do {
