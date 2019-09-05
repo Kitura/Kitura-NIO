@@ -42,7 +42,7 @@ let package = Package(
             dependencies: []),
         .target(
             name: "KituraNet",
-            dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "CLinuxHelpers", "NIOConcurrencyHelpers"]),
+            dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "CLinuxHelpers", "NIOConcurrencyHelpers", "NIOExtras"]),
         .testTarget(
             name: "KituraNetTests",
             dependencies: ["KituraNet"])

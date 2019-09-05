@@ -94,7 +94,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                 sendStatus(context: context)
                 }
             }
-            serverRequest = HTTPServerRequest(ctx: context, requestHead: header, enableSSL: enableSSLVerification)
+            serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
             requestSize += buffer.readableBytes

@@ -22,8 +22,8 @@ import SSLService
 import LoggerAPI
 import NIOWebSocket
 import CLinuxHelpers
-import NIOExtras
 import Foundation
+import NIOExtras
 import NIOConcurrencyHelpers
 
 #if os(Linux)
