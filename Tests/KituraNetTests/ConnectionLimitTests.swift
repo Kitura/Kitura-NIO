@@ -47,7 +47,7 @@ class ConnectionLimitTests: KituraNetTest {
 
 func testConnectionLimit() {
     let delegate = TestConnectionLimitDelegate()
-    performServerTest(serverConfig: HTTPServerConfiguration(requestSizeLimit: 10000, connectionLimit: 1), delegate, socketType: .tcp, useSSL: false, asyncTasks: { expectation in
+    performServerTest(serverConfig: ServerOptions(requestSizeLimit: 10000, connectionLimit: 1), delegate, socketType: .tcp, useSSL: false, asyncTasks: { expectation in
         let payload = "Hello, World!"
         var payloadBuffer = ByteBufferAllocator().buffer(capacity: 1024)
         payloadBuffer.writeString(payload)
@@ -57,8 +57,8 @@ func testConnectionLimit() {
         var payloadBuffer = ByteBufferAllocator().buffer(capacity: 1024)
         payloadBuffer.writeString(payload)
         _ =  self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus:HTTPResponseStatus.serviceUnavailable, expectation: expectation))
-    })
-}
+        })
+    }
 }
 
 class TestConnectionLimitDelegate: ServerDelegate {

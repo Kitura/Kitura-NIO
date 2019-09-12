@@ -80,7 +80,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
         switch request {
         case .head(let header):
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
-            if let requestSizeLimit = server.serverConfig.requestSizeLimit,
+            if let requestSizeLimit = server.options.requestSizeLimit,
                 let contentLength = header.headers["Content-Length"].first,
                 let contentLengthValue = Int(contentLength) {
                 if contentLengthValue > requestSizeLimit {
@@ -89,7 +89,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                 }
             }
             let headerSize = getHeaderSize(of: header)
-            if let requestSizeLimit = server.serverConfig.requestSizeLimit {
+            if let requestSizeLimit = server.options.requestSizeLimit {
             if headerSize > requestSizeLimit {
                 sendStatus(context: context)
                 }
@@ -98,9 +98,11 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
             requestSize += buffer.readableBytes
-            if let requestSizeLimit = server.serverConfig.requestSizeLimit {
+            if let requestSizeLimit = server.options.requestSizeLimit {
+                print("request size is", requestSize, requestSizeLimit)
                 if requestSize > requestSizeLimit {
                     sendStatus(context: context)
+                    print("in request size check")
                 }
             }
             guard let serverRequest = serverRequest else {
@@ -116,7 +118,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
         case .end:
             requestSize = 0
             server.connectionCount.add(1)
-            if let connectionLimit = server.serverConfig.connectionLimit {
+            if let connectionLimit = server.options.connectionLimit {
                 if server.connectionCount.load() > connectionLimit {
                     let statusCode = HTTPStatusCode.serviceUnavailable.rawValue
                     let statusDescription = HTTP.statusCodes[statusCode] ?? ""

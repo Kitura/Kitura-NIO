@@ -54,7 +54,7 @@ class ClientE2ETests: KituraNetTest {
     let delegate = TestServerDelegate()
 
     func testRequestSize() {
-        performServerTest(serverConfig: HTTPServerConfiguration(requestSizeLimit: 10000, connectionLimit: 100),delegate, useSSL: false, asyncTasks: { expectation in
+        performServerTest(serverConfig: ServerOptions(requestSizeLimit: 10000, connectionLimit: 100),delegate, useSSL: false, asyncTasks: { expectation in
             let payload = "[" + contentTypesString + "," + contentTypesString + contentTypesString + "," + contentTypesString + "]"
             self.performRequest("post", path: "/largepost", callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.requestTooLong)

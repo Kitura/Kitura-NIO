@@ -132,8 +132,8 @@ public class HTTPServer: Server {
     private var ctx: ChannelHandlerContext?
     
     /// server configuration
-    public var serverConfig: HTTPServerConfiguration
-    
+    public var options: ServerOptions
+
     //counter for no of connections
     var connectionCount = Atomic(value: 0)
 
@@ -150,14 +150,14 @@ public class HTTPServer: Server {
      server.listen(on: 8080)
      ````
     */
-    public init(serverConfig: HTTPServerConfiguration = .default) {
+    public init(options: ServerOptions = ServerOptions()) {
 #if os(Linux)
         let numberOfCores = Int(linux_sched_getaffinity())
         self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
 #else
         self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 #endif
-        self.serverConfig = serverConfig
+        self.options = options
     }
 
     /**
