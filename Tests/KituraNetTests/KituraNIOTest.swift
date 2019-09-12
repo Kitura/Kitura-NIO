@@ -136,7 +136,6 @@ class KituraNetTest: XCTestCase {
     func performServerTestWithUnixSocket(serverConfig: ServerOptions = ServerOptions(), delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: [(XCTestExpectation) -> Void]) {
         do {
             var serverConfig = serverConfig
-            print("serverconfig: ", serverConfig)
             var server: HTTPServer
             self.useSSL = useSSL
             self.unixDomainSocketPath = self.socketFilePath

@@ -65,7 +65,6 @@ class ClientE2ETests: KituraNetTest {
                     XCTAssertEqual(count, expectedResult.count, "Result should have been \(expectedResult.count) bytes, was \(String(describing: count)) bytes")
                     let postValue = String(data: data, encoding: .utf8)
                     if  let postValue = postValue {
-                        print("postvalue:", postValue)
                         XCTAssertEqual(postValue, expectedResult)
                     } else {
                         XCTFail("postValue's value wasn't an UTF8 string")

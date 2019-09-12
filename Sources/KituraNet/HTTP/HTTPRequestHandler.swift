@@ -99,10 +99,8 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
         case .body(var buffer):
             requestSize += buffer.readableBytes
             if let requestSizeLimit = server.options.requestSizeLimit {
-                print("request size is", requestSize, requestSizeLimit)
                 if requestSize > requestSizeLimit {
                     sendStatus(context: context)
-                    print("in request size check")
                 }
             }
             guard let serverRequest = serverRequest else {
