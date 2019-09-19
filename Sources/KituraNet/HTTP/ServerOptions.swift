@@ -54,11 +54,11 @@ public struct ServerOptions {
     /// than this limit, they will be rejected and the connection will be closed.
     ///
     /// A value of `nil` means no limit.
-    public let requestSizeLimit: Int?
+    public var requestSizeLimit: Int?
 
     /// Defines the maximum number of concurrent connections that a server should accept. Clients attempting
     /// to connect when this limit has been reached will be rejected.
-    public let connectionLimit: Int?
+    public var connectionLimit: Int?
 
     /**
      Determines the response message and HTTP status code used to respond to clients whose request exceeds

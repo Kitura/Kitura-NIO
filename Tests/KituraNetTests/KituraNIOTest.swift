@@ -87,7 +87,8 @@ class KituraNetTest: XCTestCase {
 
     func startServer(_ delegate: ServerDelegate?, unixDomainSocketPath: String? = nil, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, serverConfig: ServerOptions = ServerOptions()) throws -> HTTPServer {
         let serverConfig = serverConfig
-        let server = HTTP.createServer(serverConfig: serverConfig)
+        let server = HTTP.createServer()
+        server.options = serverConfig
         server.delegate = delegate
         if useSSL {
             server.sslConfig = KituraNetTest.sslConfig

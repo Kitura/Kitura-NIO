@@ -40,7 +40,7 @@ class ConnectionLimitTests: KituraNetTest {
             try channel = bootstrap.connect(host: "localhost", port: self.port).wait()
             let request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: .GET, uri: "/")
             self.sendRequest(request: request, on: channel)
-        } catch let e {
+        } catch _ {
             XCTFail("Connection is not established.")
         }
     }

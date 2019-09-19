@@ -87,9 +87,8 @@ public class HTTP {
     let server = HTTP.createServer()
     ````
     */
-    public static func createServer(serverConfig: ServerOptions = ServerOptions()) -> HTTPServer {
-        let serverConfig = serverConfig
-        return HTTPServer(options: serverConfig)
+    public static func createServer() -> HTTPServer {
+        return HTTPServer()
     }
 
     /**

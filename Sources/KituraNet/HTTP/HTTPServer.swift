@@ -132,7 +132,7 @@ public class HTTPServer: Server {
     private var ctx: ChannelHandlerContext?
     
     /// server configuration
-    public var options: ServerOptions
+    public var options: ServerOptions = ServerOptions()
 
     //counter for no of connections
     var connectionCount = Atomic(value: 0)
