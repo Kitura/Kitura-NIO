@@ -30,7 +30,7 @@ import LoggerAPI
  */
 public struct ServerOptions {
     
-    /// A default limit of 10mb on the size of requests that a server should accept.
+    /// A default limit of 100mb on the size of requests that a server should accept.
     public static let defaultRequestSizeLimit = 104857600
 
     /// A default limit of 10,000 on the number of concurrent connections that a server should accept.

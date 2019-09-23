@@ -88,12 +88,6 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                     context.close()
                 }
             }
-            let headerSize = getHeaderSize(of: header)
-            if let requestSizeLimit = server.options.requestSizeLimit {
-            if headerSize > requestSizeLimit {
-                sendStatus(context: context)
-                }
-            }
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
