@@ -84,7 +84,15 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                 let contentLength = header.headers["Content-Length"].first,
                 let contentLengthValue = Int(contentLength) {
                 if contentLengthValue > requestSizeLimit {
-                    sendStatus(context: context)
+                    do {
+                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit, "") {
+                            serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
+                            errorResponseSent = true
+                            try serverResponse?.end(with: httpStatus, message: response)
+                        }
+                    } catch {
+                        Log.error("Failed to send error response")
+                    }
                     context.close()
                 }
             }
@@ -94,7 +102,15 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             requestSize += buffer.readableBytes
             if let requestSizeLimit = server.options.requestSizeLimit {
                 if requestSize > requestSizeLimit {
-                    sendStatus(context: context)
+                    do {
+                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit, "") {
+                            serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
+                            errorResponseSent = true
+                            try serverResponse?.end(with: httpStatus, message: response)
+                        }
+                    } catch {
+                        Log.error("Failed to send error response")
+                    }
                 }
             }
             guard let serverRequest = serverRequest else {
@@ -198,16 +214,5 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             headerSize += headers.value.cString(using: .utf8)?.count ?? 0
         }
        return headerSize
-    }
-
-    func sendStatus(context: ChannelHandlerContext) {
-        let statusDescription = HTTP.statusCodes[HTTPStatusCode.requestTooLong.rawValue] ?? ""
-        do {
-        serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
-        errorResponseSent = true
-        try serverResponse?.end(with: .requestTooLong, message: statusDescription)
-        } catch {
-            Log.error("Failed to send error response")
-        }
     }
 }

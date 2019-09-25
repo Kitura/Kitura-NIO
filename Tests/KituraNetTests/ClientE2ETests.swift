@@ -59,7 +59,7 @@ class ClientE2ETests: KituraNetTest {
             self.performRequest("post", path: "/largepost", callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.requestTooLong)
                 do {
-                    let expectedResult = "Request Entity Too Large"
+                    let expectedResult = ""
                     var data = Data()
                     let count = try response?.readAllData(into: &data)
                     XCTAssertEqual(count, expectedResult.count, "Result should have been \(expectedResult.count) bytes, was \(String(describing: count)) bytes")
