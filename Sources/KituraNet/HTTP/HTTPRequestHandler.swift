@@ -112,14 +112,14 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             server.connectionCount.add(1)
             if let connectionLimit = server.options.connectionLimit {
                 if server.connectionCount.load() > connectionLimit {
-                    let statusCode = HTTPStatusCode.serviceUnavailable.rawValue
-                    let statusDescription = HTTP.statusCodes[statusCode] ?? ""
                     do {
-                        serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
-                        errorResponseSent = true
-                        try serverResponse?.end(with: .serviceUnavailable, message: statusDescription)
+                        if let (httpStatus, response) = server.options.connectionResponseGenerator(connectionLimit,"") {
+                            serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
+                            errorResponseSent = true
+                            try serverResponse?.end(with: httpStatus, message: response)
+                        }
                     } catch {
-                    Log.error("Failed to send error response")
+                        Log.error("Failed to send error response")
                     }
                 }
             }
