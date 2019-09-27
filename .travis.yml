@@ -15,34 +15,29 @@ matrix:
       dist: xenial
       sudo: required
       services: docker
-      env: DOCKER_IMAGE=swift:5.0.2-xenial DOCKER_PRIVILEGED=true CUSTOM_TEST_SCRIPT=.kitura-test.sh
+      env: DOCKER_IMAGE=swift:5.0.3-xenial SWIFT_SNAPSHOT=5.0.3 DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel"
     - os: linux
       dist: xenial
       sudo: required
       services: docker
-      env: DOCKER_IMAGE=swift:5.0.2-xenial DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel"
+      env: DOCKER_IMAGE=swift:5.1 DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel" CUSTOM_TEST_SCRIPT=.kitura-test.sh
     - os: linux
       dist: xenial
       sudo: required
       services: docker
-      env: DOCKER_IMAGE=swift:5.0.2 DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel"
-    - os: linux
-      dist: xenial
-      sudo: required
-      services: docker
-      env: DOCKER_IMAGE=swift:5.0.2 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel"
+      env: DOCKER_IMAGE=swift:5.1 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel"
     - os: osx
       osx_image: xcode10.2
       sudo: required
-      env: SWIFT_SNAPSHOT=5.0.1 JAZZY_ELIGIBLE=true SWIFT_TEST_ARGS="--parallel" CUSTOM_TEST_SCRIPT=.kitura-test.sh
+      env: SWIFT_SNAPSHOT=5.0.1 JAZZY_ELIGIBLE=true SWIFT_TEST_ARGS="--parallel"
     - os: osx
       osx_image: xcode11
       sudo: required
-      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT SWIFT_TEST_ARGS="--parallel"
+      env: SWIFT_TEST_ARGS="--parallel"
     - os: osx
       osx_image: xcode11
       sudo: required
-      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT CUSTOM_TEST_SCRIPT=.kitura-test.sh
+      env: SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT SWIFT_TEST_ARGS="--parallel" CUSTOM_TEST_SCRIPT=.kitura-test.sh
 
 
 before_install:
