@@ -31,7 +31,7 @@ class KituraNetWebSocketUpgradeTest: KituraNetTest {
         ]
     }
     
-    var httpHandler: ResponseHandler?
+    var httpHandler: HttpResponseHandler?
 
     func clientChannelInitializer(channel: Channel) -> EventLoopFuture<Void> {
         var httpRequestEncoder: HTTPRequestEncoder
@@ -84,7 +84,7 @@ class KituraNetWebSocketUpgradeTest: KituraNetTest {
     
     func sendUpgradeRequest(toPath: String, usingKey: String, wsVersion: String, semaphore: DispatchSemaphore, errorMessage: String? = nil) {
 
-        self.httpHandler = ResponseHandler(key: usingKey,semaphore: semaphore)
+        self.httpHandler = HttpResponseHandler(key: usingKey,semaphore: semaphore)
         let clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: 1)
             .channelInitializer(clientChannelInitializer)
@@ -106,7 +106,7 @@ class KituraNetWebSocketUpgradeTest: KituraNetTest {
     }
 }
 
-class ResponseHandler: ChannelInboundHandler {
+class HttpResponseHandler: ChannelInboundHandler {
     
     public typealias InboundIn = HTTPClientResponsePart
     public var responseStatus : HTTPResponseStatus

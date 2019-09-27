@@ -85,7 +85,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                 let contentLengthValue = Int(contentLength) {
                 if contentLengthValue > requestSizeLimit {
                     do {
-                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit, "") {
+                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit, serverRequest?.remoteAddress ?? "") {
                             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
                             errorResponseSent = true
                             try serverResponse?.end(with: httpStatus, message: response)
@@ -103,7 +103,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             if let requestSizeLimit = server.options.requestSizeLimit {
                 if requestSize > requestSizeLimit {
                     do {
-                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit, "") {
+                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit,serverRequest?.remoteAddress ?? "") {
                             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
                             errorResponseSent = true
                             try serverResponse?.end(with: httpStatus, message: response)
@@ -129,7 +129,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             if let connectionLimit = server.options.connectionLimit {
                 if server.connectionCount.load() > connectionLimit {
                     do {
-                        if let (httpStatus, response) = server.options.connectionResponseGenerator(connectionLimit,"") {
+                        if let (httpStatus, response) = server.options.connectionResponseGenerator(connectionLimit,serverRequest?.remoteAddress ?? "") {
                             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
                             errorResponseSent = true
                             try serverResponse?.end(with: httpStatus, message: response)
@@ -202,17 +202,5 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
 
     func channelInactive(context: ChannelHandlerContext, httpServer: HTTPServer) {
         httpServer.connectionCount.sub(1)
-    }
-    
-    func getHeaderSize(of header: HTTPRequestHead) -> Int {
-        var headerSize = 0
-        headerSize += header.uri.cString(using: .utf8)?.count ?? 0
-        headerSize += header.version.description.cString(using: .utf8)?.count ?? 0
-        headerSize += header.method.rawValue.cString(using: .utf8)?.count ?? 0
-        for headers in header.headers {
-            headerSize += headers.name.cString(using: .utf8)?.count ?? 0
-            headerSize += headers.value.cString(using: .utf8)?.count ?? 0
-        }
-       return headerSize
     }
 }

@@ -80,7 +80,6 @@ class LargePayloadTests: KituraNetTest {
 
         func handle(request: ServerRequest, response: ServerResponse) {
             if  request.method.uppercased() == "GET" {
-                print("hello world")
                 handleGet(request: request, response: response)
             } else {
                 handlePost(request: request, response: response)

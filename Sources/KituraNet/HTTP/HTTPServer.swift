@@ -324,8 +324,7 @@ public class HTTPServer: Server {
             }
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
-                let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: { ctx in
-                    self.ctx = ctx
+                let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: {_ in 
                     _ = channel.pipeline.removeHandler(httpHandler)
                 })
                 return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).flatMap {
@@ -333,7 +332,7 @@ public class HTTPServer: Server {
                         _ = channel.pipeline.addHandler(nioSSLServerHandler, position: .first)
                     }
                     return channel.pipeline.addHandler(httpHandler)
-                    }
+                }
             }
 
         let listenerDescription: String
