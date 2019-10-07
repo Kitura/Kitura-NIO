@@ -31,7 +31,8 @@ class RegressionTests: KituraNetTest {
             ("testServersCollidingOnPort", testServersCollidingOnPort),
             ("testServersSharingPort", testServersSharingPort),
             ("testBadRequest", testBadRequest),
-            ("testBadRequestFollowingGoodRequest", testBadRequestFollowingGoodRequest)
+            ("testBadRequestFollowingGoodRequest", testBadRequestFollowingGoodRequest),
+            ("testCustomEventLoopGroup", testCustomEventLoopGroup)
         ]
     }
 
@@ -172,7 +173,6 @@ class RegressionTests: KituraNetTest {
             defer {
                 server.stop()
             }
-
             guard let serverPort = server.port else {
                 XCTFail("Server port was not initialized")
                 return
@@ -188,6 +188,50 @@ class RegressionTests: KituraNetTest {
         } catch {
             XCTFail("Couldn't start server")
         }
+    }
+
+    func testCustomEventLoopGroup() {
+        do {
+            #if os(Linux)
+            let numberOfCores = Int(linux_sched_getaffinity())
+            let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
+            #else
+            let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+            #endif
+            let server = HTTPServer(eventLoopGroup: eventLoopGroup)
+            let serverPort: Int = 8091
+            defer {
+                server.stop()
+            }
+            do {
+                try server.listen(on: serverPort)
+            } catch {
+               XCTFail("Couldn't start server \(error)")
+            }
+            var goodClient = try GoodClient()
+            /// Connect a 'good' (SSL enabled) client to the server
+            try goodClient.connect(serverPort, expectation: self.expectation(description: "Connecting a bad client"))
+            XCTAssertEqual(goodClient.connectedPort, serverPort, "GoodClient not connected to expected server port")
+
+            // Start a server using eventLoopGroup api provided by HTPPServer()
+            let server2 = HTTPServer(eventLoopGroup: server.eventLoopGroup)
+            let serverPort2: Int = 8092
+            defer {
+                server2.stop()
+            }
+            do {
+                try server2.listen(on: serverPort2)
+            } catch {
+                XCTFail("Couldn't start server \(error)")
+            }
+            var goodClient2 = try GoodClient()
+            /// Connect a 'good' (SSL enabled) client to the server
+            try goodClient2.connect(serverPort2, expectation: self.expectation(description: "Connecting a bad client"))
+            XCTAssertEqual(goodClient2.connectedPort, serverPort2, "GoodClient not connected to expected server port")
+        } catch {
+            XCTFail("Error: \(error)")
+        }
+        waitForExpectations(timeout: 10)
     }
 
     /// A simple client which connects to a port but sends no data
