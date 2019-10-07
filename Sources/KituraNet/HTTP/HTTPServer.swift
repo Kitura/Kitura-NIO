@@ -129,16 +129,11 @@ public class HTTPServer: Server {
 
     var quiescingHelper: ServerQuiescingHelper?
 
-    private var ctx: ChannelHandlerContext?
-    
     /// server configuration
     public var options: ServerOptions = ServerOptions()
 
     //counter for no of connections
     var connectionCount = Atomic(value: 0)
-
-    // The data to be written as a part of the response.
-    //private var buffer: ByteBuffer
 
     /**
      Creates an HTTP server object.
