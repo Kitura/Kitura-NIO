@@ -22,7 +22,9 @@ import SSLService
 import LoggerAPI
 import NIOWebSocket
 import CLinuxHelpers
+import Foundation
 import NIOExtras
+import NIOConcurrencyHelpers
 
 #if os(Linux)
 import Glibc
@@ -127,22 +129,30 @@ public class HTTPServer: Server {
 
     var quiescingHelper: ServerQuiescingHelper?
 
+    /// server configuration
+    public var options: ServerOptions = ServerOptions()
+
+    //counter for no of connections
+    var connectionCount = Atomic(value: 0)
+
     /**
      Creates an HTTP server object.
 
      ### Usage Example: ###
      ````swift
-     let server = HTTPServer()
+     let config =HTTPServerConfiguration(requestSize: 1000, coonectionLimit: 100)
+     let server = HTTPServer(serverconfig: config)
      server.listen(on: 8080)
      ````
     */
-    public init() {
+    public init(options: ServerOptions = ServerOptions()) {
 #if os(Linux)
         let numberOfCores = Int(linux_sched_getaffinity())
         self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
 #else
         self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
 #endif
+        self.options = options
     }
 
     /**
@@ -309,7 +319,7 @@ public class HTTPServer: Server {
             }
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
-                let config: NIOHTTPServerUpgradeConfiguration = (upgraders: upgraders, completionHandler: { _ in
+                let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: {_ in 
                     _ = channel.pipeline.removeHandler(httpHandler)
                 })
                 return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).flatMap {

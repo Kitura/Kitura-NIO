@@ -26,6 +26,8 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
     /// The HTTPServer instance on which this handler is installed
     var server: HTTPServer
 
+    var requestSize: Int = 0
+
     /// The serverRequest related to this handler instance
     var serverRequest: HTTPServerRequest?
 
@@ -66,7 +68,6 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             self.enableSSLVerification = true
         }
     }
-
     public typealias InboundIn = HTTPServerRequestPart
     public typealias OutboundOut = HTTPServerResponsePart
 
@@ -76,12 +77,42 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
         // If an upgrade to WebSocket fails, both `errorCaught` and `channelRead` are triggered.
         // We'd want to return the error via `errorCaught`.
         if errorResponseSent { return }
-
         switch request {
         case .head(let header):
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
+            if let requestSizeLimit = server.options.requestSizeLimit,
+                let contentLength = header.headers["Content-Length"].first,
+                let contentLengthValue = Int(contentLength) {
+                if contentLengthValue > requestSizeLimit {
+                    do {
+                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit, serverRequest?.remoteAddress ?? "") {
+                            serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
+                            errorResponseSent = true
+                            try serverResponse?.end(with: httpStatus, message: response)
+                        }
+                    } catch {
+                        Log.error("Failed to send error response")
+                    }
+                    context.close()
+                }
+            }
+            serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
             self.clientRequestedKeepAlive = header.isKeepAlive
         case .body(var buffer):
+            requestSize += buffer.readableBytes
+            if let requestSizeLimit = server.options.requestSizeLimit {
+                if requestSize > requestSizeLimit {
+                    do {
+                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit,serverRequest?.remoteAddress ?? "") {
+                            serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
+                            errorResponseSent = true
+                            try serverResponse?.end(with: httpStatus, message: response)
+                        }
+                    } catch {
+                        Log.error("Failed to send error response")
+                    }
+                }
+            }
             guard let serverRequest = serverRequest else {
                 Log.error("No ServerRequest available")
                 return
@@ -91,7 +122,23 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             } else {
                 serverRequest.buffer!.byteBuffer.writeBuffer(&buffer)
             }
+
         case .end:
+            requestSize = 0
+            server.connectionCount.add(1)
+            if let connectionLimit = server.options.connectionLimit {
+                if server.connectionCount.load() > connectionLimit {
+                    do {
+                        if let (httpStatus, response) = server.options.connectionResponseGenerator(connectionLimit,serverRequest?.remoteAddress ?? "") {
+                            serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
+                            errorResponseSent = true
+                            try serverResponse?.end(with: httpStatus, message: response)
+                        }
+                    } catch {
+                        Log.error("Failed to send error response")
+                    }
+                }
+            }
             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
             //Make sure we use the latest delegate registered with the server
             DispatchQueue.global().async {
@@ -151,5 +198,9 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
 
     func updateKeepAliveState() {
         keepAliveState.decrement()
+    }
+
+    func channelInactive(context: ChannelHandlerContext, httpServer: HTTPServer) {
+        httpServer.connectionCount.sub(1)
     }
 }

@@ -85,9 +85,10 @@ class KituraNetTest: XCTestCase {
         }
     }
 
-    func startServer(_ delegate: ServerDelegate?, unixDomainSocketPath: String? = nil, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault) throws -> HTTPServer {
-
+    func startServer(_ delegate: ServerDelegate?, unixDomainSocketPath: String? = nil, port: Int = portDefault, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, serverConfig: ServerOptions = ServerOptions()) throws -> HTTPServer {
+        let serverConfig = serverConfig
         let server = HTTP.createServer()
+        server.options = serverConfig
         server.delegate = delegate
         if useSSL {
             server.sslConfig = KituraNetTest.sslConfig
@@ -103,8 +104,9 @@ class KituraNetTest: XCTestCase {
 
     /// Convenience function for starting an HTTPServer on an ephemeral port,
     /// returning the a tuple containing the server and the port it is listening on.
-    func startEphemeralServer(_ delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault) throws -> (server: HTTPServer, port: Int) {
-        let server = try startServer(delegate, port: 0, useSSL: useSSL, allowPortReuse: allowPortReuse)
+    func startEphemeralServer(_ delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, serverConfig: ServerOptions = ServerOptions()) throws -> (server: HTTPServer, port: Int) {
+        let serverConfig = serverConfig
+        let server = try startServer(delegate, port: 0, useSSL: useSSL,allowPortReuse: allowPortReuse, serverConfig: serverConfig)
         guard let serverPort = server.port else {
             throw KituraNetTestError(message: "Server port was not initialized")
         }
@@ -121,22 +123,24 @@ class KituraNetTest: XCTestCase {
         case both
     }
 
-    func performServerTest(_ delegate: ServerDelegate?, socketType: SocketType = .both, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: (XCTestExpectation) -> Void...) {
+    func performServerTest(serverConfig: ServerOptions = ServerOptions(), _ delegate: ServerDelegate?, socketType: SocketType = .both, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: (XCTestExpectation) -> Void...) {
+        let serverConfig = serverConfig
         self.socketType = socketType
         if socketType != .tcp {
-            performServerTestWithUnixSocket(delegate: delegate, useSSL: useSSL, allowPortReuse: allowPortReuse, line: line, asyncTasks: asyncTasks)
+            performServerTestWithUnixSocket(serverConfig: serverConfig, delegate: delegate, useSSL: useSSL, allowPortReuse: allowPortReuse, line: line, asyncTasks: asyncTasks)
         }
         if socketType != .unixDomainSocket {
-            performServerTestWithTCPPort(delegate: delegate, useSSL: useSSL, allowPortReuse:  allowPortReuse, line: line, asyncTasks: asyncTasks)
+            performServerTestWithTCPPort(serverConfig: serverConfig ,delegate: delegate, useSSL: useSSL, allowPortReuse:  allowPortReuse, line: line, asyncTasks: asyncTasks)
         }
     }
 
-    func performServerTestWithUnixSocket(delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: [(XCTestExpectation) -> Void]) { 
+    func performServerTestWithUnixSocket(serverConfig: ServerOptions = ServerOptions(), delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: [(XCTestExpectation) -> Void]) {
         do {
+            var serverConfig = serverConfig
             var server: HTTPServer
             self.useSSL = useSSL
             self.unixDomainSocketPath = self.socketFilePath
-            server = try startServer(delegate, unixDomainSocketPath: self.unixDomainSocketPath, useSSL: useSSL, allowPortReuse: allowPortReuse)
+            server = try startServer(delegate, unixDomainSocketPath: self.unixDomainSocketPath, useSSL: useSSL, allowPortReuse: allowPortReuse, serverConfig: serverConfig)
             defer {
                 server.stop()
             }
@@ -158,18 +162,18 @@ class KituraNetTest: XCTestCase {
         }
     }
 
-    func performServerTestWithTCPPort(delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: [(XCTestExpectation) -> Void]) { 
+    func performServerTestWithTCPPort(serverConfig: ServerOptions = ServerOptions(), delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: [(XCTestExpectation) -> Void]) {
         do {
+            var serverConfig = serverConfig
             var server: HTTPServer
             var ephemeralPort: Int = 0
             self.useSSL = useSSL
-            (server, ephemeralPort) = try startEphemeralServer(delegate, useSSL: useSSL, allowPortReuse: allowPortReuse)
+            (server, ephemeralPort) = try startEphemeralServer(delegate, useSSL: useSSL, allowPortReuse: allowPortReuse,serverConfig: serverConfig)
             self.port = ephemeralPort
             self.unixDomainSocketPath = nil
             defer {
                 server.stop()
             }
-
             let requestQueue = DispatchQueue(label: "Request queue")
             for (index, asyncTask) in asyncTasks.enumerated() {
                 let expectation = self.expectation(line: line, index: index)
