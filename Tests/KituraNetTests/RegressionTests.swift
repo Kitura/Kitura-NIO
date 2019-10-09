@@ -23,6 +23,12 @@ import NIOHTTP1
 import NIOSSL
 import LoggerAPI
 
+#if os(Linux)
+import Glibc
+#else
+import Darwin
+#endif
+
 class RegressionTests: KituraNetTest {
 
     static var allTests: [(String, (RegressionTests) -> () throws -> Void)] {
