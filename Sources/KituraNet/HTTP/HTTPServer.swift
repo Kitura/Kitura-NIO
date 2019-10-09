@@ -125,7 +125,7 @@ public class HTTPServer: Server {
     private let maxPendingConnections = 100
 
     /// The event loop group on which the HTTP handler runs
-    public let eventLoopGroup: MultiThreadedEventLoopGroup
+    public let eventLoopGroup: EventLoopGroup
 
     var quiescingHelper: ServerQuiescingHelper?
 
@@ -155,7 +155,7 @@ public class HTTPServer: Server {
         self.options = options
     }
 
-    public init(eventLoopGroup: MultiThreadedEventLoopGroup) {
+    public init(eventLoopGroup: EventLoopGroup) {
         self.eventLoopGroup = eventLoopGroup
     }
 
