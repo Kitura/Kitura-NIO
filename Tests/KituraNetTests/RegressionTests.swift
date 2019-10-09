@@ -22,12 +22,7 @@ import NIO
 import NIOHTTP1
 import NIOSSL
 import LoggerAPI
-
-#if os(Linux)
-import Glibc
-#else
-import Darwin
-#endif
+import CLinuxHelpers
 
 class RegressionTests: KituraNetTest {
 
