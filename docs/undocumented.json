@@ -30,7 +30,7 @@
     },
     {
       "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServer.swift",
-      "line": 50,
+      "line": 54,
       "symbol": "FastCGIServer.init()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
@@ -108,7 +108,7 @@
     {
       "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
       "line": 21,
-      "symbol": "KeepAliveState.limited",
+      "symbol": "KeepAliveState.limited(maxRequests:)",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     }

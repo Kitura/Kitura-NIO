@@ -22,7 +22,7 @@
         <a class="header-link" href="index.html">
           KituraNet Docs
         </a>
-         (94% documented)
+         (95% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -154,6 +154,9 @@
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Structs/Monitor.html">Monitor</a>
               </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/ServerOptions.html">ServerOptions</a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -170,7 +173,7 @@
 </p>
 
 <p align="center">
-<img src="https://img.shields.io/badge/Swift-4.2-orange.svg?style=flat" alt="Swift 4.2">
+<img src="https://img.shields.io/badge/Swift-5.0-orange.svg?style=flat" alt="Swift 5.0">
 <a href="https://ibm-swift.github.io/Kitura-NIO/index.html">
 <img src="https://img.shields.io/badge/apidoc-KituraNIO-1FBCE4.svg?style=flat" alt="APIDoc">
 </a>
@@ -186,20 +189,21 @@
 </p>
 <h1 id='kitura-nio' class='heading'>Kitura-NIO</h1>
 
-<p>Kitura-NIO is a <a href="https://github.com/apple/swift-nio">SwiftNIO</a> based networking library for Kitura. Kitura-NIO adopts the same API as <a href="https://github.com/IBM-Swift/Kitura-net">KituraNet</a>, making the transition from KituraNet to Kitura-NIO seamless. While Kitura-NIO shares some code with Kitura-Net, the core comprising of HTTPServer, ClientRequest/ClientResponse and TLS support have been implemented using SwiftNIO. Kitura-NIO uses <a href="https://github.com/apple/swift-nio-ssl">NIOOpenSSL</a> for TLS support.</p>
+<p>Kitura-NIO is a <a href="https://github.com/apple/swift-nio">SwiftNIO</a> based networking library for Kitura. Kitura-NIO adopts the same API as <a href="https://github.com/IBM-Swift/Kitura-net">KituraNet</a>, making the transition from KituraNet to Kitura-NIO seamless. While Kitura-NIO shares some code with Kitura-Net, the core comprising of HTTPServer, ClientRequest/ClientResponse and TLS support have been implemented using SwiftNIO. Kitura-NIO uses <a href="https://github.com/apple/swift-nio-ssl">NIOSSL</a> for TLS support.</p>
 
-<p>We expect most of our users to require higher level concepts such as routing, templates and middleware, these are not provided in Kitura-NIO, if you want to use those facilities you should be coding at the Kitura level, for this please see the <a href="https://github.com/IBM-Swift/Kitura">Kitura</a> project. Kitura-NIO, like  <a href="https://github.com/IBM-Swift/Kitura-net">Kitura-net</a>, underpins Kitura which offers a higher abstraction level to users.</p>
+<p>We expect most of our users to require higher level concepts such as routing, templates and middleware. These are not provided in Kitura-NIO. If you want to use those facilities you should be coding at the Kitura level, for this please see the <a href="https://github.com/IBM-Swift/Kitura">Kitura</a> project. Kitura-NIO, like  <a href="https://github.com/IBM-Swift/Kitura-net">Kitura-net</a>, underpins Kitura which offers a higher abstraction level to users.</p>
 
-<p>Kitura-NIO works with Swift 4.2. It is also being tested with the development binaries for Swift 5.</p>
+<p>Kitura-NIO 2 has been tested with Swift 5. If you are using Swift 4, please use Kitura-NIO 1. See the <a href="https://github.com/IBM-Swift/Kitura-NIO/releases">release history</a> for details.</p>
 <h2 id='features' class='heading'>Features</h2>
 
 <ul>
 <li>Port Listening</li>
 <li>HTTP Server support (request and response)</li>
+<li>Basic HTTP client support</li>
 </ul>
 <h2 id='using-kitura-nio' class='heading'>Using Kitura-NIO</h2>
 
-<p>With Kitura 2.5 and future releases, to run on top of Kitura-NIO (instead of Kitura-Net) all you need to do is set an environment variable called <code>KITURA_NIO</code> before building your Kitura appilication:</p>
+<p>With Kitura 2.5 and future releases, to run on top of Kitura-NIO (instead of Kitura-Net) all you need to do is set an environment variable called <code>KITURA_NIO</code> before building your Kitura application:</p>
 <pre class="highlight shell"><code>    <span class="nb">export </span><span class="nv">KITURA_NIO</span><span class="o">=</span>1 <span class="o">&amp;&amp;</span> swift build
 </code></pre>
 
@@ -209,7 +213,7 @@
 
 <p>Using the environment variable we make sure that only one out of Kitura-NIO and Kitura-Net is linked into the final binary.</p>
 
-<p>Please note that though Kitura-NIO has its own GitHub repository, the package name is <code>KituraNet</code>. This is because the Kitura-NIO and Kitura-Net are expected to provide identical APIs, and it make sense if they share the package name too.</p>
+<p>Please note that though Kitura-NIO has its own GitHub repository, the package name is <code>KituraNet</code>. This is because the Kitura-NIO and Kitura-Net are expected to provide identical APIs, and it makes sense if they share the package name too.</p>
 <h2 id='getting-started' class='heading'>Getting Started</h2>
 
 <p>Visit <a href="http://www.kitura.io/">www.kitura.io</a> for reference documentation.</p>
@@ -240,7 +244,7 @@
 <p>Join the <a href="https://forums.swift.org/c/related-projects/kitura">Kitura on Swift Forums</a> or our <a href="http://swift-at-ibm-slack.mybluemix.net/">Slack</a> to meet the team!</p>
 <h2 id='license' class='heading'>License</h2>
 
-<p>This library is licensed under Apache 2.0. Full license text is available in <a href="https://github.com/IBM-Swift/Kitura-NIO/blob/master/LICENSE.txt">LICENSE</a>.</p>
+<p>This library is licensed under Apache 2.0. The full license text is available in <a href="https://github.com/IBM-Swift/Kitura-NIO/blob/master/LICENSE.txt">LICENSE</a>.</p>
 
           </div>
         </section>
@@ -249,8 +253,8 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-03-28)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-10-09)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

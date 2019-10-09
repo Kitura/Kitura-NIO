@@ -23,7 +23,7 @@
         <a class="header-link" href="../index.html">
           KituraNet Docs
         </a>
-         (94% documented)
+         (95% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -155,6 +155,9 @@
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Structs/Monitor.html">Monitor</a>
               </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/ServerOptions.html">ServerOptions</a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -166,7 +169,7 @@
             <h1>HTTPServerRequest</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">HTTPServerRequest</span><span class="p">:</span> <span class="kt"><a href="../Protocols/ServerRequest.html">ServerRequest</a></span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">HTTPServerRequest</span> <span class="p">:</span> <span class="kt"><a href="../Protocols/ServerRequest.html">ServerRequest</a></span></code></pre>
 
                 </div>
               </div>
@@ -250,7 +253,8 @@ Use &lsquo;urlURL&rsquo; for the full URL</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">urlString</span><span class="p">:</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">deprecated</span><span class="p">,</span> <span class="nv">message</span><span class="p">:</span> <span class="s">"This contains just the path and query parameters starting with '/'. use 'urlURL' instead"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="k">var</span> <span class="nv">urlString</span><span class="p">:</span> <span class="kt">String</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -282,7 +286,7 @@ Use &lsquo;urlURL&rsquo; for the full URL</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">url</span><span class="p">:</span> <span class="kt">Data</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">url</span><span class="p">:</span> <span class="kt">Data</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -313,7 +317,8 @@ URLComponents has a memory leak on linux as of swift 3.0.1. Use &lsquo;urlURL&rs
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">urlComponents</span><span class="p">:</span> <span class="kt">URLComponents</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">deprecated</span><span class="p">,</span> <span class="nv">message</span><span class="p">:</span> <span class="s">"URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="k">var</span> <span class="nv">urlComponents</span><span class="p">:</span> <span class="kt">URLComponents</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -343,7 +348,7 @@ URLComponents has a memory leak on linux as of swift 3.0.1. Use &lsquo;urlURL&rs
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">urlURL</span><span class="p">:</span> <span class="kt">URL</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">urlURL</span><span class="p">:</span> <span class="kt">URL</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -473,9 +478,9 @@ URLComponents has a memory leak on linux as of swift 3.0.1. Use &lsquo;urlURL&rs
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet17HTTPServerRequestC4readSi10Foundation4DataVz4into_tKF"></a>
+                    <a name="/s:9KituraNet17HTTPServerRequestC4read4intoSi10Foundation4DataVz_tKF"></a>
                     <a name="//apple_ref/swift/Method/read(into:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet17HTTPServerRequestC4readSi10Foundation4DataVz4into_tKF">read(into:)</a>
+                    <a class="token" href="#/s:9KituraNet17HTTPServerRequestC4read4intoSi10Foundation4DataVz_tKF">read(into:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -570,9 +575,9 @@ URLComponents has a memory leak on linux as of swift 3.0.1. Use &lsquo;urlURL&rs
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet17HTTPServerRequestC11readAllDataSi10Foundation0G0Vz4into_tKF"></a>
+                    <a name="/s:9KituraNet17HTTPServerRequestC11readAllData4intoSi10Foundation0G0Vz_tKF"></a>
                     <a name="//apple_ref/swift/Method/readAllData(into:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet17HTTPServerRequestC11readAllDataSi10Foundation0G0Vz4into_tKF">readAllData(into:)</a>
+                    <a class="token" href="#/s:9KituraNet17HTTPServerRequestC11readAllData4intoSi10Foundation0G0Vz_tKF">readAllData(into:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -633,8 +638,8 @@ URLComponents has a memory leak on linux as of swift 3.0.1. Use &lsquo;urlURL&rs
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-03-28)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-10-09)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

@@ -14,6 +14,7 @@
   </head>
   <body>
 
+    <a name="//apple_ref/swift/Section/Classes" class="dashAnchor"></a>
 
     <a title="Classes  Reference"></a>
 
@@ -22,7 +23,7 @@
         <a class="header-link" href="index.html">
           KituraNet Docs
         </a>
-         (94% documented)
+         (95% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -154,6 +155,9 @@
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Structs/Monitor.html">Monitor</a>
               </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/ServerOptions.html">ServerOptions</a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -192,9 +196,9 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>This class provides an implementation of a buffer that can be added to and taken from in chunks. Data is always added to the end of the buffer (using <code><a href="Classes/BufferList.html#/s:9KituraNet10BufferListC6appendySPys5UInt8VG5bytes_Si6lengthtF">BufferList.append(...)</a></code> and taken out of the buffer (using <code><a href="Classes/BufferList.html#/s:9KituraNet10BufferListC4fillSiSays5UInt8VGz5array_tF">BufferList.fill(...)</a></code>) from the beginning towards the end. The location indicating where the next chunk of data will be taken from is maintained, this location can then be reset to enable data to be taken out of the buffer from the beginning again.</p>
+                        <p>This class provides an implementation of a buffer that can be added to and taken from in chunks. Data is always added to the end of the buffer (using <code><a href="Classes/BufferList.html#/s:9KituraNet10BufferListC6append5bytes6lengthySPys5UInt8VG_SitF">BufferList.append(...)</a></code> and taken out of the buffer (using <code><a href="Classes/BufferList.html#/s:9KituraNet10BufferListC4fill5arraySiSays5UInt8VGz_tF">BufferList.fill(...)</a></code>) from the beginning towards the end. The location indicating where the next chunk of data will be taken from is maintained, this location can then be reset to enable data to be taken out of the buffer from the beginning again.</p>
 
-<p>In the below example, we create an empty <code>BufferList</code> instance. You can then append data to your <code>BufferList</code> instance, in our case <code>writeBuffer</code>. We then make two seperate appends. When <code>writeBuffer</code> contains the data which you wish to write out you can use <code><a href="Classes/BufferList.html#/s:9KituraNet10BufferListC4fillSiSays5UInt8VGz5array_tF">BufferList.fill(...)</a></code> to write out the data from the buffer to your chosen location, which in this case is <code>finalArrayOfNumbers</code>.</p>
+<p>In the below example, we create an empty <code>BufferList</code> instance. You can then append data to your <code>BufferList</code> instance, in our case <code>writeBuffer</code>. We then make two seperate appends. When <code>writeBuffer</code> contains the data which you wish to write out you can use <code><a href="Classes/BufferList.html#/s:9KituraNet10BufferListC4fill5arraySiSays5UInt8VGz_tF">BufferList.fill(...)</a></code> to write out the data from the buffer to your chosen location, which in this case is <code>finalArrayOfNumbers</code>.</p>
 <h3 id='usage-example' class='heading'>Usage Example:</h3>
 <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">writeBuffer</span> <span class="o">=</span> <span class="kt">BufferList</span><span class="p">()</span>
 
@@ -381,7 +385,7 @@ protocol.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">FastCGIServer</span><span class="p">:</span> <span class="kt"><a href="Protocols/Server.html">Server</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">FastCGIServer</span> <span class="p">:</span> <span class="kt"><a href="Protocols/Server.html">Server</a></span></code></pre>
 
                         </div>
                       </div>
@@ -414,7 +418,7 @@ for incoming HTTP requests that come in over a FastCGI connection.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">FastCGIServerRequest</span><span class="p">:</span> <span class="kt"><a href="Protocols/ServerRequest.html">ServerRequest</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">FastCGIServerRequest</span> <span class="p">:</span> <span class="kt"><a href="Protocols/ServerRequest.html">ServerRequest</a></span></code></pre>
 
                         </div>
                       </div>
@@ -447,7 +451,7 @@ for incoming HTTP requests that come in over a FastCGI connection.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">FastCGIServerResponse</span><span class="p">:</span> <span class="kt"><a href="Protocols/ServerResponse.html">ServerResponse</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">FastCGIServerResponse</span> <span class="p">:</span> <span class="kt"><a href="Protocols/ServerResponse.html">ServerResponse</a></span></code></pre>
 
                         </div>
                       </div>
@@ -548,7 +552,7 @@ for incoming HTTP requests that come in over a FastCGI connection.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">HTTPServer</span><span class="p">:</span> <span class="kt"><a href="Protocols/Server.html">Server</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">HTTPServer</span> <span class="p">:</span> <span class="kt"><a href="Protocols/Server.html">Server</a></span></code></pre>
 
                         </div>
                       </div>
@@ -603,7 +607,7 @@ for incoming HTTP requests that come in over a FastCGI connection.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">HTTPServerRequest</span><span class="p">:</span> <span class="kt"><a href="Protocols/ServerRequest.html">ServerRequest</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">HTTPServerRequest</span> <span class="p">:</span> <span class="kt"><a href="Protocols/ServerRequest.html">ServerRequest</a></span></code></pre>
 
                         </div>
                       </div>
@@ -660,7 +664,7 @@ responses via the HTTP protocol. Data and Strings can be written.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">HTTPServerResponse</span><span class="p">:</span> <span class="kt"><a href="Protocols/ServerResponse.html">ServerResponse</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">HTTPServerResponse</span> <span class="p">:</span> <span class="kt"><a href="Protocols/ServerResponse.html">ServerResponse</a></span></code></pre>
 
                         </div>
                       </div>
@@ -821,7 +825,7 @@ responses via the HTTP protocol. Data and Strings can be written.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">URLParser</span><span class="p">:</span> <span class="kt">CustomStringConvertible</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">URLParser</span> <span class="p">:</span> <span class="kt">CustomStringConvertible</span></code></pre>
 
                         </div>
                       </div>
@@ -836,8 +840,8 @@ responses via the HTTP protocol. Data and Strings can be written.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-03-28)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-10-09)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

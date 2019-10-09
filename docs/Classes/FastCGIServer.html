@@ -23,7 +23,7 @@
         <a class="header-link" href="../index.html">
           KituraNet Docs
         </a>
-         (94% documented)
+         (95% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -155,6 +155,9 @@
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Structs/Monitor.html">Monitor</a>
               </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/ServerOptions.html">ServerOptions</a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -166,7 +169,7 @@
             <h1>FastCGIServer</h1>
               <div class="declaration">
                 <div class="language">
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">FastCGIServer</span><span class="p">:</span> <span class="kt"><a href="../Protocols/Server.html">Server</a></span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">FastCGIServer</span> <span class="p">:</span> <span class="kt"><a href="../Protocols/Server.html">Server</a></span></code></pre>
 
                 </div>
               </div>
@@ -183,9 +186,9 @@ protocol.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet6ServerP0C4Type"></a>
+                    <a name="/s:9KituraNet6ServerP0C4TypeQa"></a>
                     <a name="//apple_ref/swift/Alias/ServerType" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet6ServerP0C4Type">ServerType</a>
+                    <a class="token" href="#/s:9KituraNet6ServerP0C4TypeQa">ServerType</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -263,6 +266,34 @@ protocol.</p>
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:9KituraNet13FastCGIServerC7addressSSSgvp"></a>
+                    <a name="//apple_ref/swift/Property/address" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9KituraNet13FastCGIServerC7addressSSSgvp">address</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The address of a network interface to listen on, for example <q>localhost</q>. The default is nil,
+which listens for connections on all interfaces.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">address</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:9KituraNet13FastCGIServerC5stateAA11ServerStateOvp"></a>
                     <a name="//apple_ref/swift/Property/state" class="dashAnchor"></a>
                     <a class="token" href="#/s:9KituraNet13FastCGIServerC5stateAA11ServerStateOvp">state</a>
@@ -280,7 +311,7 @@ protocol.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">state</span><span class="p">:</span> <span class="kt"><a href="../Enums/ServerState.html">ServerState</a></span> <span class="o">=</span> <span class="o">.</span><span class="n">unknown</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">state</span><span class="p">:</span> <span class="kt"><a href="../Enums/ServerState.html">ServerState</a></span></code></pre>
 
                         </div>
                       </div>
@@ -307,7 +338,7 @@ protocol.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">allowPortReuse</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">allowPortReuse</span><span class="p">:</span> <span class="kt">Bool</span></code></pre>
 
                         </div>
                       </div>
@@ -344,9 +375,9 @@ protocol.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet13FastCGIServerC6listenySi2on_tKF"></a>
-                    <a name="//apple_ref/swift/Method/listen(on:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet13FastCGIServerC6listenySi2on_tKF">listen(on:)</a>
+                    <a name="/s:9KituraNet13FastCGIServerC6listen2on7addressySi_SSSgtKF"></a>
+                    <a name="//apple_ref/swift/Method/listen(on:address:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9KituraNet13FastCGIServerC6listen2on7addressySi_SSSgtKF">listen(on:address:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -361,7 +392,7 @@ protocol.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">listen</span><span class="p">(</span><span class="n">on</span> <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">listen</span><span class="p">(</span><span class="n">on</span> <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">address</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>
@@ -381,6 +412,19 @@ protocol.</p>
                                 </div>
                               </td>
                             </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>address</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The address of the network interface to listen on. Defaults to nil, which means this
+        server will listen on all interfaces.</p>
+                                </div>
+                              </td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -390,9 +434,9 @@ protocol.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet13FastCGIServerC6listenACSi2on_AA14ServerDelegate_pSg8delegatetKFZ"></a>
-                    <a name="//apple_ref/swift/Method/listen(on:delegate:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet13FastCGIServerC6listenACSi2on_AA14ServerDelegate_pSg8delegatetKFZ">listen(on:delegate:)</a>
+                    <a name="/s:9KituraNet13FastCGIServerC6listen2on7address8delegateACSi_SSSgAA14ServerDelegate_pSgtKFZ"></a>
+                    <a name="//apple_ref/swift/Method/listen(on:address:delegate:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9KituraNet13FastCGIServerC6listen2on7address8delegateACSi_SSSgAA14ServerDelegate_pSgtKFZ">listen(on:address:delegate:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -407,7 +451,7 @@ protocol.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">listen</span><span class="p">(</span><span class="n">on</span> <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/ServerDelegate.html">ServerDelegate</a></span><span class="p">?)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">FastCGIServer</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">listen</span><span class="p">(</span><span class="n">on</span> <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">address</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/ServerDelegate.html">ServerDelegate</a></span><span class="p">?)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">FastCGIServer</span></code></pre>
 
                         </div>
                       </div>
@@ -424,6 +468,19 @@ protocol.</p>
                               <td>
                                 <div>
                                   <p>port number for accepting new connections</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>address</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The address of the network interface to listen on. Defaults to nil, which means this
+        server will listen on all interfaces.</p>
                                 </div>
                               </td>
                             </tr>
@@ -452,9 +509,9 @@ protocol.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet13FastCGIServerC6listenySi4port_ys5Error_pcSg12errorHandlertF"></a>
+                    <a name="/s:9KituraNet13FastCGIServerC6listen4port12errorHandlerySi_ys5Error_pcSgtF"></a>
                     <a name="//apple_ref/swift/Method/listen(port:errorHandler:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet13FastCGIServerC6listenySi4port_ys5Error_pcSg12errorHandlertF">listen(port:errorHandler:)</a>
+                    <a class="token" href="#/s:9KituraNet13FastCGIServerC6listen4port12errorHandlerySi_ys5Error_pcSgtF">listen(port:errorHandler:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -469,7 +526,8 @@ protocol.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">listen</span><span class="p">(</span><span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">errorHandler</span><span class="p">:</span> <span class="p">((</span><span class="kt">Swift</span><span class="o">.</span><span class="kt">Error</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">deprecated</span><span class="p">,</span> <span class="nv">message</span><span class="p">:</span> <span class="s">"use 'listen(on:﹚ throws' with 'server.failed(callback:﹚' instead"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">listen</span><span class="p">(</span><span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">errorHandler</span><span class="p">:</span> <span class="p">((</span><span class="kt">Swift</span><span class="o">.</span><span class="kt">Error</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -510,9 +568,9 @@ protocol.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet13FastCGIServerC6listenACSi4port_AA14ServerDelegate_p8delegateys5Error_pcSg12errorHandlertFZ"></a>
+                    <a name="/s:9KituraNet13FastCGIServerC6listen4port8delegate12errorHandlerACSi_AA14ServerDelegate_pys5Error_pcSgtFZ"></a>
                     <a name="//apple_ref/swift/Method/listen(port:delegate:errorHandler:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet13FastCGIServerC6listenACSi4port_AA14ServerDelegate_p8delegateys5Error_pcSg12errorHandlertFZ">listen(port:delegate:errorHandler:)</a>
+                    <a class="token" href="#/s:9KituraNet13FastCGIServerC6listen4port8delegate12errorHandlerACSi_AA14ServerDelegate_pys5Error_pcSgtFZ">listen(port:delegate:errorHandler:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -527,7 +585,8 @@ protocol.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">listen</span><span class="p">(</span><span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/ServerDelegate.html">ServerDelegate</a></span><span class="p">,</span> <span class="nv">errorHandler</span><span class="p">:</span> <span class="p">((</span><span class="kt">Swift</span><span class="o">.</span><span class="kt">Error</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">FastCGIServer</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">deprecated</span><span class="p">,</span> <span class="nv">message</span><span class="p">:</span> <span class="s">"use 'listen(on:delegate:﹚ throws' with 'server.failed(callback:﹚' instead"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">listen</span><span class="p">(</span><span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt"><a href="../Protocols/ServerDelegate.html">ServerDelegate</a></span><span class="p">,</span> <span class="nv">errorHandler</span><span class="p">:</span> <span class="p">((</span><span class="kt">Swift</span><span class="o">.</span><span class="kt">Error</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">FastCGIServer</span></code></pre>
 
                         </div>
                       </div>
@@ -611,9 +670,9 @@ protocol.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet13FastCGIServerC7startedACXDyyc8callback_tF"></a>
+                    <a name="/s:9KituraNet13FastCGIServerC7started8callbackACXDyyc_tF"></a>
                     <a name="//apple_ref/swift/Method/started(callback:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet13FastCGIServerC7startedACXDyyc8callback_tF">started(callback:)</a>
+                    <a class="token" href="#/s:9KituraNet13FastCGIServerC7started8callbackACXDyyc_tF">started(callback:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -628,7 +687,8 @@ protocol.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">started</span><span class="p">(</span><span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">Self</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@discardableResult</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">started</span><span class="p">(</span><span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">Self</span></code></pre>
 
                         </div>
                       </div>
@@ -661,9 +721,9 @@ protocol.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet13FastCGIServerC7stoppedACXDyyc8callback_tF"></a>
+                    <a name="/s:9KituraNet13FastCGIServerC7stopped8callbackACXDyyc_tF"></a>
                     <a name="//apple_ref/swift/Method/stopped(callback:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet13FastCGIServerC7stoppedACXDyyc8callback_tF">stopped(callback:)</a>
+                    <a class="token" href="#/s:9KituraNet13FastCGIServerC7stopped8callbackACXDyyc_tF">stopped(callback:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -678,7 +738,8 @@ protocol.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">stopped</span><span class="p">(</span><span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">Self</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@discardableResult</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">stopped</span><span class="p">(</span><span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">Self</span></code></pre>
 
                         </div>
                       </div>
@@ -711,9 +772,9 @@ protocol.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet13FastCGIServerC6failedACXDys5Error_pc8callback_tF"></a>
+                    <a name="/s:9KituraNet13FastCGIServerC6failed8callbackACXDys5Error_pc_tF"></a>
                     <a name="//apple_ref/swift/Method/failed(callback:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet13FastCGIServerC6failedACXDys5Error_pc8callback_tF">failed(callback:)</a>
+                    <a class="token" href="#/s:9KituraNet13FastCGIServerC6failed8callbackACXDys5Error_pc_tF">failed(callback:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -728,7 +789,8 @@ protocol.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">failed</span><span class="p">(</span><span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">Swift</span><span class="o">.</span><span class="kt">Error</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">Self</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@discardableResult</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">failed</span><span class="p">(</span><span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">Swift</span><span class="o">.</span><span class="kt">Error</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">Self</span></code></pre>
 
                         </div>
                       </div>
@@ -761,9 +823,9 @@ protocol.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet13FastCGIServerC22clientConnectionFailedACXDys5Error_pc8callback_tF"></a>
+                    <a name="/s:9KituraNet13FastCGIServerC22clientConnectionFailed8callbackACXDys5Error_pc_tF"></a>
                     <a name="//apple_ref/swift/Method/clientConnectionFailed(callback:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet13FastCGIServerC22clientConnectionFailedACXDys5Error_pc8callback_tF">clientConnectionFailed(callback:)</a>
+                    <a class="token" href="#/s:9KituraNet13FastCGIServerC22clientConnectionFailed8callbackACXDys5Error_pc_tF">clientConnectionFailed(callback:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -778,7 +840,8 @@ protocol.</p>
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">clientConnectionFailed</span><span class="p">(</span><span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">Swift</span><span class="o">.</span><span class="kt">Error</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">Self</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">@discardableResult</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">clientConnectionFailed</span><span class="p">(</span><span class="nv">callback</span><span class="p">:</span> <span class="kd">@escaping</span> <span class="p">(</span><span class="kt">Swift</span><span class="o">.</span><span class="kt">Error</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">Self</span></code></pre>
 
                         </div>
                       </div>
@@ -816,8 +879,8 @@ protocol.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-03-28)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-10-09)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
