@@ -199,7 +199,12 @@ class RegressionTests: KituraNetTest {
             #else
             let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
             #endif
-            let server = HTTPServer(eventLoopGroup: eventLoopGroup)
+            let server = HTTPServer()
+            do {
+                try server.setEventLoopGroup(eventLoopGroup)
+            } catch {
+                XCTFail("Unable to initialize EventLoopGroup: \(error)")
+            }
             let serverPort: Int = 8091
             defer {
                 server.stop()
@@ -215,7 +220,13 @@ class RegressionTests: KituraNetTest {
             XCTAssertEqual(goodClient.connectedPort, serverPort, "GoodClient not connected to expected server port")
 
             // Start a server using eventLoopGroup api provided by HTPPServer()
-            let server2 = HTTPServer(eventLoopGroup: server.eventLoopGroup)
+            let server2 = HTTPServer()
+            do {
+                try server2.setEventLoopGroup(server.eventLoopGroup)
+            } catch {
+                XCTFail("Unable to initialize EventLoopGroup: \(error)")
+            }
+
             let serverPort2: Int = 8092
             defer {
                 server2.stop()
@@ -233,6 +244,29 @@ class RegressionTests: KituraNetTest {
             XCTFail("Error: \(error)")
         }
         waitForExpectations(timeout: 10)
+    }
+
+    func testFailEventLoopGroupReinitialization() {
+        do {
+        #if os(Linux)
+        let numberOfCores = Int(linux_sched_getaffinity())
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
+        #else
+        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+        #endif
+        let server = HTTPServer()
+        do {
+            try server.listen(on: 8093)
+        } catch {
+            XCTFail("Couldn't start server \(error)")
+            }
+        do {
+            try server.setEventLoopGroup(eventLoopGroup)
+        } catch {
+            let serverError = error as? HTTPServerError
+            XCTAssertEqual(serverError, HTTPServerError.eventLoopGroupAlreadyInitialized)
+            }
+        }
     }
 
     /// A simple client which connects to a port but sends no data

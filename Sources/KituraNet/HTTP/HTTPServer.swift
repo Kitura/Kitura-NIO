@@ -44,6 +44,14 @@ An HTTP server that listens for connections on a socket.
  server.stop()
 ````
 */
+
+#if os(Linux)
+    let numberOfCores = Int(linux_sched_getaffinity())
+    fileprivate let globalELG = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
+#else
+    fileprivate let globalELG = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+#endif
+
 public class HTTPServer: Server {
 
     public typealias ServerType = HTTPServer
@@ -83,8 +91,8 @@ public class HTTPServer: Server {
      ````
     */
     public private(set) var state: ServerState {
-        get {
-            return self.syncQ.sync {
+	get {
+		    return self.syncQ.sync {
                 return self._state
             }
         }
@@ -124,8 +132,17 @@ public class HTTPServer: Server {
     /// Maximum number of pending connections
     private let maxPendingConnections = 100
 
-    /// The event loop group on which the HTTP handler runs
-    public let eventLoopGroup: EventLoopGroup
+    // A lazily initialized EventLoopGroup, accessed via `eventLoopGroup`
+    private var _eventLoopGroup: EventLoopGroup?
+
+    /// The EventLoopGroup used by this HTTPServer. This property may be assigned
+    /// once and once only, by calling `setEventLoopGroup(value:)` before `listen()` is called.
+    public var eventLoopGroup: EventLoopGroup {
+        if let value = self._eventLoopGroup { return value }
+        let value = globalELG
+        self._eventLoopGroup = value
+        return value
+    }
 
     var quiescingHelper: ServerQuiescingHelper?
 
@@ -146,17 +163,7 @@ public class HTTPServer: Server {
      ````
     */
     public init(options: ServerOptions = ServerOptions()) {
-#if os(Linux)
-        let numberOfCores = Int(linux_sched_getaffinity())
-        self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
-#else
-        self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-#endif
         self.options = options
-    }
-
-    public init(eventLoopGroup: EventLoopGroup) {
-        self.eventLoopGroup = eventLoopGroup
     }
 
     /**
@@ -290,6 +297,16 @@ public class HTTPServer: Server {
         self.port = port
         self.address = address
         try listen(.tcp(port, address))
+    }
+
+    /// Sets the EventLoopGroup to be used by this HTTPServer. This may be called once
+    /// and once only, and must be called prior to `listen()`.
+    /// - Throws: If the EventLoopGroup has already been assigned.
+    public func setEventLoopGroup(_ value: EventLoopGroup) throws {
+        guard _eventLoopGroup == nil else {
+            throw HTTPServerError.eventLoopGroupAlreadyInitialized
+        }
+        _eventLoopGroup = value
     }
 
     private func listen(_ socket: SocketType) throws {
@@ -466,14 +483,6 @@ public class HTTPServer: Server {
         server.delegate = delegate
         server.listen(port: port, errorHandler: errorHandler)
         return server
-    }
-
-    deinit {
-        do {
-            try eventLoopGroup.syncShutdownGracefully()
-        } catch {
-            Log.error("Failed to shutdown eventLoopGroup")
-        }
     }
 
     /**
@@ -687,4 +696,8 @@ enum KituraWebSocketUpgradeError: Error {
 
     // Unknown upgrade error
     case unknownUpgradeError
+}
+
+public enum HTTPServerError: Error {
+    case eventLoopGroupAlreadyInitialized
 }
