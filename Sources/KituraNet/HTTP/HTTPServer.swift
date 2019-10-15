@@ -137,6 +137,11 @@ public class HTTPServer: Server {
 
     /// The EventLoopGroup used by this HTTPServer. This property may be assigned
     /// once and once only, by calling `setEventLoopGroup(value:)` before `listen()` is called.
+    /// Server runs on `eventLoopGroup` which it is initialized to i.e. when user explicitly provides `eventLoopGroup` for server,
+    /// public variable `eventLoopGroup` will  return value stored private variable `_eventLoopGroup` when `ServerBootstrap` is called in `listen()`
+    /// making the server run of userdefined EventLoopGroup. If the `setEventLoopGroup(value:)` is not called, `nil` in variable `_eventLoopGroup` forces
+    /// Server to run in `globalELG` since value of `eventLoopGroup` in `ServerBootstrap(group: eventLoopGroup)` gets initialzed to value `globalELG`
+    /// if `setEventLoopGroup(value:)` is not called before `listen()`
     public var eventLoopGroup: EventLoopGroup {
         if let value = self._eventLoopGroup { return value }
         let value = globalELG

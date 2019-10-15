@@ -212,7 +212,7 @@ class RegressionTests: KituraNetTest {
             do {
                 try server.listen(on: serverPort)
             } catch {
-               XCTFail("Couldn't start server \(error)")
+               XCTFail("Unable to start the server \(error)")
             }
             var goodClient = try GoodClient()
             /// Connect a 'good' (SSL enabled) client to the server
@@ -234,7 +234,7 @@ class RegressionTests: KituraNetTest {
             do {
                 try server2.listen(on: serverPort2)
             } catch {
-                XCTFail("Couldn't start server \(error)")
+                XCTFail("Unable to start the server \(error)")
             }
             var goodClient2 = try GoodClient()
             /// Connect a 'good' (SSL enabled) client to the server
@@ -246,6 +246,9 @@ class RegressionTests: KituraNetTest {
         waitForExpectations(timeout: 10)
     }
 
+    // Tests eventLoopGroup initialization in server after starting the server
+    // If server `setEventLoopGroup` is called after function `listen()` server should throw
+    // error HTTPServerError.eventLoopGroupAlreadyInitialized
     func testFailEventLoopGroupReinitialization() {
         do {
         #if os(Linux)
@@ -258,7 +261,7 @@ class RegressionTests: KituraNetTest {
         do {
             try server.listen(on: 8093)
         } catch {
-            XCTFail("Couldn't start server \(error)")
+            XCTFail("Unable to start the server \(error)")
             }
         do {
             try server.setEventLoopGroup(eventLoopGroup)
