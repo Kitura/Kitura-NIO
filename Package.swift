@@ -21,22 +21,19 @@ import PackageDescription
 let package = Package(
     name: "Kitura-NIO",
     products: [
-        // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "KituraNet",
             targets: ["KituraNet"])
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.3.0"),
+        // FIXME: remove version constraint once IBM-Swift/Kitura-NIO#225 is merged
+        .package(url: "https://github.com/apple/swift-nio.git", "2.3.0"..."2.8.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.0.0"),
         .package(url: "https://github.com/apple/swift-nio-extras.git", from: "1.0.0"),
         .package(url: "https://github.com/IBM-Swift/BlueSSLService.git", from: "1.0.0"),
         .package(url: "https://github.com/IBM-Swift/LoggerAPI.git", from: "1.7.3")
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "CLinuxHelpers",
             dependencies: []),
