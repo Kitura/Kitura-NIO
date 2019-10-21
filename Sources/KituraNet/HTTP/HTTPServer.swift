@@ -91,12 +91,11 @@ public class HTTPServer: Server {
      ````
     */
     public private(set) var state: ServerState {
-	get {
-		    return self.syncQ.sync {
+        get {
+            return self.syncQ.sync {
                 return self._state
             }
         }
-
         set {
             self.syncQ.sync {
                 self._state = newValue
@@ -703,6 +702,18 @@ enum KituraWebSocketUpgradeError: Error {
     case unknownUpgradeError
 }
 
-public enum HTTPServerError: Error {
-    case eventLoopGroupAlreadyInitialized
+// HTTP server errors
+public struct HTTPServerError: Error,Equatable {
+
+    internal enum _HTTPServerError: Error {
+        case eventLoopGroupAlreadyInitialized
+    }
+
+    private var _httpServerError: _HTTPServerError
+
+    private init(value: _HTTPServerError){
+        self._httpServerError = value
+    }
+
+    public static var eventLoopGroupAlreadyInitialized = HTTPServerError(value: .eventLoopGroupAlreadyInitialized)
 }

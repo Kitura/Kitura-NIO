@@ -33,7 +33,8 @@ class RegressionTests: KituraNetTest {
             ("testServersSharingPort", testServersSharingPort),
             ("testBadRequest", testBadRequest),
             ("testBadRequestFollowingGoodRequest", testBadRequestFollowingGoodRequest),
-            ("testCustomEventLoopGroup", testCustomEventLoopGroup)
+            ("testCustomEventLoopGroup", testCustomEventLoopGroup),
+            ("testFailEventLoopGroupReinitialization", testFailEventLoopGroupReinitialization),
         ]
     }
 
@@ -266,8 +267,8 @@ class RegressionTests: KituraNetTest {
         do {
             try server.setEventLoopGroup(eventLoopGroup)
         } catch {
-            let serverError = error as? HTTPServerError
-            XCTAssertEqual(serverError, HTTPServerError.eventLoopGroupAlreadyInitialized)
+            let httpError = error as? HTTPServerError
+            XCTAssertEqual(httpError, HTTPServerError.eventLoopGroupAlreadyInitialized)
             }
         }
     }
