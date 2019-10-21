@@ -705,13 +705,13 @@ enum KituraWebSocketUpgradeError: Error {
 // HTTP server errors
 public struct HTTPServerError: Error,Equatable {
 
-    internal enum _HTTPServerError: Error {
+    internal enum HTTPServerErrorType: Error {
         case eventLoopGroupAlreadyInitialized
     }
 
-    private var _httpServerError: _HTTPServerError
+    private var _httpServerError: HTTPServerErrorType
 
-    private init(value: _HTTPServerError){
+    private init(value: HTTPServerErrorType){
         self._httpServerError = value
     }
 
