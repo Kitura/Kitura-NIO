@@ -141,6 +141,10 @@ public class HTTPServer: Server {
     /// making the server run of userdefined EventLoopGroup. If the `setEventLoopGroup(value:)` is not called, `nil` in variable `_eventLoopGroup` forces
     /// Server to run in `globalELG` since value of `eventLoopGroup` in `ServerBootstrap(group: eventLoopGroup)` gets initialzed to value `globalELG`
     /// if `setEventLoopGroup(value:)` is not called before `listen()`
+    /// If you are using Kitura-NIO and need to access EventLoopGroup that Kitura uses, you can do so like this:
+    ///
+    ///         ```let eventLoopGroup = server.eventLoopGroup```
+    ///
     public var eventLoopGroup: EventLoopGroup {
         if let value = self._eventLoopGroup { return value }
         let value = globalELG
@@ -306,6 +310,11 @@ public class HTTPServer: Server {
     /// Sets the EventLoopGroup to be used by this HTTPServer. This may be called once
     /// and once only, and must be called prior to `listen()`.
     /// - Throws: If the EventLoopGroup has already been assigned.
+    /// If you are using Kitura-NIO and need to set EventLoopGroup that Kitura uses, you can do so like this:
+    ///
+    ///         ```server.setEventLoopGroup(EventLoopGroup)```
+    ///
+    /// - Parameter : this function is supplied with user defined EventLoopGroup as arguement
     public func setEventLoopGroup(_ value: EventLoopGroup) throws {
         guard _eventLoopGroup == nil else {
             throw HTTPServerError.eventLoopGroupAlreadyInitialized
