@@ -715,8 +715,8 @@ enum KituraWebSocketUpgradeError: Error {
     case unknownUpgradeError
 }
 
-// HTTP server errors
-public struct HTTPServerError: Error,Equatable {
+/// Errors thrown by HTTPServer
+public struct HTTPServerError: Error, Equatable {
 
     internal enum HTTPServerErrorType: Error {
         case eventLoopGroupAlreadyInitialized

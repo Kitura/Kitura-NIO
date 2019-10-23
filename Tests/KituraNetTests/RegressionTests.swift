@@ -194,12 +194,12 @@ class RegressionTests: KituraNetTest {
 
     func testCustomEventLoopGroup() {
         do {
-            #if os(Linux)
+#if os(Linux)
             let numberOfCores = Int(linux_sched_getaffinity())
             let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
-            #else
+#else
             let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-            #endif
+#endif
             let server = HTTPServer()
             do {
                 try server.setEventLoopGroup(eventLoopGroup)
@@ -216,7 +216,7 @@ class RegressionTests: KituraNetTest {
                XCTFail("Unable to start the server \(error)")
             }
             var goodClient = try GoodClient()
-            /// Connect a 'good' (SSL enabled) client to the server
+            // Connect a 'good' (SSL enabled) client to the server
             try goodClient.connect(serverPort, expectation: self.expectation(description: "Connecting a bad client"))
             XCTAssertEqual(goodClient.connectedPort, serverPort, "GoodClient not connected to expected server port")
 
@@ -238,7 +238,7 @@ class RegressionTests: KituraNetTest {
                 XCTFail("Unable to start the server \(error)")
             }
             var goodClient2 = try GoodClient()
-            /// Connect a 'good' (SSL enabled) client to the server
+            // Connect a 'good' (SSL enabled) client to the server
             try goodClient2.connect(serverPort2, expectation: self.expectation(description: "Connecting a bad client"))
             XCTAssertEqual(goodClient2.connectedPort, serverPort2, "GoodClient not connected to expected server port")
         } catch {
@@ -252,23 +252,23 @@ class RegressionTests: KituraNetTest {
     // error HTTPServerError.eventLoopGroupAlreadyInitialized
     func testFailEventLoopGroupReinitialization() {
         do {
-        #if os(Linux)
-        let numberOfCores = Int(linux_sched_getaffinity())
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
-        #else
-        let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-        #endif
-        let server = HTTPServer()
-        do {
-            try server.listen(on: 8093)
-        } catch {
-            XCTFail("Unable to start the server \(error)")
+#if os(Linux)
+            let numberOfCores = Int(linux_sched_getaffinity())
+            let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
+#else
+            let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+#endif
+            let server = HTTPServer()
+            do {
+                try server.listen(on: 8093)
+            } catch {
+                XCTFail("Unable to start the server \(error)")
             }
-        do {
-            try server.setEventLoopGroup(eventLoopGroup)
-        } catch {
-            let httpError = error as? HTTPServerError
-            XCTAssertEqual(httpError, HTTPServerError.eventLoopGroupAlreadyInitialized)
+            do {
+                try server.setEventLoopGroup(eventLoopGroup)
+            } catch {
+                let httpError = error as? HTTPServerError
+                XCTAssertEqual(httpError, HTTPServerError.eventLoopGroupAlreadyInitialized)
             }
         }
     }
