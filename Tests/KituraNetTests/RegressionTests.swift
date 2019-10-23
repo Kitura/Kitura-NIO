@@ -22,6 +22,7 @@ import NIO
 import NIOHTTP1
 import NIOSSL
 import LoggerAPI
+import CLinuxHelpers
 
 class RegressionTests: KituraNetTest {
 
@@ -31,7 +32,9 @@ class RegressionTests: KituraNetTest {
             ("testServersCollidingOnPort", testServersCollidingOnPort),
             ("testServersSharingPort", testServersSharingPort),
             ("testBadRequest", testBadRequest),
-            ("testBadRequestFollowingGoodRequest", testBadRequestFollowingGoodRequest)
+            ("testBadRequestFollowingGoodRequest", testBadRequestFollowingGoodRequest),
+            ("testCustomEventLoopGroup", testCustomEventLoopGroup),
+            ("testFailEventLoopGroupReinitialization", testFailEventLoopGroupReinitialization),
         ]
     }
 
@@ -172,7 +175,6 @@ class RegressionTests: KituraNetTest {
             defer {
                 server.stop()
             }
-
             guard let serverPort = server.port else {
                 XCTFail("Server port was not initialized")
                 return
@@ -187,6 +189,87 @@ class RegressionTests: KituraNetTest {
             waitForExpectations(timeout: 10)
         } catch {
             XCTFail("Couldn't start server")
+        }
+    }
+
+    func testCustomEventLoopGroup() {
+        do {
+#if os(Linux)
+            let numberOfCores = Int(linux_sched_getaffinity())
+            let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
+#else
+            let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+#endif
+            let server = HTTPServer()
+            do {
+                try server.setEventLoopGroup(eventLoopGroup)
+            } catch {
+                XCTFail("Unable to initialize EventLoopGroup: \(error)")
+            }
+            let serverPort: Int = 8091
+            defer {
+                server.stop()
+            }
+            do {
+                try server.listen(on: serverPort)
+            } catch {
+               XCTFail("Unable to start the server \(error)")
+            }
+            var goodClient = try GoodClient()
+            // Connect a 'good' (SSL enabled) client to the server
+            try goodClient.connect(serverPort, expectation: self.expectation(description: "Connecting a bad client"))
+            XCTAssertEqual(goodClient.connectedPort, serverPort, "GoodClient not connected to expected server port")
+
+            // Start a server using eventLoopGroup api provided by HTPPServer()
+            let server2 = HTTPServer()
+            do {
+                try server2.setEventLoopGroup(server.eventLoopGroup)
+            } catch {
+                XCTFail("Unable to initialize EventLoopGroup: \(error)")
+            }
+
+            let serverPort2: Int = 8092
+            defer {
+                server2.stop()
+            }
+            do {
+                try server2.listen(on: serverPort2)
+            } catch {
+                XCTFail("Unable to start the server \(error)")
+            }
+            var goodClient2 = try GoodClient()
+            // Connect a 'good' (SSL enabled) client to the server
+            try goodClient2.connect(serverPort2, expectation: self.expectation(description: "Connecting a bad client"))
+            XCTAssertEqual(goodClient2.connectedPort, serverPort2, "GoodClient not connected to expected server port")
+        } catch {
+            XCTFail("Error: \(error)")
+        }
+        waitForExpectations(timeout: 10)
+    }
+
+    // Tests eventLoopGroup initialization in server after starting the server
+    // If server `setEventLoopGroup` is called after function `listen()` server should throw
+    // error HTTPServerError.eventLoopGroupAlreadyInitialized
+    func testFailEventLoopGroupReinitialization() {
+        do {
+#if os(Linux)
+            let numberOfCores = Int(linux_sched_getaffinity())
+            let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
+#else
+            let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+#endif
+            let server = HTTPServer()
+            do {
+                try server.listen(on: 8093)
+            } catch {
+                XCTFail("Unable to start the server \(error)")
+            }
+            do {
+                try server.setEventLoopGroup(eventLoopGroup)
+            } catch {
+                let httpError = error as? HTTPServerError
+                XCTAssertEqual(httpError, HTTPServerError.eventLoopGroupAlreadyInitialized)
+            }
         }
     }
 

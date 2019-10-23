@@ -44,6 +44,14 @@ An HTTP server that listens for connections on a socket.
  server.stop()
 ````
 */
+
+#if os(Linux)
+    let numberOfCores = Int(linux_sched_getaffinity())
+    fileprivate let globalELG = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
+#else
+    fileprivate let globalELG = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+#endif
+
 public class HTTPServer: Server {
 
     public typealias ServerType = HTTPServer
@@ -88,7 +96,6 @@ public class HTTPServer: Server {
                 return self._state
             }
         }
-
         set {
             self.syncQ.sync {
                 self._state = newValue
@@ -124,8 +131,28 @@ public class HTTPServer: Server {
     /// Maximum number of pending connections
     private let maxPendingConnections = 100
 
-    /// The event loop group on which the HTTP handler runs
-    private let eventLoopGroup: MultiThreadedEventLoopGroup
+    // A lazily initialized EventLoopGroup, accessed via `eventLoopGroup`
+    private var _eventLoopGroup: EventLoopGroup?
+
+    /// The EventLoopGroup used by this HTTPServer. This property may be assigned
+    /// once and once only, by calling `setEventLoopGroup(value:)` before `listen()` is called.
+    /// Server runs on `eventLoopGroup` which it is initialized to i.e. when user explicitly provides `eventLoopGroup` for server,
+    /// public variable `eventLoopGroup` will  return value stored private variable `_eventLoopGroup` when `ServerBootstrap` is called in `listen()`
+    /// making the server run of userdefined EventLoopGroup. If the `setEventLoopGroup(value:)` is not called, `nil` in variable `_eventLoopGroup` forces
+    /// Server to run in `globalELG` since value of `eventLoopGroup` in `ServerBootstrap(group: eventLoopGroup)` gets initialzed to value `globalELG`
+    /// if `setEventLoopGroup(value:)` is not called before `listen()`
+    /// If you are using Kitura-NIO and need to access EventLoopGroup that Kitura uses, you can do so like this:
+    ///
+    ///         ```swift
+    ///         let eventLoopGroup = server.eventLoopGroup
+    ///         ```
+    ///
+    public var eventLoopGroup: EventLoopGroup {
+        if let value = self._eventLoopGroup { return value }
+        let value = globalELG
+        self._eventLoopGroup = value
+        return value
+    }
 
     var quiescingHelper: ServerQuiescingHelper?
 
@@ -146,12 +173,6 @@ public class HTTPServer: Server {
      ````
     */
     public init(options: ServerOptions = ServerOptions()) {
-#if os(Linux)
-        let numberOfCores = Int(linux_sched_getaffinity())
-        self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
-#else
-        self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
-#endif
         self.options = options
     }
 
@@ -286,6 +307,23 @@ public class HTTPServer: Server {
         self.port = port
         self.address = address
         try listen(.tcp(port, address))
+    }
+
+    /// Sets the EventLoopGroup to be used by this HTTPServer. This may be called once
+    /// and once only, and must be called prior to `listen()`.
+    /// - Throws: If the EventLoopGroup has already been assigned.
+    /// If you are using Kitura-NIO and need to set EventLoopGroup that Kitura uses, you can do so like this:
+    ///
+    ///         ```swift
+    ///         server.setEventLoopGroup(EventLoopGroup)
+    ///         ```
+    ///
+    /// - Parameter : this function is supplied with user defined EventLoopGroup as arguement
+    public func setEventLoopGroup(_ value: EventLoopGroup) throws {
+        guard _eventLoopGroup == nil else {
+            throw HTTPServerError.eventLoopGroupAlreadyInitialized
+        }
+        _eventLoopGroup = value
     }
 
     private func listen(_ socket: SocketType) throws {
@@ -462,14 +500,6 @@ public class HTTPServer: Server {
         server.delegate = delegate
         server.listen(port: port, errorHandler: errorHandler)
         return server
-    }
-
-    deinit {
-        do {
-            try eventLoopGroup.syncShutdownGracefully()
-        } catch {
-            Log.error("Failed to shutdown eventLoopGroup")
-        }
     }
 
     /**
@@ -683,4 +713,20 @@ enum KituraWebSocketUpgradeError: Error {
 
     // Unknown upgrade error
     case unknownUpgradeError
+}
+
+/// Errors thrown by HTTPServer
+public struct HTTPServerError: Error, Equatable {
+
+    internal enum HTTPServerErrorType: Error {
+        case eventLoopGroupAlreadyInitialized
+    }
+
+    private var _httpServerError: HTTPServerErrorType
+
+    private init(value: HTTPServerErrorType){
+        self._httpServerError = value
+    }
+
+    public static var eventLoopGroupAlreadyInitialized = HTTPServerError(value: .eventLoopGroupAlreadyInitialized)
 }
