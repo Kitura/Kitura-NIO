@@ -143,7 +143,9 @@ public class HTTPServer: Server {
     /// if `setEventLoopGroup(value:)` is not called before `listen()`
     /// If you are using Kitura-NIO and need to access EventLoopGroup that Kitura uses, you can do so like this:
     ///
-    ///         ```let eventLoopGroup = server.eventLoopGroup```
+    ///         ```swift
+    ///         let eventLoopGroup = server.eventLoopGroup
+    ///         ```
     ///
     public var eventLoopGroup: EventLoopGroup {
         if let value = self._eventLoopGroup { return value }
@@ -312,7 +314,9 @@ public class HTTPServer: Server {
     /// - Throws: If the EventLoopGroup has already been assigned.
     /// If you are using Kitura-NIO and need to set EventLoopGroup that Kitura uses, you can do so like this:
     ///
-    ///         ```server.setEventLoopGroup(EventLoopGroup)```
+    ///         ```swift
+    ///         server.setEventLoopGroup(EventLoopGroup)
+    ///         ```
     ///
     /// - Parameter : this function is supplied with user defined EventLoopGroup as arguement
     public func setEventLoopGroup(_ value: EventLoopGroup) throws {
