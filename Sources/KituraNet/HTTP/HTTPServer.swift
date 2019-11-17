@@ -28,6 +28,7 @@ import NIOConcurrencyHelpers
 
 #if os(Linux)
 import Glibc
+import CLinuxHelpers
 #else
 import Darwin
 #endif
