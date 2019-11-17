@@ -56,15 +56,6 @@ let package = Package(
         .package(url: "https://github.com/IBM-Swift/BlueSSLService.git", from: "1.0.0"),
         .package(url: "https://github.com/IBM-Swift/LoggerAPI.git", from: "1.7.3")
     ],
-    targets: [
-        .target(
-            name: "CLinuxHelpers",
-            dependencies: []),
-        .target(
-            name: "KituraNet",
-            dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "CLinuxHelpers", "NIOConcurrencyHelpers", "NIOExtras"]),
-        .testTarget(
-            name: "KituraNetTests",
-            dependencies: ["KituraNet"])
+    targets: targets)
     ]
 )
