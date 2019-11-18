@@ -18,29 +18,6 @@
 
 import PackageDescription
 
-#if os(Linux)
-var targets: [PackageDescription.Target] = [
-    .target(
-        name: "CLinuxHelpers",
-        dependencies: []),
-    .target(
-        name: "KituraNet",
-        dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "CLinuxHelpers", "NIOConcurrencyHelpers", "NIOExtras"]),
-    .testTarget(
-        name: "KituraNetTests",
-        dependencies: ["KituraNet"])
-]
-#else
-var targets: [PackageDescription.Target] = [
-    .target(
-        name: "KituraNet",
-        dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "NIOConcurrencyHelpers", "NIOExtras"]),
-    .testTarget(
-        name: "KituraNetTests",
-        dependencies: ["KituraNet"])
-]
-#endif
-
 let package = Package(
     name: "Kitura-NIO",
     products: [
@@ -56,5 +33,15 @@ let package = Package(
         .package(url: "https://github.com/IBM-Swift/BlueSSLService.git", from: "1.0.0"),
         .package(url: "https://github.com/IBM-Swift/LoggerAPI.git", from: "1.7.3")
     ],
-    targets: targets
+    targets: [
+        .target(
+            name: "CLinuxHelpers",
+            dependencies: []),
+        .target(
+            name: "KituraNet",
+            dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "CLinuxHelpers", "NIOConcurrencyHelpers", "NIOExtras"]),
+        .testTarget(
+            name: "KituraNetTests",
+            dependencies: ["KituraNet"])
+    ]
 )
