@@ -57,5 +57,5 @@ let package = Package(
         .package(url: "https://github.com/IBM-Swift/LoggerAPI.git", from: "1.7.3")
     ],
     targets: targets)
-    ]
+    
 )
