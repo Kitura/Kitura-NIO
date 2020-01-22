@@ -41,23 +41,24 @@ internal class SSLConfiguration {
 
     /// Convert SSLService.Configuration to NIOSSL.TLSConfiguration
     func tlsServerConfig() -> TLSConfiguration? {
-            // TODO: Consider other configuration options
+        // TODO: Consider other configuration options
+        do {
             if let certificateFilePath = certificateFilePath, let keyFilePath = keyFilePath {
-                return TLSConfiguration.forServer(certificateChain: [.file(certificateFilePath)], privateKey: .file(keyFilePath))
+                let certificateSource: [NIOSSLCertificateSource] = try NIOSSLCertificate.fromPEMFile(certificateFilePath).map {.certificate($0)}
+                return TLSConfiguration.forServer(certificateChain: certificateSource, privateKey: .file(keyFilePath))
             } else {
                 /// TLSConfiguration for PKCS#12 formatted certificate
                 guard let certificateChainFilePath = certificateChainFilePath, let password = password else { return nil }
-                do {
-                    let pkcs12Bundle = try NIOSSLPKCS12Bundle(file: certificateChainFilePath, passphrase: password.utf8)
-                    var sslCertificateSource: [NIOSSLCertificateSource] = []
-                    pkcs12Bundle.certificateChain.forEach {
-                        sslCertificateSource.append(.certificate($0))
-                    }
-                    return TLSConfiguration.forServer(certificateChain: sslCertificateSource, privateKey: .privateKey(pkcs12Bundle.privateKey))
-                } catch let error {
-                    Log.error("Error creating the TLS server configuration: \(error)")
-                    return nil
+                let pkcs12Bundle = try NIOSSLPKCS12Bundle(file: certificateChainFilePath, passphrase: password.utf8)
+                var sslCertificateSource: [NIOSSLCertificateSource] = []
+                pkcs12Bundle.certificateChain.forEach {
+                    sslCertificateSource.append(.certificate($0))
                 }
+                return TLSConfiguration.forServer(certificateChain: sslCertificateSource, privateKey: .privateKey(pkcs12Bundle.privateKey))
             }
+        } catch let error {
+            Log.error("Error creating the TLS server configuration: \(error)")
+            return nil
+        }
     }
 }
