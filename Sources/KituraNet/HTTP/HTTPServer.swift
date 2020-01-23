@@ -129,7 +129,7 @@ public class HTTPServer: Server {
     public var allowPortReuse = false
 
     /// Maximum number of pending connections
-    private let maxPendingConnections = 100
+    private let maxPendingConnections: Int32 = 100
 
     // A lazily initialized EventLoopGroup, accessed via `eventLoopGroup`
     private var _eventLoopGroup: EventLoopGroup?
@@ -347,7 +347,7 @@ public class HTTPServer: Server {
         }
 
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
-            .serverChannelOption(ChannelOptions.backlog, value: ChannelOptions.Types.BacklogOption.Value(self.maxPendingConnections))
+            .serverChannelOption(ChannelOptions.backlog, value: self.maxPendingConnections)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .serverChannelInitializer { channel in

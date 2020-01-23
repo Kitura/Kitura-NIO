@@ -93,7 +93,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                     } catch {
                         Log.error("Failed to send error response")
                     }
-                    _ = context.close()
+                    context.close(promise: nil)
                 }
             }
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
@@ -153,7 +153,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
     //IdleStateEvents are received on this method
     public func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
         if event is IdleStateHandler.IdleStateEvent {
-            _ = context.close()
+            context.close(promise: nil)
         }
     }
 
