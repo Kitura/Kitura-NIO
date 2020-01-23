@@ -129,7 +129,7 @@ public class HTTPServer: Server {
     public var allowPortReuse = false
 
     /// Maximum number of pending connections
-    private let maxPendingConnections = 100
+    private let maxPendingConnections: Int32 = 100
 
     // A lazily initialized EventLoopGroup, accessed via `eventLoopGroup`
     private var _eventLoopGroup: EventLoopGroup?
@@ -160,7 +160,7 @@ public class HTTPServer: Server {
     public var options: ServerOptions = ServerOptions()
 
     //counter for no of connections
-    var connectionCount = Atomic(value: 0)
+    var connectionCount = NIOAtomic.makeAtomic(value: 0)
 
     /**
      Creates an HTTP server object.
@@ -347,7 +347,7 @@ public class HTTPServer: Server {
         }
 
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
-            .serverChannelOption(ChannelOptions.backlog, value: BacklogOption.Value(self.maxPendingConnections))
+            .serverChannelOption(ChannelOptions.backlog, value: self.maxPendingConnections)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .serverChannelInitializer { channel in
@@ -357,7 +357,7 @@ public class HTTPServer: Server {
             }
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
-                let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: {_ in 
+                let config: NIOHTTPServerUpgradeConfiguration = (upgraders: upgraders, completionHandler: {_ in
                     _ = channel.pipeline.removeHandler(httpHandler)
                 })
                 return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).flatMap {
