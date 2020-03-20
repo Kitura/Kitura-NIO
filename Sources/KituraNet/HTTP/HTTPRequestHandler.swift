@@ -93,7 +93,17 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                     } catch {
                         Log.error("Failed to send error response")
                     }
-                    context.close()
+                    let promise = context.close()
+                    promise.whenComplete{ result in
+                        switch result {
+                            case .success(let value):
+                                Log.verbose("Channel \(context.channel) closed (value=\(value))")
+                                print("Channel \(context.channel) closed (value=\(value))")
+                            case .failure(let error):
+                                Log.error("Failed to close the channel \(context.channel) with error: \(error)")
+                                print("Failed to close the channel \(context.channel) with error: \(error)")
+                        }
+                    }
                 }
             }
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
@@ -153,7 +163,17 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
     //IdleStateEvents are received on this method
     public func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
         if event is IdleStateHandler.IdleStateEvent {
-            _ = context.close()
+            let promise = context.close()
+            promise.whenComplete{ result in
+                switch result {
+                    case .success(let value):
+                        Log.verbose("Channel \(context.channel) closed (value=\(value))")
+                        print("Channel \(context.channel) closed (value=\(value))")
+                    case .failure(let error):
+                        Log.error("Failed to close the channel \(context.channel) with error: \(error)")
+                        print("Failed to close the channel \(context.channel) with error: \(error)")
+                }
+            }
         }
     }
 
