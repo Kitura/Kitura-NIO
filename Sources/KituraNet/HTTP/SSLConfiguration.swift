@@ -44,11 +44,8 @@ internal class SSLConfiguration {
             // TODO: Consider other configuration options
             do {
                 if let certificateFilePath = certificateFilePath, let keyFilePath = keyFilePath {
-                    let sslCertificateSource: [NIOSSLCertificateSource] = [
-                        .certificate(try NIOSSLCertificate(file: certificateFilePath, format: .pem))
-                    ]
-                    let privateKeySource = try NIOSSLPrivateKey(file: keyFilePath, format: .pem)
-                    return TLSConfiguration.forServer(certificateChain: sslCertificateSource, privateKey: .privateKey(privateKeySource))
+                    let certificateSource: [NIOSSLCertificateSource] = try NIOSSLCertificate.fromPEMFile(certificateFilePath).map {.certificate($0)}
+                    return TLSConfiguration.forServer(certificateChain: certificateSource, privateKey: .file(keyFilePath))
                     // return TLSConfiguration.forServer(certificateChain: [.file(certificateFilePath)], privateKey: .file(keyFilePath))
                 } else {
                     /// TLSConfiguration for PKCS#12 formatted certificate
