@@ -585,7 +585,7 @@ public class HTTPServer: Server {
      ````swift
      server.clientConnectionFailed(callback: callBack)
      ````
-     - Parameter callback: The listener callback that will run on server after successfull start-up.
+     - Parameter callback: The listener callback that will run when the client throws an error.
 
      - Returns: A `HTTPServer` instance.
     */
@@ -720,6 +720,8 @@ public struct HTTPServerError: Error, Equatable {
 
     internal enum HTTPServerErrorType: Error {
         case eventLoopGroupAlreadyInitialized
+        case channelClosed
+        case pipelineClosed
     }
 
     private var _httpServerError: HTTPServerErrorType
@@ -729,4 +731,6 @@ public struct HTTPServerError: Error, Equatable {
     }
 
     public static var eventLoopGroupAlreadyInitialized = HTTPServerError(value: .eventLoopGroupAlreadyInitialized)
+    public static var channelClosed = HTTPServerError(value: .channelClosed)
+    public static var pipelineClosed = HTTPServerError(value: .pipelineClosed)
 }
