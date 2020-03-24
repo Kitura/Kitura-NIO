@@ -217,7 +217,10 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
     }
 
     func updateKeepAliveState() {
-        keepAliveState.decrement()
+        if let requestsRemaining = keepAliveState.requestsRemaining,
+            requestsRemaining > 0 {
+            keepAliveState.decrement()
+        }
     }
 
     func channelInactive(context: ChannelHandlerContext, httpServer: HTTPServer) {

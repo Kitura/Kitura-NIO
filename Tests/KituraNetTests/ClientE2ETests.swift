@@ -98,24 +98,89 @@ class ClientE2ETests: KituraNetTest {
     }
 
     func testKeepAlive() {
-        performServerTest(delegate, asyncTasks: { expectation in
-            self.performRequest("get", path: "/posttest", callback: {response in
+        performServerTest(keepAlive: .unlimited, delegate, asyncTasks: { expectation in
+            self.performRequest("get", path: "/gettest", close: true, callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .OK was \(String(describing: response?.statusCode))")
                 if let connectionHeader = response?.headers["Connection"] {
                     XCTAssertEqual(connectionHeader.count, 1, "The Connection header didn't have only one value. Value=\(connectionHeader)")
-                    XCTAssertEqual(connectionHeader[0], "Close", "The Connection header didn't have a value of 'Close' (was \(connectionHeader[0]))")
+                    XCTAssertEqual(connectionHeader[0].lowercased(), "close", "The Connection header didn't have a value of 'Close' (was \(connectionHeader[0]))")
+                } else {
+                    XCTFail("No connection header")
                 }
+                XCTAssertNil(response?.headers["Keep-Alive"])
                 expectation.fulfill()
-            })
+            }, headers: ["Connection": "Keep-Alive"]) // Force the headers
         }, { expectation in
-            self.performRequest("get", path: "/posttest", close: false, callback: {response in
+            self.performRequest("get", path: "/gettest", close: false, callback: {response in
                 XCTAssertEqual(response?.statusCode, HTTPStatusCode.OK, "Status code wasn't .OK was \(String(describing: response?.statusCode))")
                 if let connectionHeader = response?.headers["Connection"] {
                     XCTAssertEqual(connectionHeader.count, 1, "The Connection header didn't have only one value. Value=\(connectionHeader)")
                     XCTAssertEqual(connectionHeader[0], "Keep-Alive", "The Connection header didn't have a value of 'Keep-Alive' (was \(connectionHeader[0]))")
+                } else {
+                    XCTFail("No connection header")
                 }
+                XCTAssertNotNil(response?.headers["Keep-Alive"])
                 expectation.fulfill()
-            })
+            }, headers: ["Connection": "Keep-Alive"]) // Force the headers
+        })
+    }
+
+    func testKeepAliveDisabled() {
+        performServerTest(keepAlive: .disabled, delegate, asyncTasks: { expectation in
+            self.performRequest("get", path: "/gettest", close: false, callback: {response in
+                guard let response = response else { 
+                    XCTFail("No response") 
+                    expectation.fulfill()
+                    return
+                }
+                XCTAssertEqual(response.statusCode, HTTPStatusCode.OK, "Status code wasn't .OK was \(response.statusCode)")
+                if let connectionHeader = response.headers["Connection"] {
+                    XCTAssertEqual(connectionHeader.count, 1, "The Connection header didn't have only one value. Value=\(connectionHeader)")
+                    XCTAssertEqual(connectionHeader[0].lowercased(), "close", "The Connection header didn't have a value of 'Close' (was \(connectionHeader[0]))")
+                } else {
+                    XCTFail("No connection header")
+                }
+                XCTAssertNil(response.headers["Keep-Alive"])
+                expectation.fulfill()
+            }, headers: ["Connection": "keep-alive"])
+        }, { expectation in
+            self.performRequest("get", path: "/gettest", close: true, callback: {response in
+                guard let response = response else { 
+                    XCTFail("No response") 
+                    expectation.fulfill()
+                    return
+                }
+                XCTAssertEqual(response.statusCode, HTTPStatusCode.OK, "Status code wasn't .OK was \(response.statusCode)")
+                if let connectionHeader = response.headers["Connection"] {
+                    XCTAssertEqual(connectionHeader.count, 1, "The Connection header didn't have only one value. Value=\(connectionHeader)")
+                    XCTAssertEqual(connectionHeader[0].lowercased(), "close", "The Connection header didn't have a value of 'Close' (was \(connectionHeader[0]))")
+                } else {
+                    XCTFail("No connection header")
+                }
+                XCTAssertNil(response.headers["Keep-Alive"])
+                expectation.fulfill()
+            }, headers: ["Connection": "keep-alive"])
+        })
+    }
+    func testKeepAliveLimited() {
+        // Simulate reaching the limit by setting the limit to 0.
+        performServerTest(keepAlive: .limited(maxRequests: 0), delegate, asyncTasks: { expectation in
+            self.performRequest("get", path: "/posttest", close: false, callback: {response in
+                guard let response = response else { 
+                    XCTFail("No response") 
+                    expectation.fulfill()
+                    return
+                }
+                XCTAssertEqual(response.statusCode, HTTPStatusCode.OK, "Status code wasn't .OK was \(response.statusCode)")
+                if let connectionHeader = response.headers["Connection"] {
+                    XCTAssertEqual(connectionHeader.count, 1, "The Connection header didn't have only one value. Value=\(connectionHeader)")
+                    XCTAssertEqual(connectionHeader[0].lowercased(), "close", "The Connection header didn't have a value of 'Close' (was \(connectionHeader[0]))")
+                } else {
+                    XCTFail("No connection header")
+                }
+                XCTAssertNil(response.headers["Keep-Alive"])
+                expectation.fulfill()
+            }, headers: ["Connection": "keep-alive"])
         })
     }
 

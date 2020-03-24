@@ -188,13 +188,16 @@ public class HTTPServerResponse: ServerResponse {
         }
 
         let status = HTTPResponseStatus(statusCode: statusCode?.rawValue ?? 0)
-        if handler.clientRequestedKeepAlive {
+        if handler.clientRequestedKeepAlive && handler.keepAliveState.keepAlive() {
             headers["Connection"] = ["Keep-Alive"]
             if let maxConnections = handler.keepAliveState.requestsRemaining {
                 headers["Keep-Alive"] = ["timeout=\(HTTPRequestHandler.keepAliveTimeout), max=\(Int(maxConnections))"]
             } else {
                 headers["Keep-Alive"] = ["timeout=\(HTTPRequestHandler.keepAliveTimeout)"]
             }
+        } else {
+            headers["Connection"] = ["close"]
+            headers["Keep-Alive"] = nil
         }
 
         channel.eventLoop.run {
