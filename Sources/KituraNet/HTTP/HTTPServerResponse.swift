@@ -116,8 +116,7 @@ public class HTTPServerResponse: ServerResponse {
     public func write(from string: String) throws {
         guard let channel = channel else {
             // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
-            // TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API
-            return
+            throw HTTPServerError.channelClosed
         }
 
         channel.eventLoop.run {
@@ -139,8 +138,7 @@ public class HTTPServerResponse: ServerResponse {
     public func write(from data: Data) throws {
         guard let channel = channel else {
             // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
-            // TODO: We must be throwing an error from here, for which we'd need to add a new Error type to the API.
-            return
+            throw HTTPServerError.channelClosed
         }
 
         channel.eventLoop.run {
