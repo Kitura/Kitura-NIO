@@ -224,6 +224,9 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
     }
 
     func channelInactive(context: ChannelHandlerContext, httpServer: HTTPServer) {
-        httpServer.connectionCount.sub(1)
+        // Cherry picked from PR#239:
+        server.connectionCount.sub(1)
+        // see: https://apple.github.io/swift-nio/docs/current/NIO/Classes/ChannelHandlerContext.html#/s:3NIO21ChannelHandlerContextC04fireB8InactiveyyF
+        context.fireChannelInactive()
     }
 }

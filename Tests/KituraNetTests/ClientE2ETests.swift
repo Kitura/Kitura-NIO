@@ -29,6 +29,7 @@ class ClientE2ETests: KituraNetTest {
             ("testErrorRequests", testErrorRequests),
             ("testHeadRequests", testHeadRequests),
             ("testKeepAlive", testKeepAlive),
+            ("testKeepAliveDisabled", testKeepAliveDisabled),
             ("testPostRequests", testPostRequests),
             ("testPutRequests", testPutRequests),
             ("testPatchRequests", testPatchRequests),

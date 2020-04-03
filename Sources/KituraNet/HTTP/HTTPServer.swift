@@ -391,6 +391,8 @@ public class HTTPServer: Server {
         } catch let error {
             self.state = .failed
             self.lifecycleListener.performFailCallbacks(with: error)
+            // This should address issue #233.
+            self.lifecycleListener.performClientConnectionFailCallbacks(with: error)
             switch socket {
             case .tcp(let port):
                 Log.error("Error trying to bind to \(port): \(error)")

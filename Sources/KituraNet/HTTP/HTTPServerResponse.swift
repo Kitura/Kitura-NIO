@@ -116,7 +116,8 @@ public class HTTPServerResponse: ServerResponse {
     public func write(from string: String) throws {
         guard let channel = channel else {
             // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
-            throw HTTPServerError.channelClosed
+            // throw HTTPServerError.channelClosed
+            return
         }
 
         channel.eventLoop.run {
@@ -138,7 +139,8 @@ public class HTTPServerResponse: ServerResponse {
     public func write(from data: Data) throws {
         guard let channel = channel else {
             // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
-            throw HTTPServerError.channelClosed
+            // throw HTTPServerError.channelClosed
+            return
         }
 
         channel.eventLoop.run {
@@ -175,12 +177,14 @@ public class HTTPServerResponse: ServerResponse {
     public func end() throws {
         guard let channel = self.channel else {
             // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
-            throw HTTPServerError.channelClosed
+            // throw HTTPServerError.channelClosed
+            return
         }
 
         guard let handler = self.handler else {
             // A deallocated channel handler suggests the pipeline and the channel were also de-allocated. The connection was probably closed.
-            throw HTTPServerError.pipelineClosed
+            // throw HTTPServerError.pipelineClosed
+            return
         }
 
         let status = HTTPResponseStatus(statusCode: statusCode?.rawValue ?? 0)
@@ -210,12 +214,14 @@ public class HTTPServerResponse: ServerResponse {
     private func end(with errorCode: HTTPStatusCode, withBody: Bool = false) throws {
         guard let channel = self.channel else {
             // The connection was probably closed by the client, subsequently the Channel was closed, deregistered from the EventLoop and deallocated.
-            throw HTTPServerError.channelClosed
+            // throw HTTPServerError.channelClosed
+            return
         }
 
         guard let handler = self.handler else {
             // A deallocated channel handler suggests the pipeline and the channel were also de-allocated. The connection was probably closed.
-            throw HTTPServerError.pipelineClosed
+            // throw HTTPServerError.pipelineClosed
+            return
         }
 
         self.statusCode = errorCode
