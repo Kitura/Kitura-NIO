@@ -93,7 +93,17 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                     } catch {
                         Log.error("Failed to send error response")
                     }
-                    context.close()
+                    let promise = context.close()
+                    promise.whenComplete { result in
+                        switch result {
+                        case .success(let value):
+                            Log.verbose("Channel \(context.channel) closed (value=\(value))")
+                            print("Channel \(context.channel) closed (value=\(value))")
+                        case .failure(let error):
+                            Log.error("Failed to close the channel \(context.channel) with error: \(error)")
+                            print("Failed to close the channel \(context.channel) with error: \(error)")
+                        }
+                    }
                 }
             }
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
@@ -103,7 +113,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             if let requestSizeLimit = server.options.requestSizeLimit {
                 if requestSize > requestSizeLimit {
                     do {
-                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit,serverRequest?.remoteAddress ?? "") {
+                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit, serverRequest?.remoteAddress ?? "") {
                             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
                             errorResponseSent = true
                             try serverResponse?.end(with: httpStatus, message: response)
@@ -129,7 +139,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             if let connectionLimit = server.options.connectionLimit {
                 if server.connectionCount.load() > connectionLimit {
                     do {
-                        if let (httpStatus, response) = server.options.connectionResponseGenerator(connectionLimit,serverRequest?.remoteAddress ?? "") {
+                        if let (httpStatus, response) = server.options.connectionResponseGenerator(connectionLimit, serverRequest?.remoteAddress ?? "") {
                             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
                             errorResponseSent = true
                             try serverResponse?.end(with: httpStatus, message: response)
@@ -153,7 +163,17 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
     //IdleStateEvents are received on this method
     public func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
         if event is IdleStateHandler.IdleStateEvent {
-            _ = context.close()
+            let promise = context.close()
+            promise.whenComplete { result in
+                switch result {
+                case .success(let value):
+                    Log.verbose("Channel \(context.channel) closed (value=\(value))")
+                    print("Channel \(context.channel) closed (value=\(value))")
+                case .failure(let error):
+                    Log.error("Failed to close the channel \(context.channel) with error: \(error)")
+                    print("Failed to close the channel \(context.channel) with error: \(error)")
+                }
+            }
         }
     }
 
@@ -197,10 +217,16 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
     }
 
     func updateKeepAliveState() {
-        keepAliveState.decrement()
+        if let requestsRemaining = keepAliveState.requestsRemaining,
+            requestsRemaining > 0 {
+            keepAliveState.decrement()
+        }
     }
 
     func channelInactive(context: ChannelHandlerContext, httpServer: HTTPServer) {
-        httpServer.connectionCount.sub(1)
+        // Cherry picked from PR#239:
+        server.connectionCount.sub(1)
+        // see: https://apple.github.io/swift-nio/docs/current/NIO/Classes/ChannelHandlerContext.html#/s:3NIO21ChannelHandlerContextC04fireB8InactiveyyF
+        context.fireChannelInactive()
     }
 }

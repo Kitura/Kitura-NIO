@@ -160,7 +160,7 @@ public class HTTPServer: Server {
     public var options: ServerOptions = ServerOptions()
 
     //counter for no of connections
-    var connectionCount = Atomic(value: 0)
+    var connectionCount: NIOAtomic<Int> = NIOAtomic<Int>.makeAtomic(value: 0)
 
     /**
      Creates an HTTP server object.
@@ -347,7 +347,7 @@ public class HTTPServer: Server {
         }
 
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
-            .serverChannelOption(ChannelOptions.backlog, value: BacklogOption.Value(self.maxPendingConnections))
+            .serverChannelOption(ChannelOptions.backlog, value: ChannelOptions.Types.BacklogOption.Value(self.maxPendingConnections))
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .serverChannelInitializer { channel in
@@ -357,7 +357,7 @@ public class HTTPServer: Server {
             }
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
-                let config: HTTPUpgradeConfiguration = (upgraders: upgraders, completionHandler: {_ in 
+                let config: NIOHTTPServerUpgradeConfiguration = (upgraders: upgraders, completionHandler: {_ in
                     _ = channel.pipeline.removeHandler(httpHandler)
                 })
                 return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).flatMap {
@@ -391,6 +391,8 @@ public class HTTPServer: Server {
         } catch let error {
             self.state = .failed
             self.lifecycleListener.performFailCallbacks(with: error)
+            // This should address issue #233.
+            self.lifecycleListener.performClientConnectionFailCallbacks(with: error)
             switch socket {
             case .tcp(let port):
                 Log.error("Error trying to bind to \(port): \(error)")
@@ -585,7 +587,7 @@ public class HTTPServer: Server {
      ````swift
      server.clientConnectionFailed(callback: callBack)
      ````
-     - Parameter callback: The listener callback that will run on server after successfull start-up.
+     - Parameter callback: The listener callback that will run when the client throws an error.
 
      - Returns: A `HTTPServer` instance.
     */
@@ -668,7 +670,7 @@ final class KituraWebSocketUpgrader: HTTPServerProtocolUpgrader {
             let keyHeader = upgradeRequest.headers[canonicalForm: "Sec-WebSocket-Key"]
             let versionHeader = upgradeRequest.headers[canonicalForm: "Sec-WebSocket-Version"]
 
-            var error: KituraWebSocketUpgradeError 
+            var error: KituraWebSocketUpgradeError
             if keyHeader.count == 0 {
                 error = KituraWebSocketUpgradeError.noWebSocketKeyHeader
             } else if keyHeader.count > 1 {
@@ -680,10 +682,10 @@ final class KituraWebSocketUpgrader: HTTPServerProtocolUpgrader {
             } else if versionHeader.first! != "13" {
                 error = KituraWebSocketUpgradeError.invalidVersionHeader(String(versionHeader.first!))
             } else {
-                error = KituraWebSocketUpgradeError.unknownUpgradeError 
+                error = KituraWebSocketUpgradeError.unknownUpgradeError
             }
             return channel.eventLoop.makeFailedFuture(error)
-        }.flatMap { value in 
+        }.flatMap { value in
             return channel.eventLoop.makeSucceededFuture(value)
         }
     }
@@ -720,13 +722,17 @@ public struct HTTPServerError: Error, Equatable {
 
     internal enum HTTPServerErrorType: Error {
         case eventLoopGroupAlreadyInitialized
+        case channelClosed
+        case pipelineClosed
     }
 
     private var _httpServerError: HTTPServerErrorType
 
-    private init(value: HTTPServerErrorType){
+    private init(value: HTTPServerErrorType) {
         self._httpServerError = value
     }
 
     public static var eventLoopGroupAlreadyInitialized = HTTPServerError(value: .eventLoopGroupAlreadyInitialized)
+    public static var channelClosed = HTTPServerError(value: .channelClosed)
+    public static var pipelineClosed = HTTPServerError(value: .pipelineClosed)
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright IBM Corporation 2016
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ */
 
 import Foundation
 import XCTest
@@ -40,7 +40,7 @@ class HTTPResponseTests: KituraNetTest {
         let headers = HeadersContainer()
 
         headers.append("Content-Type", value: "text/html")
-        var values = headers["Content-Type"]
+        let values = headers["Content-Type"]
         XCTAssertNotNil(values, "Couldn't retrieve just set Content-Type header")
         XCTAssertEqual(values?.count, 1, "Content-Type header should only have one value")
         XCTAssertEqual(values?[0], "text/html")

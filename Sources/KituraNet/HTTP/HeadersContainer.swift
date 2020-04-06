@@ -28,7 +28,7 @@ public class HeadersContainer {
 
     /// An alternate backing store of type `NIOHTTP1.HTTPHeader` used to avoid translations between HeadersContainer and HTTPHeaders
     var nioHeaders: HTTPHeaders = HTTPHeaders()
-    
+
     /// Create an instance of `HeadersContainer`
     public init() {}
 
@@ -62,8 +62,7 @@ public class HeadersContainer {
                 if mode == .dual {
                     set(key, value: newValue)
                 }
-            }
-            else {
+            } else {
                 nioHeaders.remove(name: key)
                 if mode == .dual {
                     remove(key)
@@ -79,9 +78,8 @@ public class HeadersContainer {
     public func append(_ key: String, value: [String]) {
         let lowerCaseKey = key.lowercased()
         var entry = nioHeaders[key]
-        
-        switch(lowerCaseKey) {
 
+        switch lowerCaseKey {
         case "set-cookie":
             if entry.count > 0 {
                 entry += value
@@ -187,13 +185,13 @@ extension HeadersContainer: Collection {
     public typealias Index = DictionaryIndex<String, (key: String, value: [String])>
 
     /// The starting index of the `HeadersContainer` collection
-    public var startIndex:Index {
+    public var startIndex: Index {
         checkAndSwitchToDualMode()
         return headers.startIndex
     }
 
     /// The ending index of the `HeadersContainer` collection
-    public var endIndex:Index {
+    public var endIndex: Index {
         checkAndSwitchToDualMode()
         return headers.endIndex
     }

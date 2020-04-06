@@ -58,7 +58,6 @@ import Foundation
     ````
     */
 
-
 public class BufferList {
 
     /// This BufferList implementation uses a NIO.ByteBuffer as the backing store.

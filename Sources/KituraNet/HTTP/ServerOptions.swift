@@ -109,8 +109,7 @@ public struct ServerOptions {
     public init(requestSizeLimit: Int? = ServerOptions.defaultRequestSizeLimit,
                 connectionLimit: Int? = ServerOptions.defaultConnectionLimit,
                 requestSizeResponseGenerator: @escaping (Int, String) -> (HTTPStatusCode, String)? = ServerOptions.defaultRequestSizeResponseGenerator,
-                connectionResponseGenerator: @escaping (Int, String) -> (HTTPStatusCode, String)? = ServerOptions.defaultConnectionResponseGenerator)
-    {
+                connectionResponseGenerator: @escaping (Int, String) -> (HTTPStatusCode, String)? = ServerOptions.defaultConnectionResponseGenerator) {
         self.requestSizeLimit = requestSizeLimit
         self.connectionLimit = connectionLimit
         self.requestSizeResponseGenerator = requestSizeResponseGenerator

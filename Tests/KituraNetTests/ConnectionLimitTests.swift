@@ -13,7 +13,7 @@ class ConnectionLimitTests: KituraNetTest {
             ("testConnectionLimit", testConnectionLimit),
         ]
     }
-    
+
     override func setUp() {
         doSetUp()
     }
@@ -25,7 +25,7 @@ class ConnectionLimitTests: KituraNetTest {
         channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
         try! channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
     }
-    
+
     func establishConnection(expectation: XCTestExpectation, responseHandler: HTTPResponseHandler) {
         var channel: Channel
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
@@ -51,12 +51,12 @@ class ConnectionLimitTests: KituraNetTest {
         let payload = "Hello, World!"
         var payloadBuffer = ByteBufferAllocator().buffer(capacity: 1024)
         payloadBuffer.writeString(payload)
-        _ = self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus:HTTPResponseStatus.ok, expectation: expectation))
+        _ = self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus: HTTPResponseStatus.ok, expectation: expectation))
     }, { expectation in
         let payload = "Hello, World!"
         var payloadBuffer = ByteBufferAllocator().buffer(capacity: 1024)
         payloadBuffer.writeString(payload)
-        _ =  self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus:HTTPResponseStatus.serviceUnavailable, expectation: expectation))
+        _ =  self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus: HTTPResponseStatus.serviceUnavailable, expectation: expectation))
         })
     }
 }
