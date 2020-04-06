@@ -281,8 +281,7 @@ public class ClientRequest {
             self.headers["Authorization"] = createHTTPBasicAuthHeader(username: username, password: password)
         }
 
-        self.url = "\(url.scheme ?? "http")://\(self.hostName ?? "unknown")\(self.port.map { ":\($0)" } ?? "")/\(fullPath)"
-        
+        self.url = "\(url.scheme ?? "http")://\(self.hostName ?? "unknown")\(self.port.map { ":\($0)" } ?? "")/\(fullPath)"        
     }
 
     /**
@@ -673,7 +672,6 @@ extension HTTPHeaders {
         return headers
     }
 }
-
 
 /// The ChannelInboundHandler for ClientRequest
 class HTTPClientHandler: ChannelInboundHandler {

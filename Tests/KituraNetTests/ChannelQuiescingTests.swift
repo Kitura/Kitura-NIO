@@ -3,7 +3,6 @@ import NIOHTTP1
 import XCTest
 import KituraNet
 
-
 class ChannelQuiescingTests: KituraNetTest {
 
     static var allTests: [(String, (ChannelQuiescingTests) -> () throws -> Void)] {

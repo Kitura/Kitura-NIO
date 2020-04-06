@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright IBM Corporation 2016
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- **/
+ */
 
 import Foundation
 import XCTest
@@ -116,7 +116,7 @@ class ClientRequestTests: KituraNetTest {
         let options2: [ClientRequest.Options] = [ .schema("https"),
                                                   .hostname("66o.tech"),
                                                   .path("/view/match?key?=value?")
-        ]   
+        ]
         let testRequest2 = ClientRequest(options: options2, callback: testCallback)
         XCTAssertEqual(testRequest2.url, "https://66o.tech/view/match?key?=value?")
     }

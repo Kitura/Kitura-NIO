@@ -107,7 +107,7 @@ class KituraNetTest: XCTestCase {
     /// returning the a tuple containing the server and the port it is listening on.
     func startEphemeralServer(_ delegate: ServerDelegate?, keepAlive: KeepAliveState = .unlimited, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, serverConfig: ServerOptions = ServerOptions()) throws -> (server: HTTPServer, port: Int) {
         let serverConfig = serverConfig
-        let server = try startServer(delegate, keepAlive: keepAlive, port: 0, useSSL: useSSL,allowPortReuse: allowPortReuse, serverConfig: serverConfig)
+        let server = try startServer(delegate, keepAlive: keepAlive, port: 0, useSSL: useSSL, allowPortReuse: allowPortReuse, serverConfig: serverConfig)
         guard let serverPort = server.port else {
             throw KituraNetTestError(message: "Server port was not initialized")
         }
@@ -131,7 +131,7 @@ class KituraNetTest: XCTestCase {
             performServerTestWithUnixSocket(keepAlive: keepAlive, serverConfig: serverConfig, delegate: delegate, useSSL: useSSL, allowPortReuse: allowPortReuse, line: line, asyncTasks: asyncTasks)
         }
         if socketType != .unixDomainSocket {
-            performServerTestWithTCPPort(keepAlive: keepAlive, serverConfig: serverConfig ,delegate: delegate, useSSL: useSSL, allowPortReuse:  allowPortReuse, line: line, asyncTasks: asyncTasks)
+            performServerTestWithTCPPort(keepAlive: keepAlive, serverConfig: serverConfig, delegate: delegate, useSSL: useSSL, allowPortReuse: allowPortReuse, line: line, asyncTasks: asyncTasks)
         }
     }
 
@@ -169,7 +169,7 @@ class KituraNetTest: XCTestCase {
             var server: HTTPServer
             var ephemeralPort: Int = 0
             self.useSSL = useSSL
-            (server, ephemeralPort) = try startEphemeralServer(delegate, keepAlive: keepAlive, useSSL: useSSL, allowPortReuse: allowPortReuse,serverConfig: serverConfig)
+            (server, ephemeralPort) = try startEphemeralServer(delegate, keepAlive: keepAlive, useSSL: useSSL, allowPortReuse: allowPortReuse, serverConfig: serverConfig)
             self.port = ephemeralPort
             self.unixDomainSocketPath = nil
             defer {

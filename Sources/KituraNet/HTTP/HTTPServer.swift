@@ -357,7 +357,7 @@ public class HTTPServer: Server {
             }
             .childChannelInitializer { channel in
                 let httpHandler = HTTPRequestHandler(for: self)
-                let config: NIOHTTPServerUpgradeConfiguration = (upgraders: upgraders, completionHandler: {_ in 
+                let config: NIOHTTPServerUpgradeConfiguration = (upgraders: upgraders, completionHandler: {_ in
                     _ = channel.pipeline.removeHandler(httpHandler)
                 })
                 return channel.pipeline.configureHTTPServerPipeline(withServerUpgrade: config, withErrorHandling: true).flatMap {
@@ -670,7 +670,7 @@ final class KituraWebSocketUpgrader: HTTPServerProtocolUpgrader {
             let keyHeader = upgradeRequest.headers[canonicalForm: "Sec-WebSocket-Key"]
             let versionHeader = upgradeRequest.headers[canonicalForm: "Sec-WebSocket-Version"]
 
-            var error: KituraWebSocketUpgradeError 
+            var error: KituraWebSocketUpgradeError
             if keyHeader.count == 0 {
                 error = KituraWebSocketUpgradeError.noWebSocketKeyHeader
             } else if keyHeader.count > 1 {
@@ -682,10 +682,10 @@ final class KituraWebSocketUpgrader: HTTPServerProtocolUpgrader {
             } else if versionHeader.first! != "13" {
                 error = KituraWebSocketUpgradeError.invalidVersionHeader(String(versionHeader.first!))
             } else {
-                error = KituraWebSocketUpgradeError.unknownUpgradeError 
+                error = KituraWebSocketUpgradeError.unknownUpgradeError
             }
             return channel.eventLoop.makeFailedFuture(error)
-        }.flatMap { value in 
+        }.flatMap { value in
             return channel.eventLoop.makeSucceededFuture(value)
         }
     }
@@ -728,7 +728,7 @@ public struct HTTPServerError: Error, Equatable {
 
     private var _httpServerError: HTTPServerErrorType
 
-    private init(value: HTTPServerErrorType){
+    private init(value: HTTPServerErrorType) {
         self._httpServerError = value
     }
 

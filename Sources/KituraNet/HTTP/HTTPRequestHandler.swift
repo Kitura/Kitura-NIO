@@ -94,14 +94,14 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                         Log.error("Failed to send error response")
                     }
                     let promise = context.close()
-                    promise.whenComplete{ result in
+                    promise.whenComplete { result in
                         switch result {
-                            case .success(let value):
-                                Log.verbose("Channel \(context.channel) closed (value=\(value))")
-                                print("Channel \(context.channel) closed (value=\(value))")
-                            case .failure(let error):
-                                Log.error("Failed to close the channel \(context.channel) with error: \(error)")
-                                print("Failed to close the channel \(context.channel) with error: \(error)")
+                        case .success(let value):
+                            Log.verbose("Channel \(context.channel) closed (value=\(value))")
+                            print("Channel \(context.channel) closed (value=\(value))")
+                        case .failure(let error):
+                            Log.error("Failed to close the channel \(context.channel) with error: \(error)")
+                            print("Failed to close the channel \(context.channel) with error: \(error)")
                         }
                     }
                 }
@@ -113,7 +113,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             if let requestSizeLimit = server.options.requestSizeLimit {
                 if requestSize > requestSizeLimit {
                     do {
-                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit,serverRequest?.remoteAddress ?? "") {
+                        if let (httpStatus, response) = server.options.requestSizeResponseGenerator(requestSizeLimit, serverRequest?.remoteAddress ?? "") {
                             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
                             errorResponseSent = true
                             try serverResponse?.end(with: httpStatus, message: response)
@@ -139,7 +139,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
             if let connectionLimit = server.options.connectionLimit {
                 if server.connectionCount.load() > connectionLimit {
                     do {
-                        if let (httpStatus, response) = server.options.connectionResponseGenerator(connectionLimit,serverRequest?.remoteAddress ?? "") {
+                        if let (httpStatus, response) = server.options.connectionResponseGenerator(connectionLimit, serverRequest?.remoteAddress ?? "") {
                             serverResponse = HTTPServerResponse(channel: context.channel, handler: self)
                             errorResponseSent = true
                             try serverResponse?.end(with: httpStatus, message: response)
@@ -164,14 +164,14 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
     public func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
         if event is IdleStateHandler.IdleStateEvent {
             let promise = context.close()
-            promise.whenComplete{ result in
+            promise.whenComplete { result in
                 switch result {
-                    case .success(let value):
-                        Log.verbose("Channel \(context.channel) closed (value=\(value))")
-                        print("Channel \(context.channel) closed (value=\(value))")
-                    case .failure(let error):
-                        Log.error("Failed to close the channel \(context.channel) with error: \(error)")
-                        print("Failed to close the channel \(context.channel) with error: \(error)")
+                case .success(let value):
+                    Log.verbose("Channel \(context.channel) closed (value=\(value))")
+                    print("Channel \(context.channel) closed (value=\(value))")
+                case .failure(let error):
+                    Log.error("Failed to close the channel \(context.channel) with error: \(error)")
+                    print("Failed to close the channel \(context.channel) with error: \(error)")
                 }
             }
         }
