@@ -26,6 +26,7 @@ internal class FastCGIRecordEncoderHandler<Encoder: FastCGIEncoder>: ChannelOutb
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let record = unwrapOutboundIn(data)
+        //print("Fast CGI response Records are",record)
         let encoder = Encoder(record)
         let data = try! encoder.encode() as! Data
         var buffer = context.channel.allocator.buffer(capacity: data.count )

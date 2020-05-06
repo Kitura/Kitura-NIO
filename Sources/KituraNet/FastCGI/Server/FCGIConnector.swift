@@ -19,14 +19,15 @@ protocol FCGIConnectorProtocol {
     
     init(URL: String, keepAlive: Bool)
    
-    func send( request: HTTPServerRequest, _: (_ headers: [String : String], _ statusCode: Int, _ data: Data) -> Void)
+    func send( request: HTTPServerRequest, responseHandler: @escaping (HTTPResponseParts) -> Void)
 }
+public typealias HTTPResponseParts = (headers: [String: String], status: Int, body: Data?)
 
 public class FCGIConnector: FCGIConnectorProtocol {
     var keepAlive: Bool
     var bootstrap: ClientBootstrap?
     var channel: Channel?
-    let waitSemaphore = DispatchSemaphore(value: 0)
+    var responseReceived = DispatchSemaphore(value: 0)
     var port: Int?
     
     public private(set) var url: String = ""
@@ -48,38 +49,21 @@ public class FCGIConnector: FCGIConnectorProtocol {
             }
     }
     
-    func send(request: HTTPServerRequest, _: ([String : String], Int, Data) -> Void) {
+    func send(request: HTTPServerRequest, responseHandler: @escaping (HTTPResponseParts) -> Void) {
         
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         initializeClientBootstrap(eventLoopGroup: group)
         let hostName = URL(string: percentEncodedURL)?.host ?? "" //TODO: what could be the failure path here
-        let portNumber = URL(string: percentEncodedURL)?.port ?? 8080
-        defer {
-            do {
-                try group.syncShutdownGracefully()
-            } catch {
-                Log.error("ClientRequest failed to shut down the EventLoopGroup for the requested URL: \(url)")
-            }
-        }
-
+        let portNumber = self.port
         do {
             guard let bootstrap = bootstrap else { return }
             channel = try! bootstrap.connect(host: hostName, port: Int(self.port!)).wait() as Channel
-        }
-    
-        guard let channel = channel else { return }
-        channel.eventLoop.run {
-            channel.write(request)
-        }
-        waitSemaphore.wait()
-
-        // We are now free to close the connection if asked for.
-        if keepAlive {
-            channel.eventLoop.run {
-                channel.close(promise: nil)
+            try! self.channel?.writeAndFlush(request).wait()
+            responseReceived.wait()
+            if (keepAlive == false) {
+                self.channel?.close(promise: nil)
             }
         }
     }
-        
 }
     

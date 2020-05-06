@@ -10,7 +10,7 @@ import Foundation
 public struct FastCGIRecord {
     
    public enum ContentType {
-        case role (UInt16)
+        case roleandflag (UInt16,UInt8)
         case data (Data)
         case params ([[String: String]])
         case status (UInt32, UInt8)
@@ -19,6 +19,7 @@ public struct FastCGIRecord {
     public var type: FastCGIRecord.RecordType
     public var requestId: UInt16
     public var contentData: FastCGIRecord.ContentType
+    //public var flag = FastCGI.Constants.FCGI_KEEP_CONN
     
     
     public enum RecordType: UInt8 {

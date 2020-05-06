@@ -48,8 +48,11 @@ class FastCGIRecordEncoder: FastCGIEncoder {
         self.recordType = record.type.rawValue
         self.requestId = record.requestId
         switch record.contentData {
-        case .role(let role):
+        case .roleandflag(let role, let flag):
             self.requestRole = role
+            if flag != 0 {
+                keepAlive = true
+            }
         case .status(_, let protocolStatus):
             self.protocolStatus = protocolStatus
         case .params(let paramsDictionary):

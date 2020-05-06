@@ -18,6 +18,7 @@ class FastCGIRecordDecoderHandler<Decoder: FastCGIRecordDecoder>: ChannelInbound
         let request = self.unwrapInboundIn(data)
         let requestData = request.getData(at: 0, length: request.readableBytes)
         try! Decoder.decode(from: Decoder.unwrap(requestData)).forEach {
+            //print("Fast CGI Records are",self.wrapInboundOut($0))
             context.fireChannelRead(self.wrapInboundOut($0))
         }
     }

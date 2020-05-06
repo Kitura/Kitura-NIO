@@ -39,8 +39,8 @@ internal class RequestTranslator: ChannelOutboundHandler {
         params.append(["name": "SERVER_SOFTWARE", "value": "Kitura"])
         params.append(["name": "GATEWAY_INTERFACE", "value": "CGI/1.1"])
         
-        let record1 = FastCGIRecord(version: FastCGI.Constants.FASTCGI_PROTOCOL_VERSION, type: .beginRequest, requestId: FastCGI.Constants.FASTCGI_DEFAULT_REQUEST_ID, contentData: .role(1))
-        let record2 = FastCGIRecord(version: FastCGI.Constants.FASTCGI_PROTOCOL_VERSION, type: .params, requestId: FastCGI.Constants.FASTCGI_DEFAULT_REQUEST_ID, contentData: .params(params))
+        let record1 = FastCGIRecord(version: FastCGI.Constants.FASTCGI_PROTOCOL_VERSION, type: .beginRequest, requestId: FastCGI.Constants.FASTCGI_DEFAULT_REQUEST_ID, contentData: .roleandflag(1,1))
+        let record2 = FastCGIRecord(version: FastCGI.Constants.FASTCGI_PROTOCOL_VERSION, type: .params, requestId: FastCGI.Constants.FASTCGI_DEFAULT_REQUEST_ID, contentData:.params(params))
         let record3 = FastCGIRecord(version: FastCGI.Constants.FASTCGI_PROTOCOL_VERSION, type: .params, requestId: FastCGI.Constants.FASTCGI_DEFAULT_REQUEST_ID, contentData: .params([]))
         let record4 = FastCGIRecord(version: FastCGI.Constants.FASTCGI_PROTOCOL_VERSION, type: .stdin, requestId: FastCGI.Constants.FASTCGI_DEFAULT_REQUEST_ID, contentData: .data(Data("".utf8)))
         context.write(self.wrapOutboundOut(record1))

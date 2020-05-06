@@ -19,8 +19,8 @@ class FastCGIRequestHandler: ChannelInboundHandler {
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let record = self.unwrapInboundIn(data)
-        switch record.contentData {
-        case .role:
+        switch record.contentData{
+        case .roleandflag(_, _):
             serverRequest = FastCGIServerRequest(channel: context.channel)
             serverRequest?.parse(record)
             self.status = Status.requestStarted
@@ -33,7 +33,7 @@ class FastCGIRequestHandler: ChannelInboundHandler {
             self.status = Status.requestComplete
             serverResponse = FastCGIServerResponse(channel: context.channel, handler: self)
             let delegate = self.server?.delegate ?? FastCGIDummyServerDelegate()
-            delegate.handle(request: serverRequest!, response: serverResponse!)
+
         }
     }
 }

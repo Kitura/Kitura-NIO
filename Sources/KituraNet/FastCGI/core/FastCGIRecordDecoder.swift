@@ -425,7 +425,7 @@ class FastCGIRecordDecoder: FastCGIDecoder {
             var content: FastCGIRecord.ContentType
             switch type {
             case .beginRequest:
-                content = .role(decoder.role)
+                content = .roleandflag(decoder.role,decoder.flags)
             case .endRequest:
                 content = .status(decoder.appStatus, decoder.protocolStatus)
             case .params:
