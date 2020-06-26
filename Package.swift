@@ -40,6 +40,10 @@ let package = Package(
         .target(
             name: "KituraNet",
             dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "CLinuxHelpers", "NIOConcurrencyHelpers", "NIOExtras"]),
+        .target(name: "FastCGIApplicationServer",
+            dependencies: ["KituraNet"]),
+        .target(name: "FastCGIServer",
+            dependencies: ["KituraNet"]),
         .testTarget(
             name: "KituraNetTests",
             dependencies: ["KituraNet"])

@@ -204,6 +204,8 @@ public class HTTPServerResponse: ServerResponse {
                 Log.error("Error sending response: \(error)")
                 // TODO: We must be rethrowing/throwing from here, for which we'd need to add a new Error type to the API
             }
+        }?.whenSuccess {
+            self.buffer.clear()
         }
     }
 
