@@ -327,7 +327,6 @@ public class HTTPServer: Server {
     }
 
     private func listen(_ socket: SocketType) throws {
-
         if let tlsConfig = tlsConfig {
             do {
                 self.sslContext = try NIOSSLContext(configuration: tlsConfig)

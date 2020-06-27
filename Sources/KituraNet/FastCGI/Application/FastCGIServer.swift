@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
+import NIO
 import Dispatch
 import LoggerAPI
+
+
+#if os(Linux)
+    let numberOfCores = Int(linux_sched_getaffinity())
+    fileprivate let globalELG = MultiThreadedEventLoopGroup(numberOfThreads: numberOfCores > 0 ? numberOfCores : System.coreCount)
+#else
+    fileprivate let globalELG = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount)
+#endif
 
 /// A server that listens for incoming HTTP requests that are sent using the FastCGI
 /// protocol.
@@ -51,8 +60,20 @@ public class FastCGIServer: Server {
 
     fileprivate let lifecycleListener = ServerLifecycleListener()
 
-    public init() {
+    // A lazily initialized EventLoopGroup, accessed via `eventLoopGroup`
+    private var _eventLoopGroup: EventLoopGroup?
+
+    public var eventLoopGroup: EventLoopGroup {
+        if let value = self._eventLoopGroup { return value }
+        let value = globalELG
+        self._eventLoopGroup = value
+        return value
     }
+
+    /// The channel used to listen for new connections
+    var serverChannel: Channel?
+
+    public init() { }
 
     /// Listens for connections on a socket
     ///
@@ -60,7 +81,50 @@ public class FastCGIServer: Server {
     /// - Parameter address: The address of the network interface to listen on. Defaults to nil, which means this
     ///             server will listen on all interfaces.
     public func listen(on port: Int, address: String? = nil) throws {
-        fatalError("FastCGI is not implemented yet.")
+        self.port = port
+        self.address = address
+
+        let bootstrap = ServerBootstrap(group: self.eventLoopGroup)
+            .serverChannelOption(ChannelOptions.backlog, value: 256)
+            .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
+            .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
+            .childChannelInitializer { channel in
+                channel.pipeline.addHandler(FastCGIRecordEncoderHandler<FastCGIRecordEncoder>()).flatMap { _ in
+                    channel.pipeline.addHandler(FastCGIRecordDecoderHandler<FastCGIRecordDecoder>()).flatMap { _ in
+                        channel.pipeline.addHandler(FastCGIRequestHandler(self))
+                    }
+                }
+            }
+
+        let listenerDescription: String
+        do {
+            serverChannel = try bootstrap.bind(host: address ?? "0.0.0.0", port: port).wait()
+            self.port = serverChannel?.localAddress?.port.map { Int($0) }
+            listenerDescription = "port \(self.port ?? port)"
+            self.state = .started
+            self.lifecycleListener.performStartCallbacks()
+        } catch let error {
+            self.state = .failed
+            self.lifecycleListener.performFailCallbacks(with: error)
+            Log.error("Error trying to bind to \(port): \(error)")
+            throw error
+        }
+
+        print("Listening on \(listenerDescription)")
+        Log.info("Listening on \(listenerDescription)")
+        Log.verbose("Options for \(listenerDescription): maxPendingConnections: \(maxPendingConnections), allowPortReuse: \(self.allowPortReuse)")
+
+        let queuedBlock = DispatchWorkItem(block: {
+            guard let serverChannel = self.serverChannel else { return }
+            do {
+                try serverChannel.closeFuture.wait()
+            } catch let error {
+                Log.error("Error while closing channel: \(error)")
+            }
+            self.state = .stopped
+            self.lifecycleListener.performStopCallbacks()
+        })
+        ListenerGroup.enqueueAsynchronously(on: DispatchQueue.global(), block: queuedBlock)
     }
 
     /// Static method to create a new `FastCGIServer` and have it listen for conenctions
@@ -72,7 +136,10 @@ public class FastCGIServer: Server {
     ///
     /// - Returns: a new `FastCGIServer` instance
     public static func listen(on port: Int, address: String? = nil, delegate: ServerDelegate?) throws -> FastCGIServer {
-        fatalError("FastCGI not implemented yet.")
+        let server = FastCGI.createServer()
+        server.delegate = delegate
+        try server.listen(on: port, address: address)
+        return server
     }
 
     /// Listens for connections on a socket
@@ -81,7 +148,15 @@ public class FastCGIServer: Server {
     /// - Parameter errorHandler: optional callback for error handling
     @available(*, deprecated, message: "use 'listen(on:) throws' with 'server.failed(callback:)' instead")
     public func listen(port: Int, errorHandler: ((Swift.Error) -> Void)? = nil) {
-        fatalError("FastCGI not implemented yet.")
+        do {
+            try listen(on: port)
+        } catch let error {
+            if let callback = errorHandler {
+                callback(error)
+            } else {
+                Log.error("Error listening on port \(port): \(error)")
+            }
+        }
     }
 
     /// Static method to create a new `FastCGIServer` and have it listen for conenctions
@@ -93,12 +168,21 @@ public class FastCGIServer: Server {
     /// - Returns: a new `FastCGIServer` instance
     @available(*, deprecated, message: "use 'listen(on:delegate:) throws' with 'server.failed(callback:)' instead")
     public static func listen(port: Int, delegate: ServerDelegate, errorHandler: ((Swift.Error) -> Void)? = nil) -> FastCGIServer {
-        fatalError("FastCGI not implemented yet.")
+        let server = FastCGI.createServer()
+        server.delegate = delegate
+        server.listen(port: port, errorHandler: errorHandler)
+        return server
     }
 
     /// Stop listening for new connections.
     public func stop() {
-        fatalError("FastCGI is not implemented yet.")
+       // Close the listening channel
+       guard let serverChannel = serverChannel else { return }
+       do {
+           try serverChannel.close().wait()
+       } catch let error {
+           Log.error("Failed to close the server channel. Error: \(error)")
+       }
     }
 
     /// Add a new listener for server being started
@@ -108,7 +192,8 @@ public class FastCGIServer: Server {
     /// - Returns: a `FastCGIServer` instance
     @discardableResult
     public func started(callback: @escaping () -> Void) -> Self {
-        fatalError("FastCGI not implemented yet.")
+        self.lifecycleListener.addStartCallback(perform: self.state == .started, callback)
+        return self
     }
 
     /// Add a new listener for server being stopped
@@ -118,7 +203,8 @@ public class FastCGIServer: Server {
     /// - Returns: a `FastCGIServer` instance
     @discardableResult
     public func stopped(callback: @escaping () -> Void) -> Self {
-        fatalError("FastCGI not implemented yet.")
+        self.lifecycleListener.addStopCallback(perform: self.state == .stopped, callback)
+        return self
     }
 
     /// Add a new listener for server throwing an error
@@ -128,7 +214,8 @@ public class FastCGIServer: Server {
     /// - Returns: a `FastCGIServer` instance
     @discardableResult
     public func failed(callback: @escaping (Swift.Error) -> Void) -> Self {
-        fatalError("FastCGI not implemented yet.")
+        self.lifecycleListener.addFailCallback(callback)
+        return self
     }
 
     /// Add a new listener for when listenSocket.acceptClientConnection throws an error
@@ -138,6 +225,7 @@ public class FastCGIServer: Server {
     /// - Returns: a Server instance
     @discardableResult
     public func clientConnectionFailed(callback: @escaping (Swift.Error) -> Void) -> Self {
-        fatalError("FastCGI not implemented yet.")
+        self.lifecycleListener.addClientConnectionFailCallback(callback)
+        return self
     }
 }
