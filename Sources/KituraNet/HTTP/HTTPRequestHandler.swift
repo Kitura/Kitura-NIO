@@ -200,7 +200,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
         keepAliveState.decrement()
     }
 
-    func channelInactive(context: ChannelHandlerContext, httpServer: HTTPServer) {
-        httpServer.connectionCount.sub(1)
+    func channelInactive(context: ChannelHandlerContext) {
+        server.connectionCount.sub(1)
     }
 }
