@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>FastCGI Class Reference</title>
+    <title>HTTPServerError Structure Reference</title>
     <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
     <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
   </head>
   <body>
 
-    <a name="//apple_ref/swift/Class/FastCGI" class="dashAnchor"></a>
+    <a name="//apple_ref/swift/Struct/HTTPServerError" class="dashAnchor"></a>
 
-    <a title="FastCGI Class Reference"></a>
+    <a title="HTTPServerError Structure Reference"></a>
 
     <header class="header">
       <p class="header-col header-col--primary">
@@ -44,7 +44,7 @@
     <p class="breadcrumbs">
       <a class="breadcrumb" href="../index.html">KituraNet Reference</a>
       <img class="carat" src="../img/carat.png" />
-      FastCGI Class Reference
+      HTTPServerError Structure Reference
     </p>
 
     <div class="content-wrapper">
@@ -169,15 +169,15 @@
 
         <section class="section">
           <div class="section-content top-matter">
-            <h1>FastCGI</h1>
+            <h1>HTTPServerError</h1>
               <div class="declaration">
                 <div class="language">
                   
-                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">FastCGI</span></code></pre>
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">HTTPServerError</span> <span class="p">:</span> <span class="kt">Error</span><span class="p">,</span> <span class="kt">Equatable</span></code></pre>
 
                 </div>
               </div>
-            <p>The &ldquo;root&rdquo; class for the FastCGI server implementation.</p>
+            <p>Errors thrown by HTTPServer</p>
 
           </div>
         </section>
@@ -189,9 +189,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9KituraNet7FastCGIC12createServerAA0C9CGIServerCyFZ"></a>
-                    <a name="//apple_ref/swift/Method/createServer()" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9KituraNet7FastCGIC12createServerAA0C9CGIServerCyFZ">createServer()</a>
+                    <a name="/s:9KituraNet15HTTPServerErrorV32eventLoopGroupAlreadyInitializedACvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/eventLoopGroupAlreadyInitialized" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9KituraNet15HTTPServerErrorV32eventLoopGroupAlreadyInitializedACvpZ">eventLoopGroupAlreadyInitialized</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -199,22 +199,16 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Create a <code><a href="../Classes/FastCGIServer.html">FastCGIServer</a></code> instance.
-Provided as a convenience and for consistency
-with the HTTP implementation.</p>
+                        <p>Undocumented</p>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">createServer</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Classes/FastCGIServer.html">FastCGIServer</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="k">var</span> <span class="nv">eventLoopGroupAlreadyInitialized</span><span class="p">:</span> <span class="kt">HTTPServerError</span></code></pre>
 
                         </div>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>A <code><a href="../Classes/FastCGIServer.html">FastCGIServer</a></code> instance.</p>
                       </div>
                     </section>
                   </div>
