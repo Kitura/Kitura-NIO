@@ -1,117 +1,131 @@
 {
   "warnings": [
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ClientResponse.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/ClientResponse.swift",
       "line": 25,
       "symbol": "ClientResponse.init()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ClientResponse.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/ClientResponse.swift",
       "line": 27,
       "symbol": "ClientResponse.httpStatusCode",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ConnectionUpgrader.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/ConnectionUpgrader.swift",
       "line": 68,
       "symbol": "ProtocolHandlerFactory.extensionHandlers(header:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/ConnectionUpgrader.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/ConnectionUpgrader.swift",
       "line": 71,
       "symbol": "ProtocolHandlerFactory.negotiate(header:)",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServer.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServer.swift",
       "line": 54,
       "symbol": "FastCGIServer.init()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
       "line": 95,
       "symbol": "FastCGIServerRequest.FastCGIParserErrorType.success",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
       "line": 96,
       "symbol": "FastCGIServerRequest.FastCGIParserErrorType.protocolError",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
       "line": 97,
       "symbol": "FastCGIServerRequest.FastCGIParserErrorType.invalidType",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
       "line": 98,
       "symbol": "FastCGIServerRequest.FastCGIParserErrorType.clientDisconnect",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
       "line": 99,
       "symbol": "FastCGIServerRequest.FastCGIParserErrorType.unsupportedRole",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
       "line": 100,
       "symbol": "FastCGIServerRequest.FastCGIParserErrorType.internalError",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/FastCGI/FastCGIServerRequest.swift",
       "line": 103,
       "symbol": "FastCGIServerRequest.init()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/HTTP/HTTPServer.swift",
+      "line": 55,
+      "symbol": "HTTPServer",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/HTTP/HTTPServer.swift",
+      "line": 731,
+      "symbol": "HTTPServerError.eventLoopGroupAlreadyInitialized",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
       "line": 17,
       "symbol": "KeepAliveState",
       "symbol_kind": "source.lang.swift.decl.enum",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
       "line": 19,
       "symbol": "KeepAliveState.disabled",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
       "line": 20,
       "symbol": "KeepAliveState.unlimited",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/travis/build/IBM-Swift/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
+      "file": "/Users/dannys/projects/kitura/Kitura-NIO/Sources/KituraNet/HTTP/KeepAliveState.swift",
       "line": 21,
       "symbol": "KeepAliveState.limited(maxRequests:)",
       "symbol_kind": "source.lang.swift.decl.enumelement",
       "warning": "undocumented"
     }
   ],
-  "source_directory": "/Users/travis/build/IBM-Swift/Kitura-NIO"
+  "source_directory": "/Users/dannys/projects/kitura/Kitura-NIO"
 }

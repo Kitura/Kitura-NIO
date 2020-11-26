@@ -22,7 +22,7 @@
         <a class="header-link" href="index.html">
           KituraNet Docs
         </a>
-         (95% documented)
+         (94% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -32,7 +32,7 @@
       </p>
     
         <p class="header-col header-col--secondary">
-          <a class="header-link" href="https://github.com/IBM-Swift/Kitura-NIO/">
+          <a class="header-link" href="https://github.com/Kitura/Kitura-NIO/">
             <img class="header-icon" src="img/gh.png"/>
             View on GitHub
           </a>
@@ -152,6 +152,9 @@
                 <a class="nav-group-task-link" href="Structs/ConnectionUpgrader.html">ConnectionUpgrader</a>
               </li>
               <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/HTTPServerError.html">HTTPServerError</a>
+              </li>
+              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Structs/Monitor.html">Monitor</a>
               </li>
               <li class="nav-group-task">
@@ -164,21 +167,21 @@
       <article class="main-content">
 
         <section class="section">
-          <div class="section-content">
+          <div class="section-content top-matter">
             
             <p align="center">
 <a href="http://kitura.io/">
-<img src="https://raw.githubusercontent.com/IBM-Swift/Kitura/master/Sources/Kitura/resources/kitura-bird.svg?sanitize=true" height="100" alt="Kitura">
+<img src="https://raw.githubusercontent.com/Kitura/Kitura/master/Sources/Kitura/resources/kitura-bird.svg?sanitize=true" height="100" alt="Kitura">
 </a>
 </p>
 
 <p align="center">
 <img src="https://img.shields.io/badge/Swift-5.0-orange.svg?style=flat" alt="Swift 5.0">
-<a href="https://ibm-swift.github.io/Kitura-NIO/index.html">
+<a href="https://kitura.github.io/Kitura-NIO/index.html">
 <img src="https://img.shields.io/badge/apidoc-KituraNIO-1FBCE4.svg?style=flat" alt="APIDoc">
 </a>
-<a href="https://travis-ci.org/IBM-Swift/Kitura-NIO">
-<img src="https://travis-ci.org/IBM-Swift/Kitura-NIO.svg?branch=master" alt="Build Status - Master">
+<a href="https://travis-ci.org/Kitura/Kitura-NIO">
+<img src="https://travis-ci.org/Kitura/Kitura-NIO.svg?branch=master" alt="Build Status - Master">
 </a>
 <img src="https://img.shields.io/badge/os-macOS-green.svg?style=flat" alt="macOS">
 <img src="https://img.shields.io/badge/os-linux-green.svg?style=flat" alt="Linux">
@@ -189,11 +192,11 @@
 </p>
 <h1 id='kitura-nio' class='heading'>Kitura-NIO</h1>
 
-<p>Kitura-NIO is a <a href="https://github.com/apple/swift-nio">SwiftNIO</a> based networking library for Kitura. Kitura-NIO adopts the same API as <a href="https://github.com/IBM-Swift/Kitura-net">KituraNet</a>, making the transition from KituraNet to Kitura-NIO seamless. While Kitura-NIO shares some code with Kitura-Net, the core comprising of HTTPServer, ClientRequest/ClientResponse and TLS support have been implemented using SwiftNIO. Kitura-NIO uses <a href="https://github.com/apple/swift-nio-ssl">NIOSSL</a> for TLS support.</p>
+<p>Kitura-NIO is a <a href="https://github.com/apple/swift-nio">SwiftNIO</a> based networking library for Kitura. Kitura-NIO adopts the same API as <a href="https://github.com/Kitura/Kitura-net">KituraNet</a>, making the transition from KituraNet to Kitura-NIO seamless. While Kitura-NIO shares some code with Kitura-Net, the core comprising of HTTPServer, ClientRequest/ClientResponse and TLS support have been implemented using SwiftNIO. Kitura-NIO uses <a href="https://github.com/apple/swift-nio-ssl">NIOSSL</a> for TLS support.</p>
 
-<p>We expect most of our users to require higher level concepts such as routing, templates and middleware. These are not provided in Kitura-NIO. If you want to use those facilities you should be coding at the Kitura level, for this please see the <a href="https://github.com/IBM-Swift/Kitura">Kitura</a> project. Kitura-NIO, like  <a href="https://github.com/IBM-Swift/Kitura-net">Kitura-net</a>, underpins Kitura which offers a higher abstraction level to users.</p>
+<p>We expect most of our users to require higher level concepts such as routing, templates and middleware. These are not provided in Kitura-NIO. If you want to use those facilities you should be coding at the Kitura level, for this please see the <a href="https://github.com/Kitura/Kitura">Kitura</a> project. Kitura-NIO, like  <a href="https://github.com/Kitura/Kitura-net">Kitura-net</a>, underpins Kitura which offers a higher abstraction level to users.</p>
 
-<p>Kitura-NIO 2 has been tested with Swift 5. If you are using Swift 4, please use Kitura-NIO 1. See the <a href="https://github.com/IBM-Swift/Kitura-NIO/releases">release history</a> for details.</p>
+<p>Kitura-NIO 2 has been tested with Swift 5. If you are using Swift 4, please use Kitura-NIO 1. See the <a href="https://github.com/Kitura/Kitura-NIO/releases">release history</a> for details.</p>
 <h2 id='features' class='heading'>Features</h2>
 
 <ul>
@@ -225,7 +228,7 @@
 <li>Clone this repository.</li>
 </ol>
 
-<p><code>$ git clone https://github.com/IBM-Swift/Kitura-NIO &amp;&amp; cd Kitura-NIO</code></p>
+<p><code>$ git clone https://github.com/Kitura/Kitura-NIO &amp;&amp; cd Kitura-NIO</code></p>
 
 <ol>
 <li>Build and run tests.</li>
@@ -236,7 +239,7 @@
 <p>You may also want to run the tests in parallel:
 <code>$ swift test --parallel</code></p>
 
-<p>In some Linux environments, a low open file limit could cause test failures. See <a href="https://github.com/IBM-Swift/Kitura-NIO/issues/1">this</a>.</p>
+<p>In some Linux environments, a low open file limit could cause test failures. See <a href="https://github.com/Kitura/Kitura-NIO/issues/1">this</a>.</p>
 <h2 id='community' class='heading'>Community</h2>
 
 <p>We&rsquo;d really love to hear feedback from you.</p>
@@ -244,7 +247,7 @@
 <p>Join the <a href="https://forums.swift.org/c/related-projects/kitura">Kitura on Swift Forums</a> or our <a href="http://swift-at-ibm-slack.mybluemix.net/">Slack</a> to meet the team!</p>
 <h2 id='license' class='heading'>License</h2>
 
-<p>This library is licensed under Apache 2.0. The full license text is available in <a href="https://github.com/IBM-Swift/Kitura-NIO/blob/master/LICENSE.txt">LICENSE</a>.</p>
+<p>This library is licensed under Apache 2.0. The full license text is available in <a href="https://github.com/Kitura/Kitura-NIO/blob/master/LICENSE.txt">LICENSE</a>.</p>
 
           </div>
         </section>
@@ -253,8 +256,8 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2019 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2019-10-09)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2020 <a class="link" href="" target="_blank" rel="external">IBM &amp; Kitura project contributors</a>. All rights reserved. (Last updated: 2020-11-25)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
