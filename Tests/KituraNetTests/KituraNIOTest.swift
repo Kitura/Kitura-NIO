@@ -78,6 +78,11 @@ class KituraNetTest: XCTestCase {
         guard self.socketType != .tcp else { return }
         let fileURL = URL(fileURLWithPath: socketFilePath)
         let fm = FileManager.default
+        
+        // ignore if file does not exist -- which is normal if Kitura is shutdown properly.
+        guard fm.fileExists(atPath: fileURL.path) else {
+            return
+        }
         do {
             try fm.removeItem(at: fileURL)
         } catch {
