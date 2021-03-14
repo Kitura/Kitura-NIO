@@ -25,13 +25,23 @@ matrix:
       dist: xenial
       sudo: required
       services: docker
+      env: DOCKER_IMAGE=docker.kitura.net/kitura/swift-ci:5.3.3 DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel --sanitize=thread" CUSTOM_TEST_SCRIPT=.kitura-test.sh
+    - os: linux
+      dist: xenial
+      sudo: required
+      services: docker
       env: DOCKER_IMAGE=swift:5.1 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel --sanitize=thread"
+
     - os: osx
       osx_image: xcode10.2
       sudo: required
       env: SWIFT_SNAPSHOT=5.0.1 JAZZY_ELIGIBLE=true SWIFT_TEST_ARGS="--parallel"
     - os: osx
       osx_image: xcode11
+      sudo: required
+      env: SWIFT_TEST_ARGS="--parallel --sanitize=thread"
+    - os: osx
+      osx_image: xcode12
       sudo: required
       env: SWIFT_TEST_ARGS="--parallel --sanitize=thread"
     - os: osx
