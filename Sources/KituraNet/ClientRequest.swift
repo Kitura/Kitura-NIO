@@ -562,7 +562,7 @@ public class ClientRequest {
                 portNumber = 80
             } else {
                 portNumber = 8080
-                Log.error("Unknown port for url: \(url)  Assuming 8080")
+                Log.error("Unknown port for url: \(url)  Assuming 8080.  This may change in the future.")
             }
         }
         if self.headers["Host"] == nil {
