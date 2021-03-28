@@ -12,7 +12,7 @@ if [ $SWIFT_TEST_STATUS -ne 0 ]; then
   return $SWIFT_TEST_STATUS
 fi
 
-# For now, short-circuit kitura tests until those are stabalized.
+# TODO: For now, short-circuit kitura tests until those are stabalized.
 return 0
 
 
