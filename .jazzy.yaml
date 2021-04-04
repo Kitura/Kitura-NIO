@@ -1,6 +1,6 @@
 module: KituraNet
-author: IBM
-github_url: https://github.com/IBM-Swift/Kitura-NIO/
+author: IBM & Kitura Project Authors
+github_url: https://github.com/Kitura/Kitura-NIO/
 
 theme: fullwidth
 clean: true

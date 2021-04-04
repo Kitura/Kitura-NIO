@@ -535,11 +535,12 @@ public class ClientRequest {
      */
     public func end(close: Bool = false) {
         closeConnection = close
-
+        let percentEncodedURL = URL(string: self.percentEncodedURL)!
+        
         var isHTTPS = false
 
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-        if (URL(string: percentEncodedURL)?.scheme)! == "https" {
+        if (percentEncodedURL.scheme)! == "https" {
            isHTTPS = true
            self.sslConfig = TLSConfiguration.forClient(certificateVerification: .none)
         }
@@ -550,8 +551,20 @@ public class ClientRequest {
             initializeClientBootstrap(eventLoopGroup: group)
         }
 
-        let hostName = URL(string: percentEncodedURL)?.host ?? "" //TODO: what could be the failure path here
-        let portNumber = URL(string: percentEncodedURL)?.port ?? 8080
+        let hostName = percentEncodedURL.host! //TODO: what could be the failure path here
+        let portNumber: Int
+        if let port = percentEncodedURL.port {
+            portNumber = port
+        } else {
+            if percentEncodedURL.scheme == "https" {
+                portNumber = 443
+            } else if percentEncodedURL.scheme == "http" {
+                portNumber = 80
+            } else {
+                portNumber = 8080
+                Log.error("Unknown port for url: \(url)  Assuming 8080.  This may change in the future.")
+            }
+        }
         if self.headers["Host"] == nil {
            let isNotDefaultPort = (portNumber != 443 && portNumber != 80) //Check whether port is not 443/80
            self.headers["Host"] = hostName + (isNotDefaultPort ? (":" + String(portNumber)) : "")
@@ -639,7 +652,7 @@ public class ClientRequest {
         bootstrap = ClientBootstrap(group: eventLoopGroup)
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .channelInitializer { channel in
-                channel.pipeline.addHandler(try! NIOSSLClientHandler(context: self.sslContext!, serverHostname: nil)).flatMap {
+                channel.pipeline.addHandler(try! NIOSSLClientHandler(context: self.sslContext!, serverHostname: self.hostName)).flatMap {
                     channel.pipeline.addHTTPClientHandlers().flatMap {
                         channel.pipeline.addHandler(HTTPClientHandler(request: self))
                     }
