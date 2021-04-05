@@ -93,7 +93,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
                     } catch {
                         Log.error("Failed to send error response")
                     }
-                    context.close()
+                    _ = context.close()
                 }
             }
             serverRequest = HTTPServerRequest(channel: context.channel, requestHead: header, enableSSL: enableSSLVerification)
@@ -125,7 +125,7 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
 
         case .end:
             requestSize = 0
-            server.connectionCount.add(1)
+            _ = server.connectionCount.add(1)
             if let connectionLimit = server.options.connectionLimit {
                 if server.connectionCount.load() > connectionLimit {
                     do {
@@ -201,6 +201,6 @@ internal class HTTPRequestHandler: ChannelInboundHandler, RemovableChannelHandle
     }
 
     func channelInactive(context: ChannelHandlerContext) {
-        server.connectionCount.sub(1)
+        _ = server.connectionCount.sub(1)
     }
 }

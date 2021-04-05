@@ -22,9 +22,10 @@ class BufferListTests: XCTestCase {
 
     func testAppendUnsafePointerLength() {
         let array: [UInt8] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        let pointer: UnsafeMutablePointer<UInt8> = UnsafeMutablePointer(mutating: array)
-        bufferList.append(bytes: pointer, length: 10)
-        bufferList.reset()
+        array.withUnsafeBufferPointer { bufferPointer in
+            bufferList.append(bytes: bufferPointer.baseAddress!, length: 10)
+            bufferList.reset()
+        }
     }
 
     func testAppendData() {
@@ -73,13 +74,20 @@ class BufferListTests: XCTestCase {
     }
 
     func testFillUnsafeMutablePointer() {
-        let data = Data(repeating: 1, count: 512)
+        let arrayValuesToFill = 64
+        let valueToFill: UInt8 = 3
+        let expectedValue = Int(valueToFill) * arrayValuesToFill
+        
+        let data = Data(repeating: valueToFill, count: 512)
         bufferList.append(data: data)
-        let array = [UInt8](repeating: 0, count: 64)
-        let pointer = UnsafeMutablePointer(mutating: array)
-        let result = bufferList.fill(buffer: pointer, length: 64)
-        XCTAssertEqual(result, 64)
-        XCTAssertEqual(Array(UnsafeBufferPointer(start: pointer, count: 64)).reduce(0) { Int($0) + Int($1) }, 64)
+        var array = [UInt8](repeating: 0, count: arrayValuesToFill)
+        array.withUnsafeMutableBufferPointer { bufferPointer in
+            var bytesFilled: Int
+            bytesFilled = bufferList.fill(buffer: bufferPointer.baseAddress!, length: 64)
+            XCTAssertEqual(bytesFilled, 64)
+        }
+        let resolvedValue = array.reduce(0) { Int($0) + Int($1) }
+        XCTAssertEqual(resolvedValue, expectedValue)
         bufferList.reset()
     }
 

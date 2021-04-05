@@ -147,7 +147,12 @@ public class BufferList {
 
     */
     public func fill(array: inout [UInt8]) -> Int {
-        return fill(buffer: UnsafeMutablePointer(mutating: array), length: array.count)
+        var filledBytes = 0
+        let arrayCount = array.count
+        array.withUnsafeMutableBufferPointer({ bufferPointer in
+            filledBytes = fill(buffer: bufferPointer.baseAddress!, length: arrayCount)
+        })
+        return filledBytes
     }
 
     /**
