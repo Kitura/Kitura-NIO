@@ -108,7 +108,7 @@ class BufferListTests: XCTestCase {
         let data = Data(repeating: 1, count: 64)
         bufferList.append(data: data)
         XCTAssertEqual(bufferList.data.count, 64)
-        XCTAssertEqual(bufferList.count, 4096)
+        XCTAssertEqual(bufferList.count, 64)
         bufferList.reset()
     }
 

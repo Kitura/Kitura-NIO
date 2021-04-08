@@ -65,7 +65,7 @@ class KituraNetTest: XCTestCase {
         let temporaryDirectory = "/tmp"
 #else
         var temporaryDirectory: String
-        if #available(OSX 10.12, *) {
+        if #available(macOS 10.12, iOS 10.0, *) {
             temporaryDirectory = FileManager.default.temporaryDirectory.path
         } else {
             temporaryDirectory = "/tmp"

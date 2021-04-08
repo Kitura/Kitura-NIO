@@ -343,7 +343,7 @@ public class HTTPServer: Server {
         }
 
         let bootstrap = ServerBootstrap(group: eventLoopGroup)
-            .serverChannelOption(ChannelOptions.backlog, value: ChannelOptions.Types.BacklogOption.Value(self.maxPendingConnections))
+            .serverChannelOption(ChannelOptions.backlog, value: .init(self.maxPendingConnections))
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: allowPortReuse ? 1 : 0)
             .serverChannelInitializer { channel in
