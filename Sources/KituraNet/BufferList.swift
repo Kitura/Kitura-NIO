@@ -89,7 +89,7 @@ public class BufferList {
      Get the number of bytes stored in the `BufferList`.
     */
     public var count: Int {
-        return byteBuffer.capacity
+        return byteBuffer.readableBytes
     }
 
     /**
@@ -147,7 +147,19 @@ public class BufferList {
 
     */
     public func fill(array: inout [UInt8]) -> Int {
-        return fill(buffer: UnsafeMutablePointer(mutating: array), length: array.count)
+        let bytesToFill = min(array.count, self.byteBuffer.readableBytes)
+        
+        // Get a `ByteBufferView` (a `Collection`) of all readable bytes.
+        let readableByteView = self.byteBuffer.readableBytesView
+        
+        // We want to overwrite the first `bytesToFill` bytes with the first `bytesToFill` bytes from the `ByteBufferView`.
+        array.replaceSubrange(0 ..< bytesToFill,
+                              with: readableByteView.prefix(bytesToFill))
+        
+        // And then move the reader index to indicate that we consumed the bytes.
+        self.byteBuffer.moveReaderIndex(forwardBy: bytesToFill)
+        
+        return bytesToFill
     }
 
     /**
@@ -165,11 +177,22 @@ public class BufferList {
 
     */
     public func fill(buffer: UnsafeMutablePointer<UInt8>, length: Int) -> Int {
-        let fillLength = min(length, byteBuffer.readableBytes)
-        return byteBuffer.readWithUnsafeReadableBytes { bytes in
-            UnsafeMutableRawPointer(buffer).copyMemory(from: bytes.baseAddress!, byteCount: fillLength)
-            return fillLength
-        }
+        // NOTE: This API should be deprecated and expressed as either `UnsafeMutableBufferPointer<UInt8>` or
+        // preferrable `UnsafeMutableRawBufferPointer` or even better: replaced with nothing.
+        
+        let bytesToFill = min(length, self.byteBuffer.readableBytes)
+        
+        // Get a `ByteBufferView` (a `Collection`) of all readable bytes.
+        let readableByteView = self.byteBuffer.readableBytesView
+        
+        // We want to overwrite the first `bytesToFill` bytes with the first `bytesToFill` bytes from the `ByteBufferView`.
+        _ = UnsafeMutableBufferPointer(start: buffer, count: bytesToFill)
+            .initialize(from: readableByteView.prefix(bytesToFill))
+        
+        // And then move the reader index to indicate that we consumed the bytes.
+        self.byteBuffer.moveReaderIndex(forwardBy: bytesToFill)
+        
+        return bytesToFill
     }
 
     /**

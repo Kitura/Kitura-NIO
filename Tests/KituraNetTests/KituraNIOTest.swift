@@ -65,7 +65,7 @@ class KituraNetTest: XCTestCase {
         let temporaryDirectory = "/tmp"
 #else
         var temporaryDirectory: String
-        if #available(OSX 10.12, *) {
+        if #available(macOS 10.12, iOS 10.0, *) {
             temporaryDirectory = FileManager.default.temporaryDirectory.path
         } else {
             temporaryDirectory = "/tmp"
@@ -141,7 +141,6 @@ class KituraNetTest: XCTestCase {
 
     func performServerTestWithUnixSocket(serverConfig: ServerOptions = ServerOptions(), delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: [(XCTestExpectation) -> Void]) {
         do {
-            var serverConfig = serverConfig
             var server: HTTPServer
             self.useSSL = useSSL
             self.unixDomainSocketPath = self.socketFilePath
@@ -169,7 +168,6 @@ class KituraNetTest: XCTestCase {
 
     func performServerTestWithTCPPort(serverConfig: ServerOptions = ServerOptions(), delegate: ServerDelegate?, useSSL: Bool = useSSLDefault, allowPortReuse: Bool = portReuseDefault, line: Int = #line, asyncTasks: [(XCTestExpectation) -> Void]) {
         do {
-            var serverConfig = serverConfig
             var server: HTTPServer
             var ephemeralPort: Int = 0
             self.useSSL = useSSL

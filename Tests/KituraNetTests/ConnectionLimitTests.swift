@@ -51,12 +51,12 @@ class ConnectionLimitTests: KituraNetTest {
         let payload = "Hello, World!"
         var payloadBuffer = ByteBufferAllocator().buffer(capacity: 1024)
         payloadBuffer.writeString(payload)
-        _ = self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus:HTTPResponseStatus.ok, expectation: expectation))
+        self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus:HTTPResponseStatus.ok, expectation: expectation))
     }, { expectation in
         let payload = "Hello, World!"
         var payloadBuffer = ByteBufferAllocator().buffer(capacity: 1024)
         payloadBuffer.writeString(payload)
-        _ =  self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus:HTTPResponseStatus.serviceUnavailable, expectation: expectation))
+        self.establishConnection(expectation: expectation, responseHandler: HTTPResponseHandler(expectedStatus:HTTPResponseStatus.serviceUnavailable, expectation: expectation))
         })
     }
 }

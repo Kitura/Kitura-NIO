@@ -22,7 +22,7 @@ import LoggerAPI
 @testable import KituraNet
 
 func randomNumber(limit: Int) -> Int {
-    #if os(OSX)
+    #if os(OSX) || os(macOS) || os(iOS) || os(tvOS)
     return Int(arc4random_uniform(UInt32(limit)))
     #else
     let random: Int = Int(rand())
