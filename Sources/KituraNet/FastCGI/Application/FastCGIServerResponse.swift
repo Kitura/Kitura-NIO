@@ -15,26 +15,7 @@
  */
 
 import Foundation
-
-// TBD: Bound should be of type Int i.e. Bound == Int. Currently this syntax is unavailable, expected to be shipped with Swift 3.1.
-// https://forums.developer.apple.com/thread/6627
-#if !swift(>=4)
-    typealias BinaryInteger = IntegerArithmetic
-#endif
-
-extension Range where Bound: BinaryInteger {
-    func iterate(by delta: Bound, action: (Range<Bound>) throws -> Void) throws {
-
-        var base = self.lowerBound
-
-        while base < self.upperBound {
-            let subRange = (base ..< (base + delta)).clamped(to: self)
-            try action(subRange)
-
-            base += delta
-        }
-    }
-}
+import NIO
 
 /// The FastCGIServerRequest class implements the `ServerResponse` protocol
 /// for incoming HTTP requests that come in over a FastCGI connection.
@@ -71,54 +52,81 @@ public class FastCGIServerResponse: ServerResponse {
         }
     }
 
-    /// Add a string to the body of the HTTP response and complete sending the HTTP response
-    ///
-    /// - Parameter text: The String to add to the body of the HTTP response.
-    ///
-    /// - Throws: Socket.error if an error occurred while writing to the socket
+    private let channel: Channel
+    private let handler: FastCGIRequestHandler
+
+    init(channel: Channel, handler: FastCGIRequestHandler) {
+        self.channel = channel
+        self.handler = handler
+        headers["Date"] = [SPIUtils.httpDate()]
+    }
+
     public func end(text: String) throws {
-        fatalError("FastCGI not implemented yet.")
+        try write(from: text)
+        try end()
     }
 
-    /// Add a string to the body of the HTTP response.
-    ///
-    /// - Parameter string: The String data to be added.
-    ///
-    /// - Throws: Socket.error if an error occurred while writing to the socket
     public func write(from string: String) throws {
-        fatalError("FastCGI not implemented yet.")
+        try write(from: string.data(using: .utf8)!)
     }
 
-    /// Add bytes to the body of the HTTP response.
-    ///
-    /// - Parameter data: The Data struct that contains the bytes to be added.
-    ///
-    /// - Throws: Socket.error if an error occurred while writing to the socket
     public func write(from data: Data) throws {
-        fatalError("FastCGI not implemented yet.")
+        buffer.append(data)
     }
 
-    /// Complete sending the HTTP response
-    ///
-    /// - Throws: Socket.error if an error occurred while writing to a socket
+    private func startResponse() {
+        var headerData = ""
+
+        // add our status header for FastCGI
+        headerData.append("Status: \(status) \(HTTP.statusCodes[status]!)\r\n")
+
+        // add the rest of our response headers
+        for (name, value) in headers.nioHeaders {
+            headerData.append(name)
+            headerData.append(": ")
+            headerData.append(value)
+            headerData.append("\r\n")
+        }
+
+        headerData.append("\r\n")
+
+        var data = headerData.data(using: .utf8)!
+        data.append(buffer)
+        let record = FastCGIRecord(version: FastCGI.Constants.FASTCGI_PROTOCOL_VERSION,
+                                   type: .stdout,
+                                   requestId: self.handler.serverRequest?.requestId ?? 0,
+                                   contentData: .data(data))
+        _ = channel.writeAndFlush(handler.wrapInboundOut(record))
+    }
+
     public func end() throws {
-        fatalError("FastCGI not implemented yet.")
+        startResponse()
+        let emptyRecord = FastCGIRecord(version: FastCGI.Constants.FASTCGI_PROTOCOL_VERSION,
+                                        type: .stdout,
+                                        requestId: self.handler.serverRequest?.requestId ?? 0,
+                                        contentData: .data(Data()))
+         _ = channel.write(handler.wrapInboundOut(emptyRecord))
+        
+
+        let endRequestRecord = FastCGIRecord(version: FastCGI.Constants.FASTCGI_PROTOCOL_VERSION,
+                                             type: .endRequest,
+                                             requestId: self.handler.serverRequest?.requestId ?? 0,
+                                             contentData: .status(0, FastCGI.Constants.FCGI_REQUEST_COMPLETE))
+        let promise = channel.writeAndFlush(handler.wrapInboundOut(endRequestRecord))
+        promise.whenComplete { _ in
+            self.channel.close(promise: nil)
+        }
     }
 
-    /// External message write for multiplex rejection
-    ///
-    /// - Parameter requestId: The id of the request to reject.
     public func rejectMultiplexConnecton(requestId: UInt16) throws {
         fatalError("FastCGI not implemented yet.")
     }
 
-    /// External message write for role rejection
     public func rejectUnsupportedRole() throws {
         fatalError("FastCGI not implemented yet.")
     }
 
-    /// Reset the request for reuse in Keep alive
     public func reset() {
-        /*****  TBD *******/
     }
 }
+
