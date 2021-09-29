@@ -15,12 +15,7 @@ matrix:
       dist: xenial
       sudo: required
       services: docker
-      env: DOCKER_IMAGE=docker.kitura.net/kitura/swift-ci:5.0.3 SWIFT_SNAPSHOT=5.0.3 DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel"
-    - os: linux
-      dist: xenial
-      sudo: required
-      services: docker
-      env: DOCKER_IMAGE=docker.kitura.net/kitura/swift-ci-ubuntu16.04:5.1.5 DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel --sanitize=thread" CUSTOM_TEST_SCRIPT=.kitura-test.sh
+      env: DOCKER_IMAGE=docker.kitura.net/kitura/swift-ci-ubuntu16.04:5.2.5 DOCKER_PRIVILEGED=true SWIFT_TEST_ARGS="--parallel --sanitize=thread" CUSTOM_TEST_SCRIPT=.kitura-test.sh
     - os: linux
       dist: xenial
       sudo: required
