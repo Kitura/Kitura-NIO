@@ -39,7 +39,16 @@ let package = Package(
             dependencies: []),
         .target(
             name: "KituraNet",
-            dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "CLinuxHelpers", "NIOConcurrencyHelpers", "NIOExtras"]),
+            dependencies: [
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOFoundationCompat", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                .product(name: "SSLService", package: "BlueSSLService"),
+                .product(name: "NIOWebSocket", package: "swift-nio"),
+                .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
+                .product(name: "NIOExtras", package: "swift-nio-extras"),
+                 "LoggerAPI", "CLinuxHelpers"]),
         .testTarget(
             name: "KituraNetTests",
             dependencies: ["KituraNet"])
