@@ -30,7 +30,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.33.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.0.0"),
         .package(url: "https://github.com/apple/swift-nio-extras.git", from: "1.0.0"),
-        .package(url: "https://github.com/Kitura/BlueSSLService.git", from: "2.0.0"),
+        .package(name: "SSLService", url: "https://github.com/Kitura/BlueSSLService.git", from: "2.0.1"),
         .package(url: "https://github.com/Kitura/LoggerAPI.git", from: "2.0.0")
     ],
     targets: [
@@ -44,7 +44,7 @@ let package = Package(
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "NIOHTTP1", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
-                .product(name: "SSLService", package: "BlueSSLService"),
+                "SSLService",
                 .product(name: "NIOWebSocket", package: "swift-nio"),
                 .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
                 .product(name: "NIOExtras", package: "swift-nio-extras"),
