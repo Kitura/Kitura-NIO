@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 /*
  * Copyright IBM Corporation and the Kitura project authors 2016-2020
@@ -27,10 +27,10 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.8.0"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.33.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl.git", from: "2.0.0"),
         .package(url: "https://github.com/apple/swift-nio-extras.git", from: "1.0.0"),
-        .package(url: "https://github.com/Kitura/BlueSSLService.git", from: "2.0.0"),
+        .package(name: "SSLService", url: "https://github.com/Kitura/BlueSSLService.git", from: "2.0.1"),
         .package(url: "https://github.com/Kitura/LoggerAPI.git", from: "2.0.0")
     ],
     targets: [
@@ -39,7 +39,16 @@ let package = Package(
             dependencies: []),
         .target(
             name: "KituraNet",
-            dependencies: ["NIO", "NIOFoundationCompat", "NIOHTTP1", "NIOSSL", "SSLService", "LoggerAPI", "NIOWebSocket", "CLinuxHelpers", "NIOConcurrencyHelpers", "NIOExtras"]),
+            dependencies: [
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOFoundationCompat", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
+                "SSLService",
+                .product(name: "NIOWebSocket", package: "swift-nio"),
+                .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
+                .product(name: "NIOExtras", package: "swift-nio-extras"),
+                 "LoggerAPI", "CLinuxHelpers"]),
         .testTarget(
             name: "KituraNetTests",
             dependencies: ["KituraNet"])
